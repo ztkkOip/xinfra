@@ -1,0 +1,9 @@
+.cache/
+.git/
+.DS_Store
+.env
+bin/
+data/
+web/node_modules/
+web/dist/
+
