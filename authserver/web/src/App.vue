@@ -1,24 +1,16 @@
 <script setup>
-import { computed, onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const TOKEN_KEY = 'authserver_token'
 const SSO_LOGIN_PATH = '/auth/api/v1/login/internal-sso'
 const WAYEN_LOGIN_PATH = '/auth/api/v1/wayen/login'
-const WAYEN_CREDENTIAL_PATH = '/auth/api/v1/wayen/credential'
 
 const token = ref(localStorage.getItem(TOKEN_KEY) || '')
 const currentUser = ref(null)
 const message = ref('')
 const loading = ref(false)
-const ssoLoading = ref(false)
+const redirectingToSSO = ref(false)
 const wayenLoading = ref(false)
-const wayenCredentialLoading = ref(false)
-const wayenConfigured = ref(false)
-
-const wayenForm = reactive({
-  email: '',
-  password: '',
-})
 
 const isAuthed = computed(() => Boolean(token.value))
 const currentUserLabel = computed(() => {
@@ -34,10 +26,20 @@ function clearAuth() {
   localStorage.removeItem(TOKEN_KEY)
 }
 
-function ssoLogin() {
-  const relayState = `${window.location.pathname}${window.location.search}${window.location.hash}` || '/'
-  ssoLoading.value = true
-  window.location.assign(`${SSO_LOGIN_PATH}?relay_state=${encodeURIComponent(relayState)}`)
+function relayState(openWayen = false) {
+  const url = new URL(window.location.href)
+  if (openWayen) {
+    url.searchParams.set('open_wayen', '1')
+  }
+  return `${url.pathname}${url.search}${url.hash}` || '/'
+}
+
+function ssoLogin({ openWayen = false } = {}) {
+  if (redirectingToSSO.value) {
+    return
+  }
+  redirectingToSSO.value = true
+  window.location.assign(`${SSO_LOGIN_PATH}?relay_state=${encodeURIComponent(relayState(openWayen))}`)
 }
 
 async function api(path, options = {}) {
@@ -53,6 +55,7 @@ async function api(path, options = {}) {
   if (!response.ok) {
     if (response.status === 401) {
       clearAuth()
+      ssoLogin({ openWayen: true })
     }
     const error = new Error(data.error || `HTTP ${response.status}`)
     error.status = response.status
@@ -78,39 +81,11 @@ async function run(task, successText = '操作完成') {
 
 function logout() {
   clearAuth()
-  message.value = '已退出'
+  ssoLogin()
 }
 
 async function loadMe() {
   currentUser.value = await api('/auth/api/v1/users/me')
-}
-
-async function loadWayenCredential() {
-  const result = await api(WAYEN_CREDENTIAL_PATH)
-  wayenForm.email = result.email || (currentUser.value && currentUser.value.email) || ''
-  wayenConfigured.value = Boolean(result.configured)
-}
-
-async function saveWayenCredential() {
-  wayenCredentialLoading.value = true
-  message.value = ''
-  try {
-    const result = await api(WAYEN_CREDENTIAL_PATH, {
-      method: 'PUT',
-      body: JSON.stringify(wayenForm),
-    })
-    wayenForm.email = result.email || wayenForm.email
-    wayenForm.password = ''
-    wayenConfigured.value = Boolean(result.configured)
-    if (currentUser.value) {
-      currentUser.value.email = wayenForm.email
-    }
-    message.value = 'Wayen 凭据已保存'
-  } catch (error) {
-    message.value = error.message
-  } finally {
-    wayenCredentialLoading.value = false
-  }
 }
 
 async function openWayen() {
@@ -128,6 +103,7 @@ async function openWayen() {
     if (!response.ok) {
       if (response.status === 401) {
         clearAuth()
+        ssoLogin({ openWayen: true })
       }
       throw new Error(data.error || `HTTP ${response.status}`)
     }
@@ -145,19 +121,24 @@ async function openWayen() {
 onMounted(async () => {
   const url = new URL(window.location.href)
   const ssoToken = url.searchParams.get('sso_token')
+  const shouldOpenWayen = url.searchParams.get('open_wayen') === '1'
   if (ssoToken) {
     token.value = ssoToken
     localStorage.setItem(TOKEN_KEY, ssoToken)
     url.searchParams.delete('sso_token')
+    url.searchParams.delete('open_wayen')
     window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
   }
   if (!token.value) {
+    ssoLogin({ openWayen: true })
     return
   }
   await run(async () => {
     await loadMe()
-    await loadWayenCredential()
   }, '已就绪')
+  if (shouldOpenWayen) {
+    await openWayen()
+  }
 })
 </script>
 
@@ -168,9 +149,7 @@ onMounted(async () => {
         <p class="eyebrow">AuthServer</p>
         <h1>Wayen 登录入口</h1>
       </div>
-      <p class="message">当前仅保留 SSO 登录和 Wayen 单点跳转。</p>
-      <button class="primary" type="button" :disabled="ssoLoading" @click="ssoLogin">SSO 登录</button>
-      <p v-if="message" class="message">{{ message }}</p>
+      <p class="message">正在跳转到 SSO 登录...</p>
     </section>
   </main>
 
@@ -191,20 +170,6 @@ onMounted(async () => {
         <span class="wayen-icon" aria-hidden="true">W</span>
         <span class="wayen-title">Wayen</span>
       </button>
-      <form class="wayen-config form stack" @submit.prevent="saveWayenCredential">
-        <p class="config-title">Wayen 凭据</p>
-        <label>
-          <span>Wayen 账号</span>
-          <input v-model="wayenForm.email" autocomplete="email" />
-        </label>
-        <label>
-          <span>Wayen 密码</span>
-          <input v-model="wayenForm.password" type="password" autocomplete="current-password" />
-        </label>
-        <button class="secondary" type="submit" :disabled="wayenCredentialLoading">
-          {{ wayenConfigured ? '更新凭据' : '保存凭据' }}
-        </button>
-      </form>
       <p v-if="message" class="message">{{ message }}</p>
     </section>
   </main>

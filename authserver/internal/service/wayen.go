@@ -53,6 +53,13 @@ func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) 
 	if email == "" {
 		return nil, ErrWayenEmailMissing
 	}
+	if strings.TrimSpace(s.cfg.OAuthRedirectURI) != "" && strings.TrimSpace(s.cfg.WayenTargetURL) != "" {
+		target, err := s.oauthLoginURL(s.cfg.OAuthRedirectURI, s.cfg.WayenTargetURL)
+		if err != nil {
+			return nil, err
+		}
+		return &WayenLoginResult{TargetURL: target}, nil
+	}
 	if strings.TrimSpace(s.cfg.WayenLoginURL) == "" || strings.TrimSpace(s.cfg.WayenTargetURL) == "" {
 		return nil, ErrWayenNotConfigured
 	}
@@ -98,6 +105,28 @@ func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) 
 		TargetURL: s.cfg.WayenTargetURL,
 		Cookies:   resp.Cookies(),
 	}, nil
+}
+
+func (s *WayenService) oauthLoginURL(redirectURI, targetURL string) (string, error) {
+	parsed, err := url.Parse(strings.TrimSpace(redirectURI))
+	if err != nil {
+		return "", err
+	}
+	next, err := url.Parse(strings.TrimSpace(targetURL))
+	if err != nil {
+		return "", err
+	}
+	if next.Path == "" || next.Path == "/" {
+		next.Path = "/sign-in"
+	}
+	values := next.Query()
+	values.Set("ref", "oauth")
+	next.RawQuery = values.Encode()
+
+	query := parsed.Query()
+	query.Set("next", next.String())
+	parsed.RawQuery = query.Encode()
+	return parsed.String(), nil
 }
 
 func (s *WayenService) loginRequest(loginURL, email, password string) (string, io.Reader, string, error) {

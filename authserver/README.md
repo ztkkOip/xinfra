@@ -89,7 +89,7 @@ go run ./cmd/server
 发布脚本会在本地完成：
 
 - 构建后端和前端 Docker 镜像
-- 读取本地 `.env`，生成并应用线上 `ConfigMap`/`Secret`
+- 读取本地 `.env.server`，生成并应用线上 `ConfigMap`/`Secret`
 - 导出 `authserver-images-<version>.tar`
 - 上传到服务器
 - 导入 RKE2 使用的 `containerd`
@@ -102,7 +102,7 @@ go run ./cmd/server
 - 远端目录：`/authserver`
 - containerd socket：`/run/k3s/containerd/containerd.sock`
 
-发布脚本默认把仓库根目录的 `.env` 当作线上配置源。也就是说，发版前需要先把 `.env` 改成目标环境的实际值；脚本会在发版时重新生成并应用 `authserver-config` 和 `authserver-secret`。
+发布脚本默认把仓库根目录的 `.env.server` 当作服务器配置源；脚本会在发版时重新生成并应用 `authserver-config` 和 `authserver-secret`。本地开发用的 `.env` 不会被默认发布。
 
 脚本默认不会拦截测试环境配置。如果你要对正式环境启用更严格的保护，可以显式打开：
 
@@ -125,7 +125,7 @@ bash scripts/release.sh 1.0.5
 如果需要覆盖默认值，可以传环境变量：
 
 ```bash
-ENV_FILE=.env \
+ENV_FILE=.env.server \
 DEPLOY_HOST=218.11.5.223 \
 DEPLOY_KEY=/path/to/key.pem \
 REMOTE_DIR=/authserver \

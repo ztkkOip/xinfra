@@ -70,22 +70,6 @@ h1 {
   box-shadow: 0 18px 50px rgb(43 57 84 / 10%);
 }
 
-.form {
-  display: grid;
-  gap: 10px;
-}
-
-.stack {
-  gap: 14px;
-}
-
-.form label span {
-  display: block;
-  margin-bottom: 6px;
-  color: #526174;
-  font-size: 13px;
-}
-
 .primary {
   border-color: #1b64d8;
   background: #1b64d8;
@@ -188,21 +172,6 @@ h1 {
   gap: 12px;
   color: #526174;
   font-size: 14px;
-}
-
-.wayen-config {
-  width: min(360px, 100%);
-  padding: 22px;
-  border: 1px solid #dbe3ef;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 18px 50px rgb(43 57 84 / 10%);
-}
-
-.config-title {
-  color: #172033;
-  font-size: 16px;
-  font-weight: 700;
 }
 
 @media (max-width: 560px) {
