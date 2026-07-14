@@ -1,0 +1,6 @@
+# Kubernetes 部署配置
+
+存放 K8s 资源编排配置文件：
+- frontend.yaml: 前端 Deployment，副本数、Service、环境变量配置
+- server.yaml: 后端 Deployment，副本数、Service、Secret 挂载
+- ingress.yaml: Ingress 配置，域名路由规则、TLS 证书

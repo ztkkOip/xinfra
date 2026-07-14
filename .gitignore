@@ -1,0 +1,50 @@
+# XINFRA .gitignore
+
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/go.sum
+/vendor/
+
+# Node.js
+node_modules/
+dist/
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Temp files
+tmp/
+temp/
+
+# Build output
+build/
+bin/
+
+# Coverage
+coverage/
+*.cover
+*.coverprofile
+
+# Docker
+docker-compose.override.yml
+
+# Kubernetes secrets (local dev)
+*-secret.yaml
