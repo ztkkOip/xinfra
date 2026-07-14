@@ -1,7 +1,0 @@
-# 页面视图组件
-
-存放页面级组件，一个文件对应一个完整页面：
-- auth/: 认证相关页面（Login.vue）
-- dashboard/: 仪表盘页面（Index.vue）
-- subsystem/: 子系统导航页面（Navigation.vue）
-- audit/: 审计面板页面（LoginAudit.vue、OpsAudit.vue）
