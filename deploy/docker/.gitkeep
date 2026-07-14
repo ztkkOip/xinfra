@@ -1,0 +1,5 @@
+# Docker 构建配置
+
+存放 Docker 镜像构建相关文件：
+- Dockerfile.frontend: 前端镜像，基于 Node 构建 + Nginx 托管静态文件
+- Dockerfile.server: 后端镜像，基于 Go 编译 + 运行时最小镜像

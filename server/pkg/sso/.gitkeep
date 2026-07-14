@@ -1,0 +1,5 @@
+# SSO 协议处理
+
+存放 SSO 相关协议实现：
+- oauth2.go: OAuth 2.0 客户端，主系统↔子系统的 Authorization Code 流程
+- saml.go: SAML 处理，主系统↔LDAP 的 SAML 断言生成和验证
