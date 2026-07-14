@@ -86,31 +86,33 @@
         </div>
         <div class="panel-body">
           <table>
-            <tr class="tr-hover">
-              <td class="status-text ok">● 成功</td>
-              <td class="strong">MySQL 主从部署</td>
-              <td class="mono">2m14s</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="status-text warn">● 执行中</td>
-              <td class="strong">RKE2 节点加入</td>
-              <td class="mono">38s</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="status-text ok">● 成功</td>
-              <td class="strong">Redis Cluster 部署</td>
-              <td class="mono">3m02s</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="status-text err">● 失败</td>
-              <td class="strong">openresty 网关部署</td>
-              <td class="mono">41s</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="status-text ok">● 成功</td>
-              <td class="strong">业务线标签同步</td>
-              <td class="mono">5s</td>
-            </tr>
+            <tbody>
+              <tr class="tr-hover">
+                <td class="status-text ok">● 成功</td>
+                <td class="strong">MySQL 主从部署</td>
+                <td class="mono">2m14s</td>
+              </tr>
+              <tr class="tr-hover">
+                <td class="status-text warn">● 执行中</td>
+                <td class="strong">RKE2 节点加入</td>
+                <td class="mono">38s</td>
+              </tr>
+              <tr class="tr-hover">
+                <td class="status-text ok">● 成功</td>
+                <td class="strong">Redis Cluster 部署</td>
+                <td class="mono">3m02s</td>
+              </tr>
+              <tr class="tr-hover">
+                <td class="status-text err">● 失败</td>
+                <td class="strong">openresty 网关部署</td>
+                <td class="mono">41s</td>
+              </tr>
+              <tr class="tr-hover">
+                <td class="status-text ok">● 成功</td>
+                <td class="strong">业务线标签同步</td>
+                <td class="mono">5s</td>
+              </tr>
+            </tbody>
           </table>
         </div>
       </div>

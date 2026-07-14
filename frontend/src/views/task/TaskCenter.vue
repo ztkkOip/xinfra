@@ -14,11 +14,13 @@
         </div>
         <div class="panel-body">
           <table>
-            <tr v-for="task in tasks" :key="task.id" class="tr-hover" :class="{ active: task.id === selectedTask }" @click="selectedTask = task.id">
-              <td :class="['status-text', task.statusClass]">● {{ task.status }}</td>
-              <td class="strong">{{ task.name }}</td>
-              <td class="mono" style="font-size: 11px; color: var(--text-dim)">{{ task.playbook }}</td>
-            </tr>
+            <tbody>
+              <tr v-for="task in tasks" :key="task.id" class="tr-hover" :class="{ active: task.id === selectedTask }" @click="selectedTask = task.id">
+                <td :class="['status-text', task.statusClass]">● {{ task.status }}</td>
+                <td class="strong">{{ task.name }}</td>
+                <td class="mono" style="font-size: 11px; color: var(--text-dim)">{{ task.playbook }}</td>
+              </tr>
+            </tbody>
           </table>
           <div class="pagination">
             <span>共 86 条 · 每页 6 条</span>
