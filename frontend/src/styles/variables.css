@@ -1,0 +1,31 @@
+:root {
+  /* 背景色 */
+  --bg-deep: #0E1117;
+  --bg-panel: #151922;
+  --bg-panel-2: #1B202B;
+
+  /* 边框色 */
+  --line: #262C38;
+  --line-soft: #1E2330;
+
+  /* 文字色 */
+  --text-hi: #E8EBF1;
+  --text-mid: #9AA3B5;
+  --text-dim: #5C657A;
+
+  /* 强调色 */
+  --accent: #3FE0A5;
+  --accent-dim: #1F6B52;
+
+  /* 状态色 */
+  --warn: #F2B544;
+  --err: #F2554F;
+  --info: #5B9DF2;
+
+  /* 圆角 */
+  --radius: 6px;
+
+  /* 字体 */
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}

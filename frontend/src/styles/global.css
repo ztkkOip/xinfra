@@ -1,0 +1,132 @@
+@import './variables.css';
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg-deep);
+  color: var(--text-hi);
+  font-family: var(--sans);
+  font-size: 14px;
+}
+
+/* 滚动条样式 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2A3140;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: var(--sans);
+  cursor: pointer;
+}
+
+/* 通用样式类 */
+.mono {
+  font-family: var(--mono);
+}
+
+/* 状态指示器 */
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.dot.ok {
+  background: var(--accent);
+  box-shadow: 0 0 6px #3FE0A599;
+}
+
+.dot.warn {
+  background: var(--warn);
+}
+
+.dot.err {
+  background: var(--err);
+}
+
+.dot.idle {
+  background: var(--text-dim);
+}
+
+/* 状态文本 */
+.status-text {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.status-text.ok {
+  color: var(--accent);
+}
+
+.status-text.warn {
+  color: var(--warn);
+}
+
+.status-text.err {
+  color: var(--err);
+}
+
+.status-text.idle {
+  color: var(--text-dim);
+}
+
+/* 标签 */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  color: var(--text-mid);
+}
+
+/* 进度条 */
+.bar-wrap {
+  width: 90px;
+  height: 5px;
+  background: #262C38;
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.bar-fill.warn {
+  background: var(--warn);
+}
+
+.bar-fill.err {
+  background: var(--err);
+}

@@ -1,6 +1,0 @@
-# 可复用 UI 组件
-
-存放按功能模块组织的可复用组件：
-- Layout/: 页面布局组件（AppHeader、AppSidebar、AppMain）
-- SubsystemCard.vue: 子系统卡片组件
-- AuditLogTable.vue: 审计日志表格组件
