@@ -120,7 +120,7 @@ func (s *WayenService) oauthLoginURL(redirectURI, targetURL string) (string, err
 		next.Path = "/sign-in"
 	}
 	values := next.Query()
-	values.Set("ref", "oauth")
+	values.Set("ref", defaultConfigValue(s.cfg.WayenOAuthRef, "/portal/namespace/1/app"))
 	next.RawQuery = values.Encode()
 
 	query := parsed.Query()

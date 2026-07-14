@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"crypto/rsa"
 	"errors"
 	"time"
 
@@ -19,6 +20,18 @@ type OAuthCodeClaims struct {
 	UserID      uint64 `json:"uid"`
 	ClientID    string `json:"client_id"`
 	RedirectURI string `json:"redirect_uri"`
+	Scope       string `json:"scope"`
+	Nonce       string `json:"nonce,omitempty"`
+	jwt.RegisteredClaims
+}
+
+type IDTokenClaims struct {
+	UserID        uint64 `json:"uid"`
+	Username      string `json:"preferred_username"`
+	Email         string `json:"email"`
+	EmailVerified bool   `json:"email_verified"`
+	Name          string `json:"name"`
+	Nonce         string `json:"nonce,omitempty"`
 	jwt.RegisteredClaims
 }
 
@@ -45,7 +58,7 @@ func Sign(secret, issuer string, ttl time.Duration, userID uint64, username, ema
 	return signed, tokenID, expiresAt, err
 }
 
-func SignOAuthCode(secret, issuer string, ttl time.Duration, userID uint64, clientID, redirectURI string) (string, string, time.Time, error) {
+func SignOAuthCode(secret, issuer string, ttl time.Duration, userID uint64, clientID, redirectURI, scope, nonce string) (string, string, time.Time, error) {
 	now := time.Now()
 	expiresAt := now.Add(ttl)
 	codeID := randomID()
@@ -53,6 +66,8 @@ func SignOAuthCode(secret, issuer string, ttl time.Duration, userID uint64, clie
 		UserID:      userID,
 		ClientID:    clientID,
 		RedirectURI: redirectURI,
+		Scope:       scope,
+		Nonce:       nonce,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ID:        codeID,
 			Issuer:    issuer,
@@ -65,6 +80,36 @@ func SignOAuthCode(secret, issuer string, ttl time.Duration, userID uint64, clie
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	signed, err := token.SignedString([]byte(secret))
 	return signed, codeID, expiresAt, err
+}
+
+func SignIDToken(privateKey *rsa.PrivateKey, keyID, issuer, clientID string, ttl time.Duration, userID uint64, username, email, name, nonce string) (string, time.Time, error) {
+	now := time.Now()
+	expiresAt := now.Add(ttl)
+	subject := email
+	if subject == "" {
+		subject = username
+	}
+	claims := IDTokenClaims{
+		UserID:        userID,
+		Username:      username,
+		Email:         email,
+		EmailVerified: email != "",
+		Name:          name,
+		Nonce:         nonce,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Issuer:    issuer,
+			Subject:   subject,
+			Audience:  []string{clientID},
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	if keyID != "" {
+		token.Header["kid"] = keyID
+	}
+	signed, err := token.SignedString(privateKey)
+	return signed, expiresAt, err
 }
 
 func Parse(secret string, tokenValue string) (*Claims, error) {

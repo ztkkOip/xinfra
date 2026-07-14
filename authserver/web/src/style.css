@@ -98,7 +98,7 @@ h1 {
   font-size: 13px;
 }
 
-.wayen-page {
+.app-page {
   min-height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -107,7 +107,7 @@ h1 {
     #f5f7fb;
 }
 
-.wayen-header {
+.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -118,7 +118,7 @@ h1 {
   backdrop-filter: blur(10px);
 }
 
-.wayen-main {
+.app-main {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 360px));
   justify-content: center;
@@ -127,7 +127,7 @@ h1 {
   padding: 32px 20px;
 }
 
-.wayen-button {
+.app-button {
   width: min(280px, 78vw);
   aspect-ratio: 1;
   display: grid;
@@ -140,27 +140,34 @@ h1 {
   box-shadow: 0 18px 50px rgb(43 57 84 / 12%);
 }
 
-.wayen-button:hover:not(:disabled),
-.wayen-button:focus-visible {
+.app-button:hover:not(:disabled),
+.app-button:focus-visible {
   border-color: #1b64d8;
   box-shadow: 0 22px 60px rgb(27 100 216 / 18%);
   outline: none;
 }
 
-.wayen-icon {
+.app-icon {
   width: 112px;
   height: 112px;
   display: grid;
   place-items: center;
   border-radius: 28px;
-  background: #1b64d8;
   color: #ffffff;
   font-size: 64px;
   font-weight: 800;
   line-height: 1;
 }
 
-.wayen-title {
+.wayen-icon {
+  background: #1b64d8;
+}
+
+.clouddm-icon {
+  background: #0f7b6c;
+}
+
+.app-title {
   color: #172033;
   font-size: 22px;
   font-weight: 750;
@@ -175,7 +182,7 @@ h1 {
 }
 
 @media (max-width: 560px) {
-  .wayen-header {
+  .app-header {
     align-items: flex-start;
     flex-direction: column;
     padding: 18px 20px;
@@ -186,14 +193,14 @@ h1 {
     justify-content: space-between;
   }
 
-  .wayen-icon {
+  .app-icon {
     width: 92px;
     height: 92px;
     border-radius: 22px;
     font-size: 52px;
   }
 
-  .wayen-main {
+  .app-main {
     grid-template-columns: 1fr;
   }
 }

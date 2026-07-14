@@ -29,13 +29,16 @@ func New(deps Dependencies) *gin.Engine {
 	healthHandler := handler.NewHealthHandler(deps.DB)
 	userHandler := handler.NewUserHandler()
 	wayenHandler := handler.NewWayenHandler(deps.DB, wayenService, auditService)
+	clouddmHandler := handler.NewCloudDMHandler(deps.Config, auditService)
 	samlHandler := handler.NewSAMLHandler(deps.Config, authService)
 	oauthHandler := handler.NewOAuthHandler(deps.Config, deps.DB, auditService)
 
 	r.GET("/healthz", healthHandler.Healthz)
 	r.GET("/readyz", healthHandler.Readyz)
+	r.GET("/auth/.well-known/openid-configuration", oauthHandler.Discovery)
 	r.GET("/auth/oauth/authorize", oauthHandler.Authorize)
 	r.POST("/auth/oauth/token", oauthHandler.Token)
+	r.GET("/auth/oauth/jwks", oauthHandler.JWKS)
 	r.GET("/auth/oauth/userinfo", oauthHandler.UserInfo)
 
 	v1 := r.Group("/auth/api/v1")
@@ -50,6 +53,7 @@ func New(deps Dependencies) *gin.Engine {
 		protected.GET("/wayen/login", wayenHandler.Login)
 		protected.GET("/wayen/credential", wayenHandler.GetCredential)
 		protected.PUT("/wayen/credential", wayenHandler.SaveCredential)
+		protected.GET("/clouddm/login", clouddmHandler.Login)
 	}
 
 	return r

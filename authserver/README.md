@@ -161,9 +161,11 @@ bash scripts/restart-authserver.sh nginx
 | `GET` | `/api/v1/saml/metadata` | SAML SP metadata |
 | `GET` | `/api/v1/login/internal-sso` | 发起 SAML SSO 登录 |
 | `POST` | `/api/v1/saml/acs` | SAML ACS 回调，当前仅调试打印 |
+| `GET` | `/auth/.well-known/openid-configuration` | OIDC Discovery 配置 |
 | `GET` | `/auth/oauth/authorize` | OAuth2 Authorization Code 授权入口，供 Wayne 使用 |
 | `POST` | `/auth/oauth/token` | OAuth2 code 换 access token |
 | `GET` | `/auth/oauth/userinfo` | OAuth2 bearer token 查询当前用户 |
+| `GET` | `/auth/oauth/jwks` | OIDC JWKS 公钥 |
 
 ## SAML Metadata
 
@@ -232,6 +234,7 @@ AuthServer 端配置：
 OAUTH_WAYNE_CLIENT_ID=wayne
 OAUTH_WAYNE_CLIENT_SECRET=change-this-wayne-client-secret
 OAUTH_WAYNE_REDIRECT_URI=http://127.0.0.1:8080/login/oauth2/oauth2
+WAYEN_OAUTH_REF=/portal/namespace/1/app
 OAUTH_CODE_TTL_SECONDS=120
 ```
 
@@ -242,6 +245,19 @@ GET  /auth/oauth/authorize
 POST /auth/oauth/token
 GET  /auth/oauth/userinfo
 ```
+
+OIDC Discovery 里的 endpoint 默认由 `OIDC_ISSUER` 拼接，也可以按 endpoint 单独覆盖。浏览器需要访问 `OIDC_AUTHORIZATION_ENDPOINT`，后端系统通常访问 `OIDC_TOKEN_ENDPOINT`、`OIDC_USERINFO_ENDPOINT` 和 `OIDC_JWKS_URI`。
+
+```env
+OIDC_ISSUER=http://auth.example.com/auth
+OIDC_AUTHORIZATION_ENDPOINT=http://auth.example.com/auth/oauth/authorize
+OIDC_TOKEN_ENDPOINT=http://auth-internal.example.com/auth/oauth/token
+OIDC_USERINFO_ENDPOINT=http://auth-internal.example.com/auth/oauth/userinfo
+OIDC_JWKS_URI=http://auth-internal.example.com/auth/oauth/jwks
+CLOUDDM_TARGET_URL=http://authserver-nginx/internal/clouddm
+```
+
+`CLOUDDM_TARGET_URL` 用于 AuthServer 后端请求 CloudDM `/requestJumpUrl`。在 k8s 内建议指向 AuthServer nginx 的内部代理路径，由 nginx 转发到 CloudDM Service，并把 `Host` 固定成 CloudDM 公网入口，确保 CloudDM 生成浏览器可访问的 callback。
 
 Wayne `app.conf` 示例：
 
@@ -265,6 +281,7 @@ Wayne 会把回调地址拼成：
 ```
 
 因此 `OAUTH_WAYNE_REDIRECT_URI` 必须和 Wayne 实际回调地址完全一致。浏览器访问 Wayne OAuth 登录入口后，如果 AuthServer 还没有登录态，会先跳内部 SAML；SAML 成功后再回到 OAuth authorize，签发 code 给 Wayne。
+`WAYEN_OAUTH_REF` 是 AuthServer 发起 Wayne 登录时写入 Wayne `next` 参数的登录完成页，默认 `/portal/namespace/1/app`，对应 Wayne `DemoNamespaceId = 1` 的默认 namespace。不要配置成 `oauth` 或 `/oauth`，否则 Wayne 回调会把它当成前端路由跳到 `/oauth`。
 
 管理员可查看当前 SAML metadata 配置：
 

@@ -40,12 +40,15 @@ func (h *OAuthHandler) Authorize(c *gin.Context) {
 	redirectURI := strings.TrimSpace(c.Query("redirect_uri"))
 	responseType := strings.TrimSpace(c.Query("response_type"))
 	state := c.Query("state")
+	scope := strings.TrimSpace(c.Query("scope"))
+	nonce := strings.TrimSpace(c.Query("nonce"))
 
 	if responseType != "code" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported response_type"})
 		return
 	}
-	if !h.validClientRedirect(clientID, redirectURI) {
+	client, ok := h.client(clientID)
+	if !ok || !validClientRedirect(client, redirectURI) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid client_id or redirect_uri"})
 		return
 	}
@@ -57,7 +60,7 @@ func (h *OAuthHandler) Authorize(c *gin.Context) {
 		return
 	}
 
-	code, codeID, expiresAt, err := auth.SignOAuthCode(h.cfg.JWTSecret, h.cfg.JWTIssuer, h.cfg.OAuthCodeTTL(), user.ID, clientID, redirectURI)
+	code, codeID, expiresAt, err := auth.SignOAuthCode(h.cfg.JWTSecret, h.cfg.JWTIssuer, h.cfg.OAuthCodeTTL(), user.ID, clientID, redirectURI, scope, nonce)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -119,7 +122,8 @@ func (h *OAuthHandler) Token(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported grant_type"})
 		return
 	}
-	if clientID != h.cfg.OAuthClientID || clientSecret != h.cfg.OAuthClientSecret {
+	client, ok := h.client(clientID)
+	if !ok || clientSecret != client.Secret {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid client credentials"})
 		return
 	}
@@ -129,12 +133,13 @@ func (h *OAuthHandler) Token(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid code"})
 		return
 	}
-	if codeClaims.ClientID != clientID || codeClaims.RedirectURI != redirectURI || !h.validClientRedirect(clientID, redirectURI) {
+	if codeClaims.ClientID != clientID || codeClaims.RedirectURI != redirectURI || !validClientRedirect(client, redirectURI) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid code"})
 		return
 	}
 
 	var token string
+	var idToken string
 	var expiresAt time.Time
 	var user model.User
 	now := time.Now()
@@ -152,9 +157,22 @@ func (h *OAuthHandler) Token(c *gin.Context) {
 			return service.ErrUserDisabled
 		}
 
+		display := strings.TrimSpace(user.DisplayName)
+		if display == "" {
+			display = user.Username
+		}
 		tokenID := ""
 		var err error
 		token, tokenID, expiresAt, err = auth.Sign(h.cfg.JWTSecret, h.cfg.JWTIssuer, h.cfg.JWTTTL(), user.ID, user.Username, user.Email, user.IsAdmin)
+		if err != nil {
+			return err
+		}
+		privateKey, err := auth.LoadRSAPrivateKey(h.cfg.SAMLSPKey)
+		if err != nil {
+			return err
+		}
+		keyID := auth.RSAKeyID(&privateKey.PublicKey)
+		idToken, _, err = auth.SignIDToken(privateKey, keyID, h.cfg.OIDCIssuer, clientID, h.cfg.JWTTTL(), user.ID, user.Username, user.Email, display, codeClaims.Nonce)
 		if err != nil {
 			return err
 		}
@@ -195,8 +213,38 @@ func (h *OAuthHandler) Token(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{
 		"access_token": token,
+		"id_token":     idToken,
 		"token_type":   "Bearer",
 		"expires_in":   int(time.Until(expiresAt).Seconds()),
+	})
+}
+
+func (h *OAuthHandler) Discovery(c *gin.Context) {
+	issuer := strings.TrimRight(h.cfg.OIDCIssuer, "/")
+	c.JSON(http.StatusOK, gin.H{
+		"issuer":                                issuer,
+		"authorization_endpoint":                h.cfg.OIDCAuthorizeURL,
+		"token_endpoint":                        h.cfg.OIDCTokenURL,
+		"userinfo_endpoint":                     h.cfg.OIDCUserInfoURL,
+		"jwks_uri":                              h.cfg.OIDCJWKSURL,
+		"response_types_supported":              []string{"code"},
+		"grant_types_supported":                 []string{"authorization_code"},
+		"subject_types_supported":               []string{"public"},
+		"id_token_signing_alg_values_supported": []string{"RS256"},
+		"scopes_supported":                      []string{"openid", "profile", "email"},
+		"claims_supported":                      []string{"sub", "name", "preferred_username", "email", "email_verified"},
+		"token_endpoint_auth_methods_supported": []string{"client_secret_basic", "client_secret_post"},
+	})
+}
+
+func (h *OAuthHandler) JWKS(c *gin.Context) {
+	privateKey, err := auth.LoadRSAPrivateKey(h.cfg.SAMLSPKey)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"keys": []auth.JWK{auth.PublicJWKFromKey(privateKey)},
 	})
 }
 
@@ -224,22 +272,35 @@ func (h *OAuthHandler) UserInfo(c *gin.Context) {
 		display = user.Username
 	}
 	c.JSON(http.StatusOK, gin.H{
-		"name":    user.Username,
-		"email":   user.Email,
-		"display": display,
+		"sub":                user.Email,
+		"name":               user.Username,
+		"preferred_username": user.Username,
+		"email":              user.Email,
+		"email_verified":     user.Email != "",
+		"display":            display,
 	})
 }
 
 func (h *OAuthHandler) oauthConfigured() bool {
-	return h.cfg.OAuthClientID != "" && h.cfg.OAuthClientSecret != ""
+	return len(h.cfg.OAuthClients()) > 0
 }
 
-func (h *OAuthHandler) validClientRedirect(clientID, redirectURI string) bool {
-	if clientID == "" || clientID != h.cfg.OAuthClientID || redirectURI == "" {
+func (h *OAuthHandler) client(clientID string) (config.OAuthClient, bool) {
+	client, ok := h.cfg.OAuthClients()[strings.TrimSpace(clientID)]
+	return client, ok
+}
+
+func validClientRedirect(client config.OAuthClient, redirectURI string) bool {
+	if redirectURI == "" {
 		return false
 	}
-	if h.cfg.OAuthRedirectURI != "" {
-		return redirectURI == h.cfg.OAuthRedirectURI
+	if len(client.RedirectURIs) > 0 {
+		for _, allowed := range client.RedirectURIs {
+			if redirectURI == allowed {
+				return true
+			}
+		}
+		return false
 	}
 	parsed, err := url.Parse(redirectURI)
 	return err == nil && parsed.IsAbs() && (parsed.Scheme == "http" || parsed.Scheme == "https") && parsed.Host != ""

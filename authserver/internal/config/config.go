@@ -7,6 +7,12 @@ import (
 	"time"
 )
 
+type OAuthClient struct {
+	ID           string
+	Secret       string
+	RedirectURIs []string
+}
+
 type Config struct {
 	AppEnv              string
 	HTTPAddr            string
@@ -27,10 +33,20 @@ type Config struct {
 	WayenPasswordKey    string
 	WayenLoginFormat    string
 	WayenLoginValue     string
+	WayenOAuthRef       string
 	OAuthClientID       string
 	OAuthClientSecret   string
 	OAuthRedirectURI    string
 	OAuthCodeTTLSeconds int
+	OIDCIssuer          string
+	OIDCAuthorizeURL    string
+	OIDCTokenURL        string
+	OIDCUserInfoURL     string
+	OIDCJWKSURL         string
+	CloudDMClientID     string
+	CloudDMClientSecret string
+	CloudDMRedirectURI  string
+	CloudDMTargetURL    string
 }
 
 func Load() Config {
@@ -39,6 +55,8 @@ func Load() Config {
 	publicBaseURL := env("PUBLIC_BASE_URL", defaultPublicBaseURL(httpAddr))
 	samlEntityID := env("SAML_ENTITY_ID", strings.TrimRight(publicBaseURL, "/")+"/auth/api/v1/saml/metadata")
 	samlACSURL := env("SAML_ACS_URL", strings.TrimRight(publicBaseURL, "/")+"/auth/api/v1/saml/acs")
+	oidcIssuer := env("OIDC_ISSUER", strings.TrimRight(publicBaseURL, "/")+"/auth")
+	oidcIssuer = strings.TrimRight(oidcIssuer, "/")
 
 	return Config{
 		AppEnv:              env("APP_ENV", "dev"),
@@ -60,10 +78,20 @@ func Load() Config {
 		WayenPasswordKey:    env("WAYEN_PASSWORD_KEY", "password"),
 		WayenLoginFormat:    env("WAYEN_LOGIN_FORMAT", "form"),
 		WayenLoginValue:     env("WAYEN_LOGIN_VALUE", "email"),
+		WayenOAuthRef:       env("WAYEN_OAUTH_REF", "/portal/namespace/1/app"),
 		OAuthClientID:       env("OAUTH_WAYNE_CLIENT_ID", "wayne"),
 		OAuthClientSecret:   env("OAUTH_WAYNE_CLIENT_SECRET", "wayne-secret"),
 		OAuthRedirectURI:    env("OAUTH_WAYNE_REDIRECT_URI", ""),
 		OAuthCodeTTLSeconds: envInt("OAUTH_CODE_TTL_SECONDS", 120),
+		OIDCIssuer:          oidcIssuer,
+		OIDCAuthorizeURL:    trimURL(env("OIDC_AUTHORIZATION_ENDPOINT", oidcIssuer+"/oauth/authorize")),
+		OIDCTokenURL:        trimURL(env("OIDC_TOKEN_ENDPOINT", oidcIssuer+"/oauth/token")),
+		OIDCUserInfoURL:     trimURL(env("OIDC_USERINFO_ENDPOINT", oidcIssuer+"/oauth/userinfo")),
+		OIDCJWKSURL:         trimURL(env("OIDC_JWKS_URI", oidcIssuer+"/oauth/jwks")),
+		CloudDMClientID:     env("OIDC_CLOUDDM_CLIENT_ID", "clouddm"),
+		CloudDMClientSecret: env("OIDC_CLOUDDM_CLIENT_SECRET", ""),
+		CloudDMRedirectURI:  env("OIDC_CLOUDDM_REDIRECT_URI", ""),
+		CloudDMTargetURL:    env("CLOUDDM_TARGET_URL", ""),
 	}
 }
 
@@ -97,6 +125,42 @@ func (c Config) JWTTTL() time.Duration {
 
 func (c Config) OAuthCodeTTL() time.Duration {
 	return time.Duration(c.OAuthCodeTTLSeconds) * time.Second
+}
+
+func (c Config) OAuthClients() map[string]OAuthClient {
+	clients := make(map[string]OAuthClient)
+	addOAuthClient(clients, c.OAuthClientID, c.OAuthClientSecret, c.OAuthRedirectURI)
+	addOAuthClient(clients, c.CloudDMClientID, c.CloudDMClientSecret, c.CloudDMRedirectURI)
+	return clients
+}
+
+func addOAuthClient(clients map[string]OAuthClient, id, secret, redirectURIs string) {
+	id = strings.TrimSpace(id)
+	secret = strings.TrimSpace(secret)
+	if id == "" || secret == "" {
+		return
+	}
+	clients[id] = OAuthClient{
+		ID:           id,
+		Secret:       secret,
+		RedirectURIs: splitCSV(redirectURIs),
+	}
+}
+
+func splitCSV(value string) []string {
+	parts := strings.Split(value, ",")
+	items := make([]string, 0, len(parts))
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+		if part != "" {
+			items = append(items, part)
+		}
+	}
+	return items
+}
+
+func trimURL(value string) string {
+	return strings.TrimRight(strings.TrimSpace(value), "/")
 }
 
 func env(key, fallback string) string {
