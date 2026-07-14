@@ -1,4 +1,4 @@
-# CLAUDE.md
+# AGENTS.md
 
 ## MVP 实现阶段指南
 
