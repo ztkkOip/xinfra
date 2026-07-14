@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>xinfra · 统一基础设施平台</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root{
+  --bg-deep:#0E1117;
+  --bg-panel:#151922;
+  --bg-panel-2:#1B202B;
+  --line:#262C38;
+  --line-soft:#1E2330;
+  --text-hi:#E8EBF1;
+  --text-mid:#9AA3B5;
+  --text-dim:#5C657A;
+  --accent:#3FE0A5;
+  --accent-dim:#1F6B52;
+  --warn:#F2B544;
+  --err:#F2554F;
+  --info:#5B9DF2;
+  --radius:6px;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg-deep);color:var(--text-hi);font-family:var(--sans);font-size:14px;}
+::-webkit-scrollbar{width:8px;height:8px;}
+::-webkit-scrollbar-thumb{background:#2A3140;border-radius:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+
+a{color:inherit;}
+button{font-family:var(--sans);cursor:pointer;}
+
+/* ---------- shell ---------- */
+.shell{display:grid;grid-template-columns:226px 1fr;grid-template-rows:56px 1fr;height:100vh;}
+
+.topbar{
+  grid-column:1/3;
+  display:flex;align-items:center;
+  padding:0 18px 0 16px;
+  background:var(--bg-panel);
+  border-bottom:1px solid var(--line);
+  gap:14px;
+}
+.brand{display:flex;align-items:center;gap:9px;font-weight:600;letter-spacing:.3px;font-size:15px;}
+.brand .mark{
+  width:22px;height:22px;border-radius:5px;
+  background:linear-gradient(135deg,var(--accent),#1C8F69);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:11px;font-weight:600;color:#08140F;
+}
+.brand .sub{color:var(--text-dim);font-weight:400;font-size:12px;margin-left:4px;}
+.topbar .spacer{flex:1;}
+.env-pill{
+  font-family:var(--mono);font-size:11px;color:var(--accent);
+  border:1px solid var(--accent-dim);background:#0F261D;
+  padding:3px 9px;border-radius:20px;letter-spacing:.4px;
+}
+.search-box{
+  display:flex;align-items:center;gap:7px;
+  background:var(--bg-panel-2);border:1px solid var(--line);
+  border-radius:6px;padding:6px 10px;color:var(--text-dim);font-size:12.5px;
+  width:240px;
+}
+.search-box kbd{margin-left:auto;font-family:var(--mono);font-size:10px;background:#262C38;padding:1px 5px;border-radius:3px;color:var(--text-dim);}
+.identity{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text-mid);}
+.identity .avatar{width:26px;height:26px;border-radius:50%;background:#2A3142;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;color:var(--text-hi);}
+.identity .ldap-tag{font-family:var(--mono);font-size:10px;color:var(--text-dim);}
+
+/* ---------- sidebar ---------- */
+.sidebar{
+  background:var(--bg-panel);
+  border-right:1px solid var(--line);
+  padding:14px 10px;
+  display:flex;flex-direction:column;
+  overflow-y:auto;
+}
+.nav-group{margin-bottom:18px;}
+.nav-label{
+  font-size:10.5px;color:var(--text-dim);text-transform:uppercase;
+  letter-spacing:1px;padding:0 10px;margin-bottom:6px;font-weight:600;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:6px;
+  color:var(--text-mid);font-size:13px;font-weight:500;
+  cursor:pointer;margin-bottom:2px;
+  border:1px solid transparent;
+}
+.nav-item .ic{width:16px;text-align:center;font-size:13px;opacity:.85;}
+.nav-item:hover{background:var(--bg-panel-2);color:var(--text-hi);}
+.nav-item.active{background:#13261F;color:var(--accent);border-color:var(--accent-dim);}
+.nav-item .badge{
+  margin-left:auto;font-family:var(--mono);font-size:10px;
+  background:#262C38;color:var(--text-dim);padding:1px 6px;border-radius:10px;
+}
+.nav-item.active .badge{background:var(--accent-dim);color:#CFFCE9;}
+
+.sidebar-foot{
+  margin-top:auto;padding:10px;border-top:1px solid var(--line-soft);
+  font-size:11px;color:var(--text-dim);line-height:1.6;
+}
+
+/* ---------- main ---------- */
+.main{overflow-y:auto;padding:22px 26px 60px;}
+.view{display:none;}
+.view.active{display:block;}
+
+.page-head{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:18px;}
+.page-head h1{font-size:19px;margin:0 0 4px;font-weight:700;letter-spacing:.2px;}
+.page-head p{margin:0;color:var(--text-dim);font-size:12.5px;}
+.btn{
+  border-radius:6px;border:1px solid var(--line);background:var(--bg-panel-2);
+  color:var(--text-hi);padding:8px 14px;font-size:12.5px;font-weight:500;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn:hover{border-color:#3A4356;}
+.btn-primary{background:var(--accent);border-color:var(--accent);color:#06150F;font-weight:600;}
+.btn-primary:hover{background:#55E8B3;}
+.btn-ghost{background:transparent;color:var(--text-mid);border-color:transparent;}
+.btn-ghost:hover{color:var(--text-hi);background:var(--bg-panel-2);}
+
+/* stat cards */
+.stat-row{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.stat-card{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;
+  padding:14px 16px;position:relative;overflow:hidden;
+}
+.stat-card .label{font-size:11px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;}
+.stat-card .value{font-family:var(--mono);font-size:24px;font-weight:600;}
+.stat-card .delta{font-size:11px;color:var(--text-dim);margin-top:4px;}
+.stat-card .delta.up{color:var(--accent);}
+.stat-card .delta.warn{color:var(--warn);}
+
+/* panel */
+.panel{background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;margin-bottom:18px;}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--line-soft);}
+.panel-head h3{margin:0;font-size:13.5px;font-weight:600;}
+.panel-head .meta{font-size:11.5px;color:var(--text-dim);font-family:var(--mono);}
+.panel-body{padding:4px 0;}
+
+/* table */
+table{width:100%;border-collapse:collapse;font-size:12.5px;}
+th{
+  text-align:left;color:var(--text-dim);font-weight:500;font-size:11px;
+  text-transform:uppercase;letter-spacing:.4px;
+  padding:9px 16px;border-bottom:1px solid var(--line-soft);
+}
+td{padding:11px 16px;border-bottom:1px solid var(--line-soft);color:var(--text-mid);}
+tr:last-child td{border-bottom:none;}
+tr.tr-hover:hover td{background:var(--bg-panel-2);}
+td.mono, .mono{font-family:var(--mono);}
+td.strong{color:var(--text-hi);font-weight:500;}
+
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:10.5px;
+  padding:2px 8px;border-radius:4px;border:1px solid var(--line);color:var(--text-mid);
+}
+.tag.zone-a{color:#8EC8FF;border-color:#1C3A5C;background:#0E1C2C;}
+.tag.zone-b{color:#C9A6FF;border-color:#3A2C5C;background:#1A1430;}
+.tag.zone-c{color:#FFC97A;border-color:#5C4A1C;background:#241B0A;}
+.tag.biz{color:var(--text-mid);}
+.tag.src-cmdb{color:#7FFFC2;border-color:var(--accent-dim);background:#0F261D;}
+.tag.src-ali{color:#FFC97A;border-color:#5C4A1C;background:#241B0A;}
+.tag.src-aws{color:#8EC8FF;border-color:#1C3A5C;background:#0E1C2C;}
+.tag.src-qiniu{color:#C9A6FF;border-color:#3A2C5C;background:#1A1430;}
+
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:6px;}
+.dot.ok{background:var(--accent);box-shadow:0 0 6px #3FE0A599;}
+.dot.warn{background:var(--warn);}
+.dot.err{background:var(--err);}
+.dot.idle{background:var(--text-dim);}
+
+.status-text{font-size:12px;display:flex;align-items:center;}
+.status-text.ok{color:var(--accent);}
+.status-text.warn{color:var(--warn);}
+.status-text.err{color:var(--err);}
+.status-text.idle{color:var(--text-dim);}
+
+.bar-wrap{width:90px;height:5px;background:#262C38;border-radius:3px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px;}
+.bar-fill{height:100%;border-radius:3px;background:var(--accent);}
+.bar-fill.warn{background:var(--warn);}
+.bar-fill.err{background:var(--err);}
+
+/* two col layout */
+.cols-2{display:grid;grid-template-columns:1.4fr 1fr;gap:18px;}
+
+/* topology mini */
+.topo{padding:18px 16px;display:flex;gap:14px;}
+.topo-cluster{
+  flex:1;border:1px dashed var(--line);border-radius:8px;padding:12px;
+}
+.topo-cluster .tname{font-size:12px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.node-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;}
+.node-cell{
+  aspect-ratio:1;border-radius:3px;background:#1E2532;border:1px solid var(--line-soft);
+}
+.node-cell.a{background:#13261F;border-color:var(--accent-dim);}
+.node-cell.b{background:#1A1430;border-color:#3A2C5C;}
+.node-cell.c{background:#241B0A;border-color:#5C4A1C;}
+.node-cell.empty{background:transparent;border-style:dashed;}
+
+/* service catalog grid */
+.svc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.svc-card{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;
+  padding:16px;cursor:pointer;transition:border-color .15s;
+}
+.svc-card:hover{border-color:#3A4356;}
+.svc-card .svc-top{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.svc-ic{
+  width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-weight:600;font-size:13px;
+}
+.svc-card h4{margin:0;font-size:13.5px;}
+.svc-card .svc-desc{font-size:12px;color:var(--text-dim);line-height:1.5;margin-bottom:12px;min-height:36px;}
+.svc-card .svc-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-dim);}
+.svc-foot .playbook{font-family:var(--mono);color:var(--text-mid);}
+
+/* modal */
+.overlay{
+  position:fixed;inset:0;background:rgba(7,9,13,.72);backdrop-filter:blur(2px);
+  display:none;align-items:flex-start;justify-content:center;z-index:50;padding-top:6vh;
+}
+.overlay.show{display:flex;}
+.modal{
+  width:560px;max-width:92vw;background:var(--bg-panel);border:1px solid var(--line);
+  border-radius:10px;overflow:hidden;box-shadow:0 30px 60px rgba(0,0,0,.5);
+}
+.modal-head{display:flex;align-items:center;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line-soft);}
+.modal-head h3{margin:0;font-size:14.5px;}
+.modal-head .close{margin-left:auto;color:var(--text-dim);font-size:18px;border:none;background:none;}
+.modal-body{padding:18px;}
+.modal-foot{padding:14px 18px;border-top:1px solid var(--line-soft);display:flex;justify-content:flex-end;gap:8px;}
+
+.steps{display:flex;gap:0;margin-bottom:18px;}
+.step{flex:1;text-align:center;position:relative;}
+.step .num{
+  width:24px;height:24px;border-radius:50%;background:var(--bg-panel-2);border:1px solid var(--line);
+  display:flex;align-items:center;justify-content:center;margin:0 auto 6px;font-family:var(--mono);font-size:11px;color:var(--text-dim);
+}
+.step.active .num{background:var(--accent);border-color:var(--accent);color:#06150F;}
+.step.done .num{background:var(--accent-dim);border-color:var(--accent-dim);color:#CFFCE9;}
+.step .stitle{font-size:10.5px;color:var(--text-dim);}
+.step.active .stitle{color:var(--text-hi);}
+
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:11.5px;color:var(--text-dim);margin-bottom:6px;}
+.field select, .field input{
+  width:100%;background:var(--bg-panel-2);border:1px solid var(--line);border-radius:6px;
+  padding:8px 10px;color:var(--text-hi);font-size:12.5px;font-family:var(--sans);
+}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.chip-select{display:flex;gap:8px;flex-wrap:wrap;}
+.chip{
+  padding:7px 13px;border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--text-mid);
+}
+.chip.sel{border-color:var(--accent);color:var(--accent);background:#0F261D;}
+
+.yaml-preview{
+  background:#0B0D12;border:1px solid var(--line-soft);border-radius:6px;
+  padding:12px 14px;font-family:var(--mono);font-size:11.5px;color:#8EC8FF;line-height:1.7;
+  white-space:pre;overflow-x:auto;
+}
+.yaml-preview .k{color:#7FB8FF;}
+.yaml-preview .s{color:#FFC97A;}
+.yaml-preview .c{color:var(--text-dim);}
+
+/* task log */
+.task-log-line{font-family:var(--mono);font-size:11.5px;padding:2px 0;color:var(--text-mid);}
+.task-log-line .t{color:var(--text-dim);margin-right:10px;}
+.task-log-line.ok{color:var(--accent);}
+.task-log-line.tag-ok{color:#7FB8FF;}
+
+.empty-state{padding:60px 20px;text-align:center;color:var(--text-dim);}
+.empty-state .ic{font-size:26px;margin-bottom:10px;}
+
+.tooltip-note{font-size:11px;color:var(--text-dim);background:#1A1F29;border:1px solid var(--line-soft);border-radius:6px;padding:9px 11px;margin-top:10px;line-height:1.6;}
+.tooltip-note b{color:var(--text-mid);}
+
+/* pagination */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--line-soft);font-size:11.5px;color:var(--text-dim);}
+.pagination .pg-btns{display:flex;gap:4px;align-items:center;}
+.pg-btn{min-width:26px;height:26px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;border:1px solid var(--line);border-radius:5px;color:var(--text-mid);font-family:var(--mono);font-size:11px;background:var(--bg-panel-2);}
+.pg-btn.active{background:var(--accent-dim);border-color:var(--accent-dim);color:#CFFCE9;}
+.pg-btn:hover{border-color:#3A4356;color:var(--text-hi);}
+.pg-btn.disabled{opacity:.35;}
+.pg-sep{color:var(--text-dim);padding:0 2px;}
+
+/* external nav cards */
+.ext-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.ext-card{
+  background:var(--bg-panel);border:1px solid var(--line);border-radius:8px;padding:18px;
+  display:flex;flex-direction:column;gap:10px;
+}
+.ext-card .ext-top{display:flex;align-items:center;gap:10px;}
+.ext-logo{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:13px;}
+.ext-card h4{margin:0;font-size:14px;}
+.ext-card .ext-sub{font-size:11px;color:var(--text-dim);font-family:var(--mono);}
+.ext-card p{font-size:12px;color:var(--text-mid);line-height:1.6;margin:0;}
+.sso-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-dim);margin-top:auto;}
+.sso-row .sso-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+
+.toast-wrap{position:fixed;bottom:20px;right:20px;display:flex;flex-direction:column;gap:8px;z-index:80;}
+
+/* ---------- resource status dashboard ---------- */
+.tag.sev-p0{color:#FF8E9C;border-color:#5C1C28;background:#241018;}
+.tag.sev-p1{color:#F2B544;border-color:#5C4A1C;background:#241B0A;}
+.tag.sev-avg{color:#9AA3B5;border-color:var(--line);background:var(--bg-panel-2);}
+
+.dc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.dc-row-3{grid-template-columns:repeat(4,1fr);}
+.dc-row-4{grid-template-columns:repeat(4,1fr);}
+.dc-card{background:var(--bg-deep);border:1px solid var(--line-soft);border-radius:7px;padding:10px 12px;}
+.dc-card-flat{background:rgba(255,255,255,.02);}
+.dc-name{font-size:12px;font-weight:600;margin-bottom:7px;color:var(--text-hi);}
+.dc-role{display:block;font-size:10px;color:var(--text-dim);font-weight:400;margin-top:2px;}
+.dc-item{
+  font-size:10.5px;font-family:var(--mono);color:var(--text-mid);
+  background:var(--bg-panel-2);border:1px solid var(--line-soft);border-radius:4px;
+  padding:4px 7px;margin-bottom:4px;
+}
+.dc-item:last-child{margin-bottom:0;}
+
+/* ---------- LAS view ---------- */
+.las-toolbar{display:flex;gap:10px;margin-bottom:14px;align-items:center;}
+.las-toolbar select, .las-toolbar input{
+  background:var(--bg-panel-2);border:1px solid var(--line);border-radius:6px;
+  padding:7px 10px;color:var(--text-mid);font-size:12px;
+}
+.drawer-row td{cursor:pointer;}
+.detail-panel{
+  background:#0B0D12;border:1px solid var(--line-soft);border-radius:6px;
+  padding:14px 16px;font-family:var(--mono);font-size:11px;color:var(--text-mid);
+  line-height:1.9;max-height:380px;overflow-y:auto;
+}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 22px;}
+.detail-grid .dk{color:var(--text-dim);}
+.detail-grid .dv{color:var(--text-hi);}
+.toast{
+  background:var(--bg-panel);border:1px solid var(--accent-dim);border-radius:8px;
+  padding:11px 16px;font-size:12.5px;color:var(--text-hi);display:flex;align-items:center;gap:9px;
+  box-shadow:0 10px 30px rgba(0,0,0,.4);min-width:260px;animation:slidein .25s ease;
+}
+@keyframes slidein{from{transform:translateX(20px);opacity:0;}to{transform:translateX(0);opacity:1;}}
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="topbar">
+    <div class="brand"><div class="mark">xi</div>xinfra <span class="sub">统一基础设施平台</span></div>
+    <span class="env-pill">● 生产环境</span>
+    <div class="spacer"></div>
+    <div class="search-box">⌕ 搜索集群 / 节点 / 服务实例<kbd>⌘K</kbd></div>
+    <div class="identity">
+      <div class="avatar">王</div>
+      <div>
+        <div>王晓东</div>
+        <div class="ldap-tag">LDAP · Kodo业务线</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sidebar">
+    <div class="nav-group">
+      <div class="nav-label">概览</div>
+      <div class="nav-item active" data-view="dashboard"><span class="ic">▣</span>资源大盘</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">机房 &amp; 网络</div>
+      <div class="nav-item" data-view="resource-status"><span class="ic">⬡</span>资源状态看板</div>
+      <div class="nav-item" data-view="clusters"><span class="ic">◆</span>集群 / 节点<span class="badge">7</span></div>
+      <div class="nav-item" data-view="tenants"><span class="ic">▦</span>业务线 / 配额</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">资源管理</div>
+      <div class="nav-item" data-view="resource-mgmt"><span class="ic">▥</span>资源管理<span class="badge">CMDB</span></div>
+      <div class="nav-item" data-view="service-mgmt"><span class="ic">◈</span>服务管理<span class="badge">Consul</span></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">服务交付</div>
+      <div class="nav-item" data-view="catalog"><span class="ic">▤</span>基础服务目录</div>
+      <div class="nav-item" data-view="instances"><span class="ic">▥</span>组件实例</div>
+      <div class="nav-item" data-view="tasks"><span class="ic">▧</span>任务中心<span class="badge">2</span></div>
+      <div class="nav-item" data-view="config-center"><span class="ic">⚙</span>配置中心管理<span class="badge">Apollo</span></div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">可观测性</div>
+      <div class="nav-item" data-view="monitor"><span class="ic">◎</span>监控 / 日志 / 告警</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">统一入口</div>
+      <div class="nav-item" data-view="portal"><span class="ic">↗</span>子系统导航</div>
+    </div>
+    <div class="sidebar-foot">
+      xinfra v3 一期 · 七机房容器化<br>RKE2 · Calico BGP · Ceph · LAS<br>AWS TGW + WireGuard · LDAP 认证
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- ================= DASHBOARD ================= -->
+    <div class="view active" id="view-dashboard">
+      <div class="page-head">
+        <div><h1>资源大盘</h1><p>跨机房 / 多云容器资源统一视图 · 最近更新于 12 秒前</p></div>
+        <button class="btn btn-ghost">⟳ 刷新</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="label">RKE2 集群</div><div class="value">3</div><div class="delta">3 机房在线</div></div>
+        <div class="stat-card"><div class="label">节点总数</div><div class="value">128</div><div class="delta up">↑ 6 本周新增</div></div>
+        <div class="stat-card"><div class="label">CPU 已分配</div><div class="value">61%</div><div class="delta">2,048 / 3,360 核</div></div>
+        <div class="stat-card"><div class="label">组件实例</div><div class="value">214</div><div class="delta">MySQL 38 · Redis 92 · 其他 84</div></div>
+        <div class="stat-card"><div class="label">进行中任务</div><div class="value" style="color:var(--warn)">2</div><div class="delta warn">1 个待关注</div></div>
+      </div>
+
+      <div class="cols-2">
+        <div class="panel">
+          <div class="panel-head"><h3>集群拓扑 · 按机房 / 业务线标签</h3><span class="meta">node-label 调度视图</span></div>
+          <div class="topo">
+            <div class="topo-cluster">
+              <div class="tname"><span class="tag zone-a">IDC-华北机房</span><span class="mono" style="color:var(--text-dim)">46节点</span></div>
+              <div class="node-grid" id="grid-a"></div>
+            </div>
+            <div class="topo-cluster">
+              <div class="tname"><span class="tag zone-b">IDC-华东机房</span><span class="mono" style="color:var(--text-dim)">52节点</span></div>
+              <div class="node-grid" id="grid-b"></div>
+            </div>
+            <div class="topo-cluster">
+              <div class="tname"><span class="tag zone-c">阿里云-华南</span><span class="mono" style="color:var(--text-dim)">30节点</span></div>
+              <div class="node-grid" id="grid-c"></div>
+            </div>
+          </div>
+          <div style="padding:0 16px 14px;display:flex;gap:16px;font-size:11px;color:var(--text-dim);">
+            <span><span class="node-cell a" style="display:inline-block;width:9px;height:9px;margin-right:5px;"></span>Kodo业务线</span>
+            <span><span class="node-cell b" style="display:inline-block;width:9px;height:9px;margin-right:5px;"></span>LAS业务线</span>
+            <span><span class="node-cell c" style="display:inline-block;width:9px;height:9px;margin-right:5px;"></span>灵矽业务线</span>
+            <span><span class="node-cell empty" style="display:inline-block;width:9px;height:9px;margin-right:5px;"></span>空闲</span>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>最近任务</h3><a href="#" class="meta" onclick="switchView('tasks');return false;">查看全部 →</a></div>
+          <div class="panel-body">
+            <table>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">MySQL 主从部署</td><td class="mono">2m14s</td></tr>
+              <tr class="tr-hover"><td class="status-text warn">● 执行中</td><td class="strong">RKE2 节点加入</td><td class="mono">38s</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">Redis Cluster 部署</td><td class="mono">3m02s</td></tr>
+              <tr class="tr-hover"><td class="status-text err">● 失败</td><td class="strong">openresty 网关部署</td><td class="mono">41s</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">业务线标签同步</td><td class="mono">5s</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= RESOURCE STATUS DASHBOARD ================= -->
+    <div class="view" id="view-resource-status">
+      <div class="page-head">
+        <div><h1>资源状态看板</h1><p>物理机 / 虚机 / 基础服务状态汇总 · 夜莺（Nightingale）统一告警引擎对接 Zabbix + VictoriaMetrics · 最近更新于 18 秒前</p></div>
+        <button class="btn btn-ghost">⟳ 刷新</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="label">物理机总数</div><div class="value">186</div><div class="delta">186 / 186 监控覆盖</div></div>
+        <div class="stat-card"><div class="label">虚机总数（LAS）</div><div class="value">512</div><div class="delta up">↑ 14 本周新增</div></div>
+        <div class="stat-card"><div class="label">基础组件实例</div><div class="value">214</div><div class="delta">MySQL 38 · Redis 92 · 其他 84</div></div>
+        <div class="stat-card"><div class="label">P0 / Disaster 告警</div><div class="value" style="color:var(--err)">1</div><div class="delta" style="color:var(--err)">来自 VictoriaMetrics</div></div>
+        <div class="stat-card"><div class="label">P1 / High 告警</div><div class="value" style="color:var(--warn)">5</div><div class="delta warn">来自 Zabbix · 4 条 / VM · 1 条</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>告警来源接入 · 夜莺统一告警</h3><span class="meta">Nightingale ← Zabbix / VictoriaMetrics</span></div>
+        <div class="panel-body" style="padding:14px 16px;">
+          <div class="dc-row dc-row-3" style="margin-bottom:0;">
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">Zabbix <span class="dc-role">物理机 / 硬件层</span></div>
+              <div class="dc-item">IPMI · 温度 · 电源 · 风扇</div>
+              <div class="dc-item">网络设备 · 存储健康度</div>
+              <div class="dc-item">事件级别：disaster / high / average</div>
+            </div>
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">VictoriaMetrics <span class="dc-role">虚机 / 容器 / 业务层</span></div>
+              <div class="dc-item">K8s / 容器 / 主机指标</div>
+              <div class="dc-item">基础服务可用性探活</div>
+              <div class="dc-item">告警级别：P0 / P1 / P2</div>
+            </div>
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">夜莺 Nightingale <span class="dc-role">统一告警引擎</span></div>
+              <div class="dc-item">按 P0/P1 或 disaster/high/average 过滤聚合</div>
+              <div class="dc-item">去重 · 收敛 · 分级推送</div>
+              <div class="dc-item">下游：qpass 统一告警通道</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cols-2">
+        <div class="panel">
+          <div class="panel-head"><h3>物理机状态 · 按机房</h3><span class="meta">数据源：Zabbix</span></div>
+          <div class="panel-body">
+            <table>
+              <tr><th>机房</th><th>总数</th><th>在线</th><th>健康率</th><th>状态</th></tr>
+              <tr class="tr-hover"><td class="strong mono">YZH 机房</td><td class="mono">78</td><td class="mono">78</td><td><span class="bar-wrap"><span class="bar-fill" style="width:98%"></span></span>98%</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td class="strong mono">XS 机房</td><td class="mono">64</td><td class="mono">63</td><td><span class="bar-wrap"><span class="bar-fill warn" style="width:91%"></span></span>91%</td><td class="status-text warn">● 1 条告警</td></tr>
+              <tr class="tr-hover"><td class="strong mono">JF 机房</td><td class="mono">22</td><td class="mono">22</td><td><span class="bar-wrap"><span class="bar-fill" style="width:100%"></span></span>100%</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td class="strong mono">海外 IDC（4）</td><td class="mono">22</td><td class="mono">21</td><td><span class="bar-wrap"><span class="bar-fill err" style="width:86%"></span></span>86%</td><td class="status-text err">● 1 条严重</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head"><h3>虚机状态 · LAS 资源池</h3><span class="meta">数据源：VictoriaMetrics</span></div>
+          <div class="panel-body">
+            <table>
+              <tr><th>业务线</th><th>虚机数</th><th>CPU 均值</th><th>状态</th></tr>
+              <tr class="tr-hover"><td class="strong mono">Kodo</td><td class="mono">218</td><td><span class="bar-wrap"><span class="bar-fill" style="width:64%"></span></span>64%</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td class="strong mono">LAS</td><td class="mono">164</td><td><span class="bar-wrap"><span class="bar-fill warn" style="width:82%"></span></span>82%</td><td class="status-text warn">● 1 条告警</td></tr>
+              <tr class="tr-hover"><td class="strong mono">灵矽</td><td class="mono">96</td><td><span class="bar-wrap"><span class="bar-fill" style="width:57%"></span></span>57%</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td class="strong mono">共享池 / 未分配</td><td class="mono">34</td><td><span class="bar-wrap"><span class="bar-fill" style="width:31%"></span></span>31%</td><td class="status-text ok">● 正常</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>基础服务状态汇总</h3><span class="meta">MySQL / Redis / 中间件 · 探活数据源：VictoriaMetrics</span></div>
+        <div class="panel-body">
+          <table>
+            <tr><th>服务类型</th><th>实例数</th><th>异常</th><th>可用率</th><th>状态</th></tr>
+            <tr class="tr-hover"><td class="strong">MySQL</td><td class="mono">38</td><td class="mono">0</td><td class="mono">100%</td><td class="status-text ok">● 正常</td></tr>
+            <tr class="tr-hover"><td class="strong">Redis（CacheCloud）</td><td class="mono">92</td><td class="mono">1</td><td class="mono">98.9%</td><td class="status-text warn">● 1 条告警</td></tr>
+            <tr class="tr-hover"><td class="strong">PostgreSQL</td><td class="mono">12</td><td class="mono">0</td><td class="mono">100%</td><td class="status-text ok">● 正常</td></tr>
+            <tr class="tr-hover"><td class="strong">openresty 网关</td><td class="mono">26</td><td class="mono">0</td><td class="mono">100%</td><td class="status-text ok">● 正常</td></tr>
+            <tr class="tr-hover"><td class="strong">其他中间件</td><td class="mono">46</td><td class="mono">0</td><td class="mono">100%</td><td class="status-text ok">● 正常</td></tr>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>当前告警 · P0/P1（disaster / high / average）</h3><span class="meta">夜莺聚合 · 已去重</span></div>
+        <div class="panel-body">
+          <table>
+            <tr><th>级别</th><th>来源</th><th>原始级别</th><th>对象</th><th>告警内容</th><th>时间</th></tr>
+            <tr class="tr-hover"><td><span class="tag sev-p0">P0</span></td><td class="mono">VictoriaMetrics</td><td class="mono">disaster</td><td class="strong mono">sg-las-overseas-007</td><td>磁盘只读 / IO 错误，节点不可写</td><td class="mono">07:38:55</td></tr>
+            <tr class="tr-hover"><td><span class="tag sev-p1">P1</span></td><td class="mono">Zabbix</td><td class="mono">high</td><td class="strong mono">yzh-las-014</td><td>风扇转速低于阈值（FAN_6: 1920 RPM）</td><td class="mono">07:35:12</td></tr>
+            <tr class="tr-hover"><td><span class="tag sev-p1">P1</span></td><td class="mono">Zabbix</td><td class="mono">high</td><td class="strong mono">xs-bm-291</td><td>电源冗余丢失（PSU2 离线）</td><td class="mono">07:21:40</td></tr>
+            <tr class="tr-hover"><td><span class="tag sev-p1">P1</span></td><td class="mono">VictoriaMetrics</td><td class="mono">high</td><td class="strong mono">redis-ads-feature-cluster-02</td><td>慢查询比例超阈值（&gt;5%，持续5分钟）</td><td class="mono">07:18:03</td></tr>
+            <tr class="tr-hover"><td><span class="tag sev-avg">average</span></td><td class="mono">Zabbix</td><td class="mono">average</td><td class="strong mono">overseas-dallas-idc</td><td>专线延迟抖动超基线（WireGuard ↔ AWS US）</td><td class="mono">07:10:22</td></tr>
+            <tr class="tr-hover"><td><span class="tag sev-avg">average</span></td><td class="mono">Zabbix</td><td class="mono">average</td><td class="strong mono">jf-bm-118</td><td>CPU 温度接近阈值（76℃ / 80℃）</td><td class="mono">06:58:47</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+
+
+
+    <div class="view" id="view-clusters">
+      <div class="page-head">
+        <div><h1>集群 / 节点</h1><p>按机房切分的 RKE2 集群，Calico BGP 扁平网络</p></div>
+        <button class="btn btn-primary" onclick="openModal('node-join')">+ 加入新节点</button>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>集群</th><th>机房 / 区域</th><th>状态</th><th>节点</th><th>CPU 使用</th><th>RKE2 版本</th><th>Calico</th><th></th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td class="strong">rke2-bj-prod-01</td><td><span class="tag zone-a">华北 · IDC</span></td><td class="status-text ok">● 健康</td><td class="mono">46</td><td><span class="bar-wrap"><span class="bar-fill" style="width:64%"></span></span>64%</td><td class="mono">v1.28.9+rke2r1</td><td class="mono">BGP AS64512</td><td><button class="btn btn-ghost">详情</button></td></tr>
+              <tr class="tr-hover"><td class="strong">rke2-sh-prod-01</td><td><span class="tag zone-b">华东 · IDC</span></td><td class="status-text ok">● 健康</td><td class="mono">52</td><td><span class="bar-wrap"><span class="bar-fill" style="width:71%"></span></span>71%</td><td class="mono">v1.28.9+rke2r1</td><td class="mono">BGP AS64513</td><td><button class="btn btn-ghost">详情</button></td></tr>
+              <tr class="tr-hover"><td class="strong">rke2-ali-sz-01</td><td><span class="tag zone-c">阿里云 · 华南</span></td><td class="status-text warn">● 1 节点告警</td><td class="mono">30</td><td><span class="bar-wrap"><span class="bar-fill warn" style="width:83%"></span></span>83%</td><td class="mono">v1.28.6+rke2r1</td><td class="mono">BGP AS64514</td><td><button class="btn btn-ghost">详情</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>rke2-bj-prod-01 · 节点列表（节选）</h3><span class="meta">node-label 多租户隔离</span></div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>节点</th><th>IP</th><th>业务线标签</th><th>污点 Taint</th><th>规格</th><th>CPU / Mem</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td class="strong mono">bj-node-014</td><td class="mono">10.21.4.14</td><td><span class="tag biz" style="color:#8EC8FF;border-color:#1C3A5C;">business-line=kodo</span></td><td class="mono" style="font-size:11px">kodo:NoSchedule</td><td class="mono">64C/256G</td><td><span class="bar-wrap"><span class="bar-fill" style="width:58%"></span></span>58%</td><td class="status-text ok">● Ready</td></tr>
+              <tr class="tr-hover"><td class="strong mono">bj-node-015</td><td class="mono">10.21.4.15</td><td><span class="tag biz" style="color:#8EC8FF;border-color:#1C3A5C;">business-line=kodo</span></td><td class="mono" style="font-size:11px">kodo:NoSchedule</td><td class="mono">64C/256G</td><td><span class="bar-wrap"><span class="bar-fill" style="width:62%"></span></span>62%</td><td class="status-text ok">● Ready</td></tr>
+              <tr class="tr-hover"><td class="strong mono">bj-node-031</td><td class="mono">10.21.4.31</td><td><span class="tag biz" style="color:#C9A6FF;border-color:#3A2C5C;">business-line=las</span></td><td class="mono" style="font-size:11px">las:NoSchedule</td><td class="mono">32C/128G</td><td><span class="bar-wrap"><span class="bar-fill warn" style="width:88%"></span></span>88%</td><td class="status-text warn">● 资源告警</td></tr>
+              <tr class="tr-hover"><td class="strong mono">bj-node-048</td><td class="mono">10.21.4.48</td><td><span class="tag biz" style="color:var(--text-dim)">未分配</span></td><td class="mono" style="font-size:11px">—</td><td class="mono">32C/128G</td><td><span class="bar-wrap"><span class="bar-fill" style="width:4%"></span></span>4%</td><td class="status-text ok">● Ready · 空闲</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= TENANTS ================= -->
+    <div class="view" id="view-tenants">
+      <div class="page-head">
+        <div><h1>业务线 / 配额</h1><p>LDAP 部门信息自动同步生成，节点标签 + ResourceQuota 双重隔离</p></div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>业务线</th><th>LDAP 部门</th><th>归属节点数</th><th>CPU 配额</th><th>已用</th><th>命名空间</th><th>负责人</th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td class="strong">kodo · Kodo业务线</td><td class="mono" style="font-size:11px">ou=kodo,dc=company,dc=com</td><td class="mono">42</td><td class="mono">1,344 核</td><td><span class="bar-wrap"><span class="bar-fill" style="width:58%"></span></span>58%</td><td class="mono">ns-kodo-prod</td><td>王晓东</td></tr>
+              <tr class="tr-hover"><td class="strong">las · LAS业务线</td><td class="mono" style="font-size:11px">ou=las,dc=company,dc=com</td><td class="mono">38</td><td class="mono">1,216 核</td><td><span class="bar-wrap"><span class="bar-fill warn" style="width:85%"></span></span>85%</td><td class="mono">ns-las-prod</td><td>李雯</td></tr>
+              <tr class="tr-hover"><td class="strong">lingxi · 灵矽业务线</td><td class="mono" style="font-size:11px">ou=lingxi,dc=company,dc=com</td><td class="mono">26</td><td class="mono">832 核</td><td><span class="bar-wrap"><span class="bar-fill" style="width:47%"></span></span>47%</td><td class="mono">ns-lingxi-prod</td><td>张昊</td></tr>
+              <tr class="tr-hover"><td class="strong">ltoken · LTOKEN业务线</td><td class="mono" style="font-size:11px">ou=ltoken,dc=company,dc=com</td><td class="mono">14</td><td class="mono">448 核</td><td><span class="bar-wrap"><span class="bar-fill" style="width:33%"></span></span>33%</td><td class="mono">ns-ltoken-prod</td><td>陈思</td></tr>
+              <tr class="tr-hover"><td class="strong">maas · MAAS业务线</td><td class="mono" style="font-size:11px">ou=maas,dc=company,dc=com</td><td class="mono">8</td><td class="mono">256 核</td><td><span class="bar-wrap"><span class="bar-fill" style="width:21%"></span></span>21%</td><td class="mono">ns-maas-prod</td><td>赵帆</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="tooltip-note" style="max-width:640px;">
+        <b>隔离策略说明：</b>节点标签（nodeAffinity + taints）决定 Pod 只能调度到归属业务线的物理节点上；ResourceQuota / LimitRange 在此基础上限制命名空间内的资源上限，二者结合避免单一业务线在自己的节点池内无限占用资源。
+      </div>
+    </div>
+
+    <!-- ================= CATALOG ================= -->
+    <div class="view" id="view-catalog">
+      <div class="page-head">
+        <div><h1>基础服务目录</h1><p>点击卡片，通过封装好的 ansible-playbook 一键部署标准化基础服务</p></div>
+      </div>
+      <div class="svc-grid">
+        <div class="svc-card" onclick="openModal('deploy-mysql')">
+          <div class="svc-top"><div class="svc-ic" style="background:#1C2E4A;color:#7FB8FF;">My</div><h4>MySQL</h4></div>
+          <div class="svc-desc">一主多从，自动注册进 open-cdm 数据源，支持 LDAP 账号统一审核 SQL 上线。</div>
+          <div class="svc-foot"><span class="playbook">roles/mysql-deploy</span><span>v8.0.36</span></div>
+        </div>
+        <div class="svc-card" onclick="openModal('deploy-redis')">
+          <div class="svc-ic" style="background:#3A1C28;color:#FF8E9C;">Rd</div><h4 style="display:inline">Redis</h4>
+          <div class="svc-desc" style="margin-top:8px;">支持 Standalone / Sentinel / Cluster，部署完成后自动注册进 CacheCloud。</div>
+          <div class="svc-foot"><span class="playbook">roles/redis-deploy</span><span>v7.2</span></div>
+        </div>
+        <div class="svc-card">
+          <div class="svc-top"><div class="svc-ic" style="background:#1C3A2E;color:#7FFFC2;">Or</div><h4>openresty</h4></div>
+          <div class="svc-desc">容器化部署在 K8s 内，作为业务边缘网关，支持灰度路由配置。</div>
+          <div class="svc-foot"><span class="playbook">roles/openresty-deploy</span><span>v1.25</span></div>
+        </div>
+        <div class="svc-card">
+          <div class="svc-top"><div class="svc-ic" style="background:#3A2E1C;color:#FFC97A;">Dp</div><h4>dpvs</h4></div>
+          <div class="svc-desc">四层负载均衡，直接管理宿主机网络命名空间，不纳入容器编排。</div>
+          <div class="svc-foot"><span class="playbook">roles/dpvs-deploy</span><span>v1.9</span></div>
+        </div>
+        <div class="svc-card">
+          <div class="svc-top"><div class="svc-ic" style="background:#2E1C3A;color:#C9A6FF;">Pg</div><h4>PgSQL</h4></div>
+          <div class="svc-desc">流复制主从架构，规划中 · 第二期接入 open-cdm 统一审核体系。</div>
+          <div class="svc-foot"><span class="playbook">roles/pgsql-deploy</span><span style="color:var(--text-dim)">规划中</span></div>
+        </div>
+        <div class="svc-card" style="opacity:.5;cursor:default;">
+          <div class="svc-top"><div class="svc-ic" style="background:#262C38;color:var(--text-dim);">+</div><h4 style="color:var(--text-dim)">接入新服务</h4></div>
+          <div class="svc-desc">封装新的 ansible-playbook，注册进基础服务目录</div>
+          <div class="svc-foot"><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= INSTANCES ================= -->
+    <div class="view" id="view-instances">
+      <div class="page-head">
+        <div><h1>组件实例</h1><p>所有基础组件实例的统一台账，关联 CMDB / 子系统注册状态</p></div>
+      </div>
+      <div class="panel">
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>实例</th><th>类型</th><th>业务线</th><th>所在集群</th><th>状态</th><th>子系统注册</th><th></th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td class="strong mono">mysql-kodo-order-01</td><td>MySQL 8.0 主从</td><td class="mono">kodo</td><td class="mono">rke2-bj-prod-01</td><td class="status-text ok">● 运行中</td><td><span class="tag" style="color:#7FB8FF;">open-cdm ✓</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+              <tr class="tr-hover"><td class="strong mono">redis-las-feature-cluster</td><td>Redis Cluster</td><td class="mono">las</td><td class="mono">rke2-sh-prod-01</td><td class="status-text ok">● 运行中</td><td><span class="tag" style="color:#FF8E9C;">CacheCloud ✓</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+              <tr class="tr-hover"><td class="strong mono">redis-lingxi-session</td><td>Redis Sentinel</td><td class="mono">lingxi</td><td class="mono">rke2-ali-sz-01</td><td class="status-text warn">● 同步中</td><td><span class="tag" style="color:var(--text-dim);">CacheCloud 同步中…</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+              <tr class="tr-hover"><td class="strong mono">mysql-las-billing-01</td><td>MySQL 8.0 主从</td><td class="mono">las</td><td class="mono">rke2-sh-prod-01</td><td class="status-text ok">● 运行中</td><td><span class="tag" style="color:#7FB8FF;">open-cdm ✓</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+              <tr class="tr-hover"><td class="strong mono">mysql-ltoken-account-01</td><td>MySQL 8.0 主从</td><td class="mono">ltoken</td><td class="mono">rke2-bj-prod-01</td><td class="status-text ok">● 运行中</td><td><span class="tag" style="color:#7FB8FF;">open-cdm ✓</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+              <tr class="tr-hover"><td class="strong mono">redis-maas-infer-cache-01</td><td>Redis Standalone</td><td class="mono">maas</td><td class="mono">rke2-ali-sz-01</td><td class="status-text ok">● 运行中</td><td><span class="tag" style="color:#FF8E9C;">CacheCloud ✓</span></td><td><button class="btn btn-ghost">管理</button></td></tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 214 条 · 每页 6 条</span>
+            <div class="pg-btns">
+              <span class="pg-btn disabled">‹</span>
+              <span class="pg-btn active">1</span>
+              <span class="pg-btn">2</span>
+              <span class="pg-btn">3</span>
+              <span class="pg-sep">…</span>
+              <span class="pg-btn">36</span>
+              <span class="pg-btn">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= RESOURCE MANAGEMENT ================= -->
+    <div class="view" id="view-resource-mgmt">
+      <div class="page-head">
+        <div><h1>资源管理</h1><p>统一纳管物理机与虚机资源 · 基础数据来自 SINA CMDB，云上虚机由阿里云 / AWS / 七牛 LAS 增量同步回写</p></div>
+        <button class="btn btn-primary" onclick="openModal('las-create')">+ 创建虚机</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="label">资源总数</div><div class="value">658</div><div class="delta">物理机 146 · 虚机 512</div></div>
+        <div class="stat-card"><div class="label">SINA CMDB</div><div class="value">368</div><div class="delta">物理机 146 · 虚机 222</div></div>
+        <div class="stat-card"><div class="label">阿里云同步</div><div class="value">154</div><div class="delta">ECS · 增量同步</div></div>
+        <div class="stat-card"><div class="label">AWS / 七牛 LAS 同步</div><div class="value">136</div><div class="delta">AWS 58 · 七牛 LAS 78</div></div>
+        <div class="stat-card"><div class="label">最近一次同步</div><div class="value" style="color:var(--accent);font-size:16px;">● 正常</div><div class="delta">07:39:10 · 新增 3 条</div></div>
+      </div>
+
+      <div class="las-toolbar">
+        <select><option>全部资源类型</option><option>物理机</option><option>虚机</option></select>
+        <select><option>全部数据来源</option><option>SINA CMDB</option><option>阿里云同步</option><option>AWS 同步</option><option>七牛 LAS 同步</option></select>
+        <select><option>全部业务线</option><option>kodo</option><option>las</option><option>lingxi</option><option>ltoken</option><option>maas</option><option>未分配</option></select>
+        <select><option>全部状态</option><option>production</option><option>idle</option><option>retired</option></select>
+        <input placeholder="搜索 hostname / asset_number / IP" style="flex:1;">
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>资源台账 · 物理机 / 虚机</h3><span class="meta">SINA CMDB asset items + 云厂商同步增量</span></div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>主机名</th><th>资产编号</th><th>类型</th><th>机房 / 区域</th><th>内网 IP</th><th>规格</th><th>业务线</th><th>数据来源</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">xs291</td><td class="mono" style="font-size:11px">SERV00003502</td><td><span class="tag" style="color:var(--text-mid);">物理机</span></td><td><span class="tag zone-b">华东·杭州下沙</span></td><td class="mono">10.34.37.52</td><td class="mono" style="font-size:11px">20C/192G/13.52T</td><td class="mono">kodo</td><td><span class="tag src-cmdb">SINA CMDB</span></td><td class="status-text ok">● production</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">yzh-las-014</td><td class="mono" style="font-size:11px">SERV00004187</td><td><span class="tag" style="color:#8EC8FF;">虚机</span></td><td><span class="tag zone-a">华北·YZH</span></td><td class="mono">10.21.4.214</td><td class="mono" style="font-size:11px">32C/128G/4.0T</td><td class="mono">las</td><td><span class="tag src-cmdb">SINA CMDB</span></td><td class="status-text ok">● production</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">jf-bm-118</td><td class="mono" style="font-size:11px">SERV00004290</td><td><span class="tag" style="color:var(--text-mid);">物理机</span></td><td><span class="tag zone-c">华南·JF</span></td><td class="mono">10.45.2.18</td><td class="mono" style="font-size:11px">16C/64G/2.0T</td><td class="mono">lingxi</td><td><span class="tag src-cmdb">SINA CMDB</span></td><td class="status-text ok">● production</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">ali-ecs-sz-0231</td><td class="mono" style="font-size:11px">—</td><td><span class="tag" style="color:#8EC8FF;">虚机</span></td><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">阿里云·华南</span></td><td class="mono">172.18.4.31</td><td class="mono" style="font-size:11px">16C/64G/500G</td><td class="mono">ltoken</td><td><span class="tag src-ali">阿里云同步</span></td><td class="status-text ok">● production</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">aws-us-i-0a13fe2</td><td class="mono" style="font-size:11px">—</td><td><span class="tag" style="color:#8EC8FF;">虚机</span></td><td><span class="tag" style="color:#8EC8FF;border-color:#1C3A5C;">AWS · 美国</span></td><td class="mono">10.66.2.12</td><td class="mono" style="font-size:11px">8C/32G/200G</td><td class="mono">maas</td><td><span class="tag src-aws">AWS 同步</span></td><td class="status-text ok">● production</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">sg-las-007</td><td class="mono" style="font-size:11px">SERV00004511</td><td><span class="tag" style="color:#8EC8FF;">虚机</span></td><td><span class="tag" style="color:#C9A6FF;border-color:#3A2C5C;">七牛 LAS · 新加坡</span></td><td class="mono">10.88.1.07</td><td class="mono" style="font-size:11px">16C/64G/2.0T</td><td class="mono">las</td><td><span class="tag src-qiniu">七牛 LAS 同步</span></td><td class="status-text warn">● idle</td></tr>
+              <tr class="tr-hover drawer-row" onclick="openModal('las-detail')"><td class="strong mono">hk-bm-001</td><td class="mono" style="font-size:11px">SERV00004602</td><td><span class="tag" style="color:var(--text-mid);">物理机</span></td><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">香港 IDC</span></td><td class="mono">10.90.0.11</td><td class="mono" style="font-size:11px">8C/32G/1.0T</td><td class="mono">未分配</td><td><span class="tag src-cmdb">SINA CMDB</span></td><td class="status-text ok">● production</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 658 条 · 每页 7 条</span>
+            <div class="pg-btns">
+              <span class="pg-btn disabled">‹</span>
+              <span class="pg-btn active">1</span>
+              <span class="pg-btn">2</span>
+              <span class="pg-btn">3</span>
+              <span class="pg-sep">…</span>
+              <span class="pg-btn">94</span>
+              <span class="pg-btn">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tooltip-note" style="max-width:780px;">
+        <b>同步与去重策略：</b>SINA CMDB 作为物理机 / 虚机的基础数据底座；阿里云、AWS、七牛 LAS 的虚机资源由各云 OpenAPI 定时增量同步回写。同步时先以唯一标识（资产编号 / 实例 ID / 内网 IP）查询数据库中是否已存在记录：<b>已存在则跳过更新，保留 CMDB 侧人工维护的字段</b>；<b>不存在则新增记录并标记对应数据来源</b>（SINA CMDB / 阿里云同步 / AWS 同步 / 七牛 LAS 同步），避免重复纳管与覆盖人工修正数据。
+      </div>
+    </div>
+
+    <!-- ================= SERVICE MANAGEMENT (CONSUL) ================= -->
+    <div class="view" id="view-service-mgmt">
+      <div class="page-head">
+        <div><h1>服务管理</h1><p>同步全部机房 Consul 注册中心服务目录，统一查看服务名 / 服务 IP / 业务标签 / 实例数</p></div>
+        <button class="btn btn-ghost">⟳ 立即同步</button>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="label">接入 Consul Datacenter</div><div class="value">7</div><div class="delta">国内 3 · 海外 4</div></div>
+        <div class="stat-card"><div class="label">服务总数</div><div class="value">186</div><div class="delta">去重后唯一服务名</div></div>
+        <div class="stat-card"><div class="label">服务实例总数</div><div class="value">842</div><div class="delta">所有机房注册 IP 汇总</div></div>
+        <div class="stat-card"><div class="label">健康实例占比</div><div class="value" style="color:var(--accent)">98.6%</div><div class="delta warn">12 个实例 critical</div></div>
+        <div class="stat-card"><div class="label">最近同步</div><div class="value" style="color:var(--accent);font-size:16px;">● 正常</div><div class="delta">07:41:05 · 间隔 30s</div></div>
+      </div>
+
+      <div class="las-toolbar">
+        <select><option>全部机房</option><option>YZH</option><option>XS</option><option>JF</option><option>达拉斯</option><option>新加坡</option><option>香港</option><option>东南亚</option></select>
+        <select><option>全部业务标签</option><option>kodo</option><option>las</option><option>lingxi</option><option>ltoken</option><option>maas</option></select>
+        <select><option>全部状态</option><option>健康</option><option>部分异常</option><option>全部下线</option></select>
+        <input placeholder="搜索服务名 / IP" style="flex:1;">
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>服务台账 · 按 Consul Datacenter 同步</h3><span class="meta">数据源：Consul Catalog API（/v1/catalog/services · /v1/health/service）</span></div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>服务名</th><th>机房 / Datacenter</th><th>业务标签</th><th>实例数</th><th>健康实例</th><th>示例 IP</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td class="strong mono">kodo-gateway-svc</td><td><span class="tag zone-a">YZH</span></td><td class="mono">kodo</td><td class="mono">12</td><td class="mono">12 / 12</td><td class="mono">10.21.4.51</td><td class="status-text ok">● 健康</td></tr>
+              <tr class="tr-hover"><td class="strong mono">kodo-upload-svc</td><td><span class="tag zone-b">XS</span></td><td class="mono">kodo</td><td class="mono">10</td><td class="mono">10 / 10</td><td class="mono">10.34.37.66</td><td class="status-text ok">● 健康</td></tr>
+              <tr class="tr-hover"><td class="strong mono">las-search-api</td><td><span class="tag zone-b">XS</span></td><td class="mono">las</td><td class="mono">18</td><td class="mono">17 / 18</td><td class="mono">10.34.37.20</td><td class="status-text warn">● 部分异常</td></tr>
+              <tr class="tr-hover"><td class="strong mono">las-order-svc</td><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">达拉斯 IDC</span></td><td class="mono">las</td><td class="mono">5</td><td class="mono">5 / 5</td><td class="mono">10.66.2.20</td><td class="status-text ok">● 健康</td></tr>
+              <tr class="tr-hover"><td class="strong mono">lingxi-render-svc</td><td><span class="tag zone-c">JF</span></td><td class="mono">lingxi</td><td class="mono">6</td><td class="mono">6 / 6</td><td class="mono">10.45.2.30</td><td class="status-text ok">● 健康</td></tr>
+              <tr class="tr-hover"><td class="strong mono">ltoken-wallet-svc</td><td><span class="tag zone-a">YZH</span></td><td class="mono">ltoken</td><td class="mono">8</td><td class="mono">8 / 8</td><td class="mono">10.21.4.88</td><td class="status-text ok">● 健康</td></tr>
+              <tr class="tr-hover"><td class="strong mono">maas-infer-svc</td><td><span class="tag" style="color:#C9A6FF;border-color:#3A2C5C;">新加坡 IDC</span></td><td class="mono">maas</td><td class="mono">4</td><td class="mono">3 / 4</td><td class="mono">10.88.1.40</td><td class="status-text warn">● 部分异常</td></tr>
+            </tbody>
+          </table>
+          <div class="pagination">
+            <span>共 186 条 · 每页 7 条</span>
+            <div class="pg-btns">
+              <span class="pg-btn disabled">‹</span>
+              <span class="pg-btn active">1</span>
+              <span class="pg-btn">2</span>
+              <span class="pg-btn">3</span>
+              <span class="pg-sep">…</span>
+              <span class="pg-btn">27</span>
+              <span class="pg-btn">›</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tooltip-note" style="max-width:780px;">
+        <b>同步方式：</b>xinfra 定时调用各机房 Consul 集群的 Catalog API（<span class="mono">/v1/catalog/services</span>、<span class="mono">/v1/health/service</span>）按 Datacenter 维度拉取服务目录，汇总服务名、注册 IP、健康检查状态以及 Consul service tag 中携带的业务标签（kodo / las / lingxi / ltoken / maas），实现跨机房服务的统一查看与健康巡检，不改变各机房 Consul 自身的注册与发现链路。
+      </div>
+    </div>
+    <div class="view" id="view-monitor">
+      <div class="page-head">
+        <div><h1>监控 / 日志 / 告警</h1><p>VictoriaMetrics 指标 · Zabbix 硬件状态 · ELK 日志中心 · 夜莺（Nightingale）统一告警引擎对接 qpass</p></div>
+      </div>
+      <div class="cols-2">
+        <div class="panel">
+          <div class="panel-head"><h3>VictoriaMetrics · 指标概览</h3><span class="meta">K8s / 容器 / 业务指标</span></div>
+          <div class="panel-body">
+            <table>
+              <tr class="tr-hover"><td>七机房采集节点数</td><td class="mono strong">128</td></tr>
+              <tr class="tr-hover"><td>活跃时序数量</td><td class="mono strong">42.6M</td></tr>
+              <tr class="tr-hover"><td>Prometheus 接口接入</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td>Grafana 仪表盘数</td><td class="mono strong">37</td></tr>
+            </table>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Zabbix · 硬件健康</h3><span class="meta">IPMI / 温度 / 电源 / 风扇</span></div>
+          <div class="panel-body">
+            <table>
+              <tr class="tr-hover"><td>物理机监控覆盖</td><td class="mono strong">186 / 186</td></tr>
+              <tr class="tr-hover"><td>当前告警</td><td class="status-text warn">● 2 条（风扇转速异常）</td></tr>
+              <tr class="tr-hover"><td>网络设备健康</td><td class="status-text ok">● 正常</td></tr>
+              <tr class="tr-hover"><td>存储健康度</td><td class="status-text ok">● 正常</td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>日志 + 统一告警</h3><span class="meta">Filebeat → Kafka → ES → Kibana · VM + Zabbix → qpass</span></div>
+        <div class="panel-body" style="padding:14px 16px;">
+          <div class="task-log-line"><span class="t">07:39:10</span>CMDB 采集器同步完成：xs291 · 华东-杭州下沙机房</div>
+          <div class="task-log-line"><span class="t">07:38:55</span>[Zabbix] 告警：yzh-las-014 风扇转速低于阈值（FAN_6: 1920 RPM）</div>
+          <div class="task-log-line ok"><span class="t">07:38:02</span>[VictoriaMetrics] 七机房抓取任务全部正常</div>
+          <div class="task-log-line"><span class="t">07:35:41</span>[ELK] sg-las-007 应用日志接入 Kafka topic：las-sg-app</div>
+          <div class="task-log-line"><span class="t">07:30:00</span>[qpass] 告警已合并推送：1 条硬件告警 + 0 条业务告警</div>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="view" id="view-tasks">
+      <div class="page-head">
+        <div><h1>任务中心</h1><p>所有 ansible-playbook / Wayne 发布任务的执行记录与实时日志</p></div>
+      </div>
+      <div class="cols-2">
+        <div class="panel">
+          <div class="panel-head"><h3>任务列表</h3></div>
+          <div class="panel-body">
+            <table>
+              <tr class="tr-hover" style="background:var(--bg-panel-2);"><td class="status-text warn">● 执行中</td><td class="strong">RKE2 节点加入 · bj-node-061</td><td class="mono" style="font-size:11px;color:var(--text-dim)">roles/rke2-node-join</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">MySQL 主从部署 · kodo</td><td class="mono" style="font-size:11px;color:var(--text-dim)">roles/mysql-deploy</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">Redis Cluster 部署 · las</td><td class="mono" style="font-size:11px;color:var(--text-dim)">roles/redis-deploy</td></tr>
+              <tr class="tr-hover"><td class="status-text err">● 失败</td><td class="strong">openresty 网关部署</td><td class="mono" style="font-size:11px;color:var(--text-dim)">roles/openresty-deploy</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">业务线标签同步 · LDAP</td><td class="mono" style="font-size:11px;color:var(--text-dim)">internal/label-sync</td></tr>
+              <tr class="tr-hover"><td class="status-text ok">● 成功</td><td class="strong">MySQL 主从部署 · ltoken</td><td class="mono" style="font-size:11px;color:var(--text-dim)">roles/mysql-deploy</td></tr>
+            </table>
+            <div class="pagination">
+              <span>共 86 条 · 每页 6 条</span>
+              <div class="pg-btns">
+                <span class="pg-btn disabled">‹</span>
+                <span class="pg-btn active">1</span>
+                <span class="pg-btn">2</span>
+                <span class="pg-btn">3</span>
+                <span class="pg-sep">…</span>
+                <span class="pg-btn">15</span>
+                <span class="pg-btn">›</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>实时日志 · RKE2 节点加入</h3><span class="meta">WebSocket 流式输出</span></div>
+          <div class="panel-body" style="padding:14px 16px;max-height:340px;overflow-y:auto;" id="log-stream">
+            <div class="task-log-line"><span class="t">10:42:01</span>PLAY [rke2-node-join] **********************</div>
+            <div class="task-log-line"><span class="t">10:42:02</span>TASK [初始化内核参数] ...</div>
+            <div class="task-log-line ok"><span class="t">10:42:04</span>ok: [bj-node-061]</div>
+            <div class="task-log-line"><span class="t">10:42:05</span>TASK [安装 containerd] ...</div>
+            <div class="task-log-line ok"><span class="t">10:42:18</span>ok: [bj-node-061]</div>
+            <div class="task-log-line"><span class="t">10:42:19</span>TASK [写入 RKE2 node-labels: business-line=kodo] ...</div>
+            <div class="task-log-line tag-ok"><span class="t">10:42:20</span>changed: [bj-node-061] => labels applied</div>
+            <div class="task-log-line"><span class="t">10:42:21</span>TASK [加入集群 rke2-bj-prod-01] ...</div>
+            <div class="task-log-line" id="log-cursor"><span class="t">10:42:33</span><span class="blink">▌</span> 等待节点 Ready...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= CONFIG CENTER MANAGEMENT ================= -->
+    <div class="view" id="view-config-center">
+      <div class="page-head">
+        <div><h1>配置中心管理</h1><p>Apollo 配置中心（携程开源）· 按机房部署 Config Service Cluster，Portal 统一入口管理</p></div>
+        <span class="env-pill">● 运行中</span>
+      </div>
+
+      <div class="stat-row">
+        <div class="stat-card"><div class="label">接入机房数</div><div class="value">3 / 7</div><div class="delta">国内 3 已接入 · 海外 4 建设中</div></div>
+        <div class="stat-card"><div class="label">Apollo Cluster</div><div class="value">7</div><div class="delta">按机房 1:1 划分</div></div>
+        <div class="stat-card"><div class="label">配置项总数</div><div class="value">1,260</div><div class="delta">Namespace 38 个</div></div>
+        <div class="stat-card"><div class="label">接入业务线</div><div class="value">2 / 5</div><div class="delta">kodo · las 已接入</div></div>
+        <div class="stat-card"><div class="label">同步状态</div><div class="value" style="color:var(--accent);font-size:16px;">● 正常</div><div class="delta">最近发布 09:12:30</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>统一入口</h3><span class="meta">Apollo Portal · LDAP 单点登录</span></div>
+        <div class="panel-body" style="padding:16px;">
+          <div class="ext-card" style="max-width:560px;">
+            <div class="ext-top"><div class="ext-logo" style="background:#1C2A3A;color:#8EC8FF;">AP</div><div><h4>Apollo Portal</h4><div class="ext-sub">apollo.xinfra.internal</div></div></div>
+            <p>统一管理 7 个机房 Config Service Cluster 的配置发布、灰度、回滚与变更审计，所有机房配置项均可在此单一入口检索与编辑，发布后由各机房 Config Service 就近下发。</p>
+            <div class="sso-row"><span class="sso-dot"></span>LDAP 原生配置接入 · 已上线</div>
+            <a href="#" class="btn btn-primary" style="margin-top:4px;align-self:flex-start;">打开 Apollo Portal ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>部署架构说明</h3><span class="meta">Config Service / Admin Service / Portal</span></div>
+        <div class="panel-body" style="padding:14px 16px;">
+          <div class="dc-row dc-row-3" style="margin-bottom:0;">
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">Portal + Admin Service <span class="dc-role">YZH 主中心统一部署</span></div>
+              <div class="dc-item">配置发布、权限、审计统一入口</div>
+              <div class="dc-item">LDAP 账号统一登录</div>
+              <div class="dc-item">跨机房管理所有 Cluster</div>
+            </div>
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">Config Service <span class="dc-role">每机房独立集群</span></div>
+              <div class="dc-item">Cluster = 机房标识（yzh / xs / jf ...）</div>
+              <div class="dc-item">客户端就近读取，降低跨机房延迟</div>
+              <div class="dc-item">单机房故障不影响其他机房取配置</div>
+            </div>
+            <div class="dc-card dc-card-flat">
+              <div class="dc-name">配置数据同步 <span class="dc-role">MySQL 主从 + 缓存</span></div>
+              <div class="dc-item">ConfigDB / PortalDB 部署在 YZH</div>
+              <div class="dc-item">各机房 Config Service 本地缓存全量配置</div>
+              <div class="dc-item">网络抖动时仍可降级提供本地缓存配置</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>机房配置中心列表</h3><span class="meta">Cluster 维度 · Config Service 部署明细</span></div>
+        <div class="panel-body">
+          <table>
+            <thead><tr><th>机房 / 区域</th><th>Apollo Cluster</th><th>Config Service 地址</th><th>承载方式</th><th>接入业务线</th><th>配置项数</th><th>状态</th></tr></thead>
+            <tbody>
+              <tr class="tr-hover"><td><span class="tag zone-a">YZH 机房</span></td><td class="mono">cluster=yzh</td><td class="mono" style="font-size:11px">config-yzh.xinfra.internal:8080</td><td class="mono">容器化 · K8s Service</td><td class="mono">kodo</td><td class="mono">486</td><td class="status-text ok">● 运行中</td></tr>
+              <tr class="tr-hover"><td><span class="tag zone-b">XS 机房</span></td><td class="mono">cluster=xs</td><td class="mono" style="font-size:11px">config-xs.xinfra.internal:8080</td><td class="mono">容器化 · K8s Service</td><td class="mono">las</td><td class="mono">398</td><td class="status-text ok">● 运行中</td></tr>
+              <tr class="tr-hover"><td><span class="tag zone-c">JF 机房</span></td><td class="mono">cluster=jf</td><td class="mono" style="font-size:11px">config-jf.xinfra.internal:8080</td><td class="mono">容器化 · K8s Service</td><td class="mono">灵矽</td><td class="mono">376</td><td class="status-text warn">● 灰度接入中</td></tr>
+              <tr class="tr-hover"><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">达拉斯 IDC</span></td><td class="mono">cluster=dallas</td><td class="mono" style="font-size:11px">—</td><td class="mono">容器化 · K8s Service</td><td class="mono">—</td><td class="mono">0</td><td class="status-text idle">● 建设中</td></tr>
+              <tr class="tr-hover"><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">新加坡 IDC</span></td><td class="mono">cluster=singapore</td><td class="mono" style="font-size:11px">—</td><td class="mono">容器化 · K8s Service</td><td class="mono">—</td><td class="mono">0</td><td class="status-text idle">● 建设中</td></tr>
+              <tr class="tr-hover"><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">香港 IDC</span></td><td class="mono">cluster=hk</td><td class="mono" style="font-size:11px">—</td><td class="mono">容器化 · K8s Service</td><td class="mono">—</td><td class="mono">0</td><td class="status-text idle">● 待启动</td></tr>
+              <tr class="tr-hover"><td><span class="tag" style="color:#FFC97A;border-color:#5C4A1C;">东南亚 IDC</span></td><td class="mono">cluster=sea</td><td class="mono" style="font-size:11px">—</td><td class="mono">容器化 · K8s Service</td><td class="mono">—</td><td class="mono">0</td><td class="status-text idle">● 待启动</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="tooltip-note" style="max-width:780px;">
+        <b>使用说明：</b>YZH / XS 两机房已正式运行，kodo / las 业务线配置已接入；JF 机房处于灰度接入阶段。所有机房的配置统一通过 Apollo Portal 单一入口检索、编辑与发布，发布后由对应机房 Config Service 就近下发给客户端，机房间故障隔离、互不影响。达拉斯、新加坡、香港、东南亚四个海外机房按第三期规划陆续建设 Config Service 集群，建成后接入对应业务线配置。
+      </div>
+    </div>
+
+    <!-- ================= PORTAL ================= -->
+    <div class="view" id="view-portal">
+      <div class="page-head">
+        <div><h1>子系统导航</h1><p>统一 LDAP 账号，点击即用免二次登录（同账号同密码）</p></div>
+      </div>
+      <div class="ext-grid">
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#1C2A3A;color:#7FB8FF;">W</div><div><h4>Wayne</h4><div class="ext-sub">多集群发布平台</div></div></div>
+          <p>业务容器发布、命名空间与配额管理，复用 Wayne 原生多租户能力。</p>
+          <div class="sso-row"><span class="sso-dot"></span>LDAP 原生配置接入 · 零代码</div>
+        </div>
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#1C3A2E;color:#7FFFC2;">DM</div><div><h4>open-cdm</h4><div class="ext-sub">SQL 审核与变更平台</div></div></div>
+          <p>数据库 SQL 上线统一审核，支持 LDAP 用户组到角色的自动映射。</p>
+          <div class="sso-row"><span class="sso-dot"></span>LDAP 原生配置接入 · 零代码</div>
+        </div>
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#3A1C28;color:#FF8E9C;">CC</div><div><h4>CacheCloud</h4><div class="ext-sub">Redis 统一管理平台</div></div></div>
+          <p>Redis 实例全生命周期管理，登录与监控运维统一入口。</p>
+          <div class="sso-row"><span class="sso-dot" style="background:var(--warn);"></span>LDAP 接入改造中 · 预计 3 天</div>
+        </div>
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#241B0A;color:#FFC97A;">QP</div><div><h4>qpass</h4><div class="ext-sub">统一告警 / 值班平台</div></div></div>
+          <p>夜莺、Zabbix、VictoriaMetrics 告警统一收敛与值班通知，按 P0/P1 分级推送。</p>
+          <div class="sso-row"><span class="sso-dot"></span>LDAP 原生配置接入 · 零代码</div>
+        </div>
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#1B202B;color:#F2B544;">GF</div><div><h4>Grafana</h4><div class="ext-sub">指标可视化平台</div></div></div>
+          <p>对接 VictoriaMetrics 数据源，K8s / 容器 / 业务指标统一仪表盘展示。</p>
+          <div class="sso-row"><span class="sso-dot"></span>LDAP 原生配置接入 · 零代码</div>
+        </div>
+        <div class="ext-card">
+          <div class="ext-top"><div class="ext-logo" style="background:#1C2A3A;color:#8EC8FF;">AP</div><div><h4>Apollo</h4><div class="ext-sub">配置中心（携程开源）</div></div></div>
+          <p>统一配置管理，按机房 Cluster 隔离，支持灰度发布、版本回滚与变更审计。</p>
+          <div class="sso-row"><span class="sso-dot" style="background:var(--warn);"></span>LDAP 接入改造中 · 规划中</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= MODAL: NODE JOIN ================= -->
+<div class="overlay" id="overlay-node-join">
+  <div class="modal">
+    <div class="modal-head"><h3>加入新节点</h3><button class="close" onclick="closeModal('node-join')">×</button></div>
+    <div class="modal-body">
+      <div class="field"><label>目标集群</label>
+        <select><option>rke2-bj-prod-01（华北机房）</option><option>rke2-sh-prod-01（华东机房）</option><option>rke2-ali-sz-01（阿里云华南）</option></select>
+      </div>
+      <div class="field"><label>节点 IP（多个换行分隔）</label><input value="10.21.4.061"></div>
+      <div class="field"><label>归属业务线（自动注入 node-label / taint）</label>
+        <div class="chip-select">
+          <div class="chip sel">kodo</div><div class="chip">las</div><div class="chip">lingxi</div><div class="chip">ltoken</div><div class="chip">maas</div><div class="chip">未分配（共享池）</div>
+        </div>
+      </div>
+      <div class="tooltip-note">将执行 <b>roles/rke2-node-join</b>：内核参数初始化 → 安装 containerd → 写入 node-label/taint → 加入指定集群 → 等待 Ready。</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('node-join')">取消</button>
+      <button class="btn btn-primary" onclick="runTask('node-join', '节点加入任务已提交')">提交任务</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: DEPLOY MYSQL ================= -->
+<div class="overlay" id="overlay-deploy-mysql">
+  <div class="modal">
+    <div class="modal-head"><h3>部署 MySQL</h3><button class="close" onclick="closeModal('deploy-mysql')">×</button></div>
+    <div class="modal-body">
+      <div class="steps">
+        <div class="step done"><div class="num">✓</div><div class="stitle">基础信息</div></div>
+        <div class="step active"><div class="num">2</div><div class="stitle">规格 / 网络</div></div>
+        <div class="step"><div class="num">3</div><div class="stitle">确认部署</div></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>业务线</label><select><option>kodo</option><option>las</option><option>lingxi</option><option>ltoken</option><option>maas</option></select></div>
+        <div class="field"><label>架构模式</label><select><option>一主两从</option><option>一主一从</option><option>单实例（测试）</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>规格</label><select><option>8C 32G · 500G SSD（Ceph RBD）</option><option>16C 64G · 1T SSD（Ceph RBD）</option></select></div>
+        <div class="field"><label>版本</label><select><option>MySQL 8.0.36</option><option>MySQL 5.7.44</option></select></div>
+      </div>
+      <div class="field"><label>实例名称</label><input value="mysql-kodo-payment-01"></div>
+      <div class="yaml-preview"><span class="c"># ansible-runner 调用预览</span>
+<span class="k">playbook</span>: roles/mysql-deploy
+<span class="k">tenant</span>: <span class="s">kodo</span>
+<span class="k">topology</span>: <span class="s">1-master-2-replica</span>
+<span class="k">node_selector</span>: <span class="s">business-line=kodo</span>
+<span class="k">storage_class</span>: <span class="s">ceph-rbd-ssd</span>
+<span class="k">register_to</span>: <span class="s">open-cdm</span>  <span class="c"># 自动注册数据源</span></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deploy-mysql')">取消</button>
+      <button class="btn btn-primary" onclick="runTask('deploy-mysql', 'MySQL 部署任务已提交，预计 3 分钟完成')">确认部署</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: DEPLOY REDIS ================= -->
+<div class="overlay" id="overlay-deploy-redis">
+  <div class="modal">
+    <div class="modal-head"><h3>部署 Redis</h3><button class="close" onclick="closeModal('deploy-redis')">×</button></div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field"><label>业务线</label><select><option>las</option><option>kodo</option><option>lingxi</option><option>ltoken</option><option>maas</option></select></div>
+        <div class="field"><label>架构模式</label><select><option>Cluster（6 分片）</option><option>Sentinel（1主2从）</option><option>Standalone</option></select></div>
+      </div>
+      <div class="field"><label>实例名称</label><input value="redis-las-feature-cluster-02"></div>
+      <div class="tooltip-note">部署完成后将自动调用 CacheCloud 应用创建 API，注册机器与应用信息，无需手动二次接入。</div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('deploy-redis')">取消</button>
+      <button class="btn btn-primary" onclick="runTask('deploy-redis', 'Redis 部署任务已提交，完成后自动同步至 CacheCloud')">确认部署</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<style>
+.blink{animation:blink 1s step-start infinite;color:var(--accent);}
+@keyframes blink{50%{opacity:0;}}
+</style>
+
+<script>
+// nav switching
+function switchView(name){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.view===name));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.addEventListener('click', ()=>switchView(n.dataset.view));
+});
+
+// modal
+function openModal(id){ document.getElementById('overlay-'+id).classList.add('show'); }
+function closeModal(id){ document.getElementById('overlay-'+id).classList.remove('show'); }
+
+function runTask(id, message){
+  closeModal(id);
+  toast(message);
+  switchView('tasks');
+}
+
+function toast(msg){
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className='toast';
+  el.innerHTML = '<span style="color:var(--accent)">●</span>' + msg;
+  wrap.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(), 300); }, 3600);
+}
+
+// chip select in modal
+document.querySelectorAll('.chip-select').forEach(group=>{
+  group.querySelectorAll('.chip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      group.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));
+      c.classList.add('sel');
+    });
+  });
+});
+
+// node grid generator
+function buildGrid(id, total, fillClass, fillRatio){
+  const el = document.getElementById(id);
+  let html='';
+  for(let i=0;i<total;i++){
+    if(i < total*fillRatio) html += '<div class="node-cell '+fillClass+'"></div>';
+    else html += '<div class="node-cell"></div>';
+  }
+  el.innerHTML = html;
+}
+buildGrid('grid-a', 24, 'a', 0.78);
+buildGrid('grid-b', 24, 'b', 0.85);
+buildGrid('grid-c', 18, 'c', 0.65);
+
+// fake live log append
+const logLines = [
+  ['10:42:34','TASK [节点加入集群确认] ...',''],
+  ['10:42:41','ok: [bj-node-061] => node status: Ready','ok'],
+  ['10:42:42','TASK [关联 ResourceQuota: ns-kodo-prod] ...',''],
+  ['10:42:43','ok: [bj-node-061] => labels confirmed: business-line=kodo','tag-ok'],
+  ['10:42:44','PLAY RECAP ********************************',''],
+  ['10:42:44','bj-node-061 : ok=8 changed=5 unreachable=0 failed=0','ok'],
+];
+let li=0;
+function appendLog(){
+  if(li>=logLines.length) return;
+  const cursor = document.getElementById('log-cursor');
+  const [t,msg,cls] = logLines[li];
+  const div = document.createElement('div');
+  div.className = 'task-log-line ' + cls;
+  div.innerHTML = '<span class="t">'+t+'</span>'+msg;
+  cursor.parentNode.insertBefore(div, cursor);
+  li++;
+  document.getElementById('log-stream').scrollTop = document.getElementById('log-stream').scrollHeight;
+}
+setInterval(appendLog, 1800);
+</script>
+
+</body>
+</html>
