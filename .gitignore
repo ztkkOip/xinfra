@@ -48,3 +48,8 @@ docker-compose.override.yml
 
 # Kubernetes secrets (local dev)
 *-secret.yaml
+
+# Documentation & local dev config (not tracked in repo)
+docs/
+CLAUDE.md
+AGENTS.md
