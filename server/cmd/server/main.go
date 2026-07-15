@@ -2,14 +2,33 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-	"time"
 
 	"github.com/1024XEngineer/xinfra/server/internal/handler"
 	"github.com/1024XEngineer/xinfra/server/internal/middleware"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
+
+// @title           xinfra API
+// @version         1.0
+// @description     xinfra 平台后端 API 文档
+// @termsOfService  http://swagger.io/terms/
+
+// @contact.name   API Support
+// @contact.url    http://www.swagger.io/support
+// @contact.email  support@swagger.io
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      localhost:8080
+// @BasePath  /api/v1
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description 请输入 Bearer Token（例如：Bearer xxx）
 
 func main() {
 	r := gin.Default()
@@ -18,21 +37,17 @@ func main() {
 	r.Use(middleware.Logger())
 	r.Use(middleware.Recovery())
 
+	// Swagger UI
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, ginSwagger.URL("/swagger/doc.json")))
+
 	// 健康检查
-	r.GET("/api/v1/ping", func(c *gin.Context) {
-		handler.Success(c, gin.H{"time": time.Now().Format(time.RFC3339)})
-	})
+	r.GET("/api/v1/ping", handler.Ping)
 
 	// 测试路由组 — 用于验证统一响应格式
 	testGroup := r.Group("/api/v1/test")
 	{
 		// 成功响应
-		testGroup.GET("/success", func(c *gin.Context) {
-			handler.Success(c, gin.H{
-				"username": "testuser",
-				"role":     "admin",
-			})
-		})
+		testGroup.GET("/success", handler.TestSuccess)
 
 		// 业务错误 — 传入错误码
 		// GET /api/v1/test/error/10001 → LDAP 认证失败
@@ -40,47 +55,22 @@ func main() {
 		// GET /api/v1/test/error/10003 → Token 已过期
 		// GET /api/v1/test/error/20001 → 任务创建失败
 		// GET /api/v1/test/error/20002 → 任务执行超时
-		testGroup.GET("/error/:code", func(c *gin.Context) {
-			codeStr := c.Param("code")
-			code, err := strconv.Atoi(codeStr)
-			if err != nil {
-				handler.BadRequest(c, "错误码必须是数字")
-				return
-			}
-			details := fmt.Sprintf("这是错误码 %d 的测试响应", code)
-			handler.Error(c, http.StatusOK, code, details)
-		})
+		testGroup.GET("/error/:code", handler.TestError)
 
 		// HTTP 500 错误
-		testGroup.GET("/500", func(c *gin.Context) {
-			handler.InternalError(c, "模拟服务器内部错误")
-		})
+		testGroup.GET("/500", handler.Test500)
 
 		// HTTP 401 未授权
-		testGroup.GET("/401", func(c *gin.Context) {
-			handler.Unauthorized(c, "模拟 Token 过期")
-		})
+		testGroup.GET("/401", handler.Test401)
 
 		// HTTP 403 禁止访问
-		testGroup.GET("/403", func(c *gin.Context) {
-			handler.Forbidden(c, "模拟无权限")
-		})
+		testGroup.GET("/403", handler.Test403)
 
 		// 模拟超时（sleep 超过前端 10s timeout）
-		testGroup.GET("/timeout", func(c *gin.Context) {
-			time.Sleep(15 * time.Second)
-			handler.Success(c, "这条消息不应该出现")
-		})
+		testGroup.GET("/timeout", handler.TestTimeout)
 
 		// 返回分页数据
-		testGroup.GET("/paginated", func(c *gin.Context) {
-			items := []gin.H{
-				{"id": 1, "name": "item-1"},
-				{"id": 2, "name": "item-2"},
-				{"id": 3, "name": "item-3"},
-			}
-			handler.SuccessWithPaginated(c, 100, items)
-		})
+		testGroup.GET("/paginated", handler.TestPaginated)
 	}
 
 	fmt.Println("Server starting on :8080...")

@@ -13,6 +13,7 @@ help:
 	@echo "  make test          - 运行测试"
 	@echo "  make docker        - 构建 Docker 镜像"
 	@echo "  make clean         - 清理构建产物"
+	@echo "  make swagger       - 生成 Swagger API 文档"
 	@echo ""
 
 # 构建前后端项目
@@ -74,6 +75,12 @@ dev-up:
 dev-down:
 	@echo "Stopping local development environment..."
 	docker-compose down
+
+# Swagger 文档
+swagger:
+	@echo "Generating Swagger documentation..."
+	cd server && swag init -g cmd/server/main.go -o ./docs
+	@echo "Swagger docs generated at server/docs/"
 
 # 数据库迁移
 migrate-up:

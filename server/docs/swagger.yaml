@@ -1,0 +1,212 @@
+basePath: /api/v1
+definitions:
+  handler.PaginatedData:
+    properties:
+      items: {}
+      total:
+        type: integer
+    type: object
+  handler.Response:
+    properties:
+      code:
+        description: 业务错误码，0 表示成功
+        type: integer
+      data:
+        description: 响应数据，成功时返回
+      details:
+        description: 错误详情，失败时返回
+        type: string
+      message:
+        description: 响应消息
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: xinfra 平台后端 API 文档
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: xinfra API
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: 检查服务器是否正常运行
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  properties:
+                    time:
+                      type: string
+                  type: object
+              type: object
+      summary: 健康检查
+      tags:
+      - 系统
+  /test/401:
+    get:
+      consumes:
+      - application/json
+      description: 模拟返回 HTTP 401 未授权错误
+      produces:
+      - application/json
+      responses:
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 测试 401 错误
+      tags:
+      - 测试
+  /test/403:
+    get:
+      consumes:
+      - application/json
+      description: 模拟返回 HTTP 403 禁止访问错误
+      produces:
+      - application/json
+      responses:
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 测试 403 错误
+      tags:
+      - 测试
+  /test/500:
+    get:
+      consumes:
+      - application/json
+      description: 模拟返回 HTTP 500 服务器内部错误
+      produces:
+      - application/json
+      responses:
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 测试 500 错误
+      tags:
+      - 测试
+  /test/error/{code}:
+    get:
+      consumes:
+      - application/json
+      description: 根据错误码返回对应的业务错误响应
+      parameters:
+      - description: '业务错误码 (10001-10099: 认证相关, 20001-20099: 任务相关)'
+        in: path
+        name: code
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                details:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 测试业务错误响应
+      tags:
+      - 测试
+  /test/paginated:
+    get:
+      consumes:
+      - application/json
+      description: 测试返回分页数据的统一响应格式
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  allOf:
+                  - $ref: '#/definitions/handler.PaginatedData'
+                  - properties:
+                      items:
+                        items:
+                          type: object
+                        type: array
+                    type: object
+              type: object
+      summary: 测试分页响应
+      tags:
+      - 测试
+  /test/success:
+    get:
+      consumes:
+      - application/json
+      description: 测试返回成功的统一响应格式
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/handler.Response'
+            - properties:
+                data:
+                  properties:
+                    role:
+                      type: string
+                    username:
+                      type: string
+                  type: object
+              type: object
+      summary: 测试成功响应
+      tags:
+      - 测试
+  /test/timeout:
+    get:
+      consumes:
+      - application/json
+      description: 模拟请求超时（15秒延迟，超过前端 10s timeout）
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handler.Response'
+        "408":
+          description: Request Timeout
+          schema:
+            $ref: '#/definitions/handler.Response'
+      summary: 测试超时响应
+      tags:
+      - 测试
+securityDefinitions:
+  BearerAuth:
+    description: 请输入 Bearer Token（例如：Bearer xxx）
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
