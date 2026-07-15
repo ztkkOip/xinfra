@@ -97,15 +97,15 @@ func (h *SAMLHandler) ACS(c *gin.Context) {
 
 func ssoRedirectURL(relayState, token string) string {
 	target := strings.TrimSpace(relayState)
-	if target == "" || !strings.HasPrefix(target, "/auth/") {
-		target = "/auth/"
+	if target == "" || !strings.HasPrefix(target, "/") {
+		target = "/"
 	}
 	if strings.HasPrefix(target, "//") {
-		target = "/auth/"
+		target = "/"
 	}
 	parsed, err := url.Parse(target)
 	if err != nil || parsed.IsAbs() {
-		parsed = &url.URL{Path: "/auth/"}
+		parsed = &url.URL{Path: "/"}
 	}
 	values := parsed.Query()
 	values.Set("sso_token", token)
