@@ -212,7 +212,7 @@ tr.tr-hover.active td {
 }
 
 .task-log-line.tag-ok {
-  color: #7FB8FF;
+  color: var(--tag-blue-text);
 }
 
 .blink {
@@ -259,11 +259,11 @@ tr.tr-hover.active td {
 .pg-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
-  color: #CFFCE9;
+  color: var(--active-text);
 }
 
 .pg-btn:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
   color: var(--text-hi);
 }
 

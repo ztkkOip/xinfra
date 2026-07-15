@@ -1,4 +1,96 @@
+/* 浅色模式（默认） */
 :root {
+  /* 背景色 */
+  --bg-deep: #F5F7FA;
+  --bg-panel: #FFFFFF;
+  --bg-panel-2: #F0F2F5;
+
+  /* 边框色 */
+  --line: #E4E7ED;
+  --line-soft: #EBEEF5;
+
+  /* 文字色 */
+  --text-hi: #1D2129;
+  --text-mid: #4E5969;
+  --text-dim: #86909C;
+
+  /* 强调色 */
+  --accent: #00B42A;
+  --accent-dim: #E8FFEA;
+
+  /* 状态色 */
+  --warn: #FF7D00;
+  --err: #F53F3F;
+  --info: #165DFF;
+
+  /* 圆角 */
+  --radius: 6px;
+
+  /* 字体 */
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', sans-serif;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+  /* 标签/徽章颜色 - 蓝色系 */
+  --tag-blue-text: #165DFF;
+  --tag-blue-bg: #E8F3FF;
+  --tag-blue-border: #BEDAFF;
+
+  /* 标签/徽章颜色 - 紫色系 */
+  --tag-purple-text: #722ED1;
+  --tag-purple-bg: #F5E8FF;
+  --tag-purple-border: #D3ADF7;
+
+  /* 标签/徽章颜色 - 琥珀色系 */
+  --tag-amber-text: #D46B08;
+  --tag-amber-bg: #FFF7E6;
+  --tag-amber-border: #FFD591;
+
+  /* 标签/徽章颜色 - 绿色系 */
+  --tag-green-text: #00B42A;
+  --tag-green-bg: #E8FFEA;
+  --tag-green-border: #9FD9A8;
+
+  /* 节点单元格颜色 */
+  --node-empty-bg: #F0F2F5;
+  --node-a-bg: #E8FFEA;
+  --node-a-border: #9FD9A8;
+  --node-b-bg: #F5E8FF;
+  --node-b-border: #D3ADF7;
+  --node-c-bg: #FFF7E6;
+  --node-c-border: #FFD591;
+
+  /* 进度条背景 */
+  --bar-bg: #E4E7ED;
+
+  /* 悬停边框 */
+  --hover-border: #C9CDD4;
+
+  /* 激活状态文字 */
+  --active-text: #00873E;
+
+  /* 主题切换按钮 */
+  --theme-btn-bg: #F0F2F5;
+  --theme-btn-hover: #E4E7ED;
+
+  /* 子系统卡片logo背景 */
+  --logo-w-bg: #E8F3FF;
+  --logo-dm-bg: #E8FFEA;
+  --logo-cc-bg: #FFF0F0;
+  --logo-ap-bg: #E8F3FF;
+  --logo-qp-bg: #FFF7E6;
+  --logo-gf-bg: #F5F7FA;
+
+  /* 发光/阴影效果 */
+  --accent-glow: rgba(0, 180, 42, 0.3);
+}
+
+/* 深色模式 */
+:root.dark {
   /* 背景色 */
   --bg-deep: #0E1117;
   --bg-panel: #151922;
@@ -28,4 +120,62 @@
   /* 字体 */
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', sans-serif;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+  /* 标签/徽章颜色 - 蓝色系 */
+  --tag-blue-text: #8EC8FF;
+  --tag-blue-bg: #0E1C2C;
+  --tag-blue-border: #1C3A5C;
+
+  /* 标签/徽章颜色 - 紫色系 */
+  --tag-purple-text: #C9A6FF;
+  --tag-purple-bg: #1A1430;
+  --tag-purple-border: #3A2C5C;
+
+  /* 标签/徽章颜色 - 琥珀色系 */
+  --tag-amber-text: #FFC97A;
+  --tag-amber-bg: #241B0A;
+  --tag-amber-border: #5C4A1C;
+
+  /* 标签/徽章颜色 - 绿色系 */
+  --tag-green-text: #7FFFC2;
+  --tag-green-bg: #0F261D;
+  --tag-green-border: var(--accent-dim);
+
+  /* 节点单元格颜色 */
+  --node-empty-bg: #1E2532;
+  --node-a-bg: #13261F;
+  --node-a-border: var(--accent-dim);
+  --node-b-bg: #1A1430;
+  --node-b-border: #3A2C5C;
+  --node-c-bg: #241B0A;
+  --node-c-border: #5C4A1C;
+
+  /* 进度条背景 */
+  --bar-bg: #262C38;
+
+  /* 悬停边框 */
+  --hover-border: #3A4356;
+
+  /* 激活状态文字 */
+  --active-text: #CFFCE9;
+
+  /* 主题切换按钮 */
+  --theme-btn-bg: #1B202B;
+  --theme-btn-hover: #262C38;
+
+  /* 子系统卡片logo背景 */
+  --logo-w-bg: #1C2A3A;
+  --logo-dm-bg: #1C3A2E;
+  --logo-cc-bg: #3A1C28;
+  --logo-ap-bg: #1C2A3A;
+  --logo-qp-bg: #241B0A;
+  --logo-gf-bg: #1B202B;
+
+  /* 发光/阴影效果 */
+  --accent-glow: rgba(63, 224, 165, 0.3);
 }

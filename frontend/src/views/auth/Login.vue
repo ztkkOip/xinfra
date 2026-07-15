@@ -135,7 +135,7 @@ const handleLogin = async () => {
   font-family: var(--mono);
   font-size: 16px;
   font-weight: 600;
-  color: #08140F;
+  color: var(--bg-deep);
 }
 
 .login-header h2 {
@@ -174,7 +174,7 @@ const handleLogin = async () => {
 }
 
 :deep(.el-input__wrapper:hover) {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
 }
 
 :deep(.el-input__wrapper.is-focus) {
@@ -188,11 +188,11 @@ const handleLogin = async () => {
 :deep(.el-button--primary) {
   background: var(--accent);
   border-color: var(--accent);
-  color: #06150F;
+  color: var(--bg-deep);
   font-weight: 600;
 }
 
 :deep(.el-button--primary:hover) {
-  background: #55E8B3;
+  opacity: 0.9;
 }
 </style>

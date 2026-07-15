@@ -86,9 +86,9 @@ const clusters = ref([
 ])
 
 const nodes = ref([
-  { name: 'bj-node-014', ip: '10.21.4.14', label: 'business-line=kodo', labelColor: '#8EC8FF', labelBorder: '#1C3A5C', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 58, cpuClass: '', status: 'Ready', statusClass: 'ok' },
-  { name: 'bj-node-015', ip: '10.21.4.15', label: 'business-line=kodo', labelColor: '#8EC8FF', labelBorder: '#1C3A5C', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 62, cpuClass: '', status: 'Ready', statusClass: 'ok' },
-  { name: 'bj-node-031', ip: '10.21.4.31', label: 'business-line=las', labelColor: '#C9A6FF', labelBorder: '#3A2C5C', taint: 'las:NoSchedule', spec: '32C/128G', cpu: 88, cpuClass: 'warn', status: '资源告警', statusClass: 'warn' },
+  { name: 'bj-node-014', ip: '10.21.4.14', label: 'business-line=kodo', labelColor: 'var(--tag-blue-text)', labelBorder: 'var(--tag-blue-border)', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 58, cpuClass: '', status: 'Ready', statusClass: 'ok' },
+  { name: 'bj-node-015', ip: '10.21.4.15', label: 'business-line=kodo', labelColor: 'var(--tag-blue-text)', labelBorder: 'var(--tag-blue-border)', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 62, cpuClass: '', status: 'Ready', statusClass: 'ok' },
+  { name: 'bj-node-031', ip: '10.21.4.31', label: 'business-line=las', labelColor: 'var(--tag-purple-text)', labelBorder: 'var(--tag-purple-border)', taint: 'las:NoSchedule', spec: '32C/128G', cpu: 88, cpuClass: 'warn', status: '资源告警', statusClass: 'warn' },
   { name: 'bj-node-048', ip: '10.21.4.48', label: '未分配', labelColor: 'var(--text-dim)', labelBorder: 'var(--line)', taint: '—', spec: '32C/128G', cpu: 4, cpuClass: '', status: 'Ready · 空闲', statusClass: 'ok' },
 ])
 </script>
@@ -197,21 +197,21 @@ tr.tr-hover:hover td {
 }
 
 .tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.zone-b {
-  color: #C9A6FF;
-  border-color: #3A2C5C;
-  background: #1A1430;
+  color: var(--tag-purple-text);
+  border-color: var(--tag-purple-border);
+  background: var(--tag-purple-bg);
 }
 
 .tag.zone-c {
-  color: #FFC97A;
-  border-color: #5C4A1C;
-  background: #241B0A;
+  color: var(--tag-amber-text);
+  border-color: var(--tag-amber-border);
+  background: var(--tag-amber-bg);
 }
 
 .tag.biz {
@@ -221,7 +221,7 @@ tr.tr-hover:hover td {
 .bar-wrap {
   width: 90px;
   height: 5px;
-  background: #262C38;
+  background: var(--bar-bg);
   border-radius: 3px;
   overflow: hidden;
   display: inline-block;

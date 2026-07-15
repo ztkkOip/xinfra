@@ -133,7 +133,7 @@ const clusters = ref([
   font-size: 11px;
   color: var(--accent);
   border: 1px solid var(--accent-dim);
-  background: #0F261D;
+  background: var(--accent-dim);
   padding: 3px 9px;
   border-radius: 20px;
   letter-spacing: 0.4px;
@@ -312,21 +312,21 @@ tr.tr-hover:hover td {
 }
 
 .tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.zone-b {
-  color: #C9A6FF;
-  border-color: #3A2C5C;
-  background: #1A1430;
+  color: var(--tag-purple-text);
+  border-color: var(--tag-purple-border);
+  background: var(--tag-purple-bg);
 }
 
 .tag.zone-c {
-  color: #FFC97A;
-  border-color: #5C4A1C;
-  background: #241B0A;
+  color: var(--tag-amber-text);
+  border-color: var(--tag-amber-border);
+  background: var(--tag-amber-bg);
 }
 
 .status-text {

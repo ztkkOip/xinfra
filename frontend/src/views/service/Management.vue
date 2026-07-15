@@ -273,21 +273,21 @@ tr.tr-hover:hover td {
 }
 
 .tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.zone-b {
-  color: #C9A6FF;
-  border-color: #3A2C5C;
-  background: #1A1430;
+  color: var(--tag-purple-text);
+  border-color: var(--tag-purple-border);
+  background: var(--tag-purple-bg);
 }
 
 .tag.zone-c {
-  color: #FFC97A;
-  border-color: #5C4A1C;
-  background: #241B0A;
+  color: var(--tag-amber-text);
+  border-color: var(--tag-amber-border);
+  background: var(--tag-amber-bg);
 }
 
 .status-text {
@@ -339,11 +339,11 @@ tr.tr-hover:hover td {
 .pg-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
-  color: #CFFCE9;
+  color: var(--active-text);
 }
 
 .pg-btn:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
   color: var(--text-hi);
 }
 

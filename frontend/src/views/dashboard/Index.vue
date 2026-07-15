@@ -260,23 +260,23 @@ const refresh = () => {
 .node-cell {
   aspect-ratio: 1;
   border-radius: 3px;
-  background: #1E2532;
+  background: var(--node-empty-bg);
   border: 1px solid var(--line-soft);
 }
 
 .node-cell.a {
-  background: #13261F;
-  border-color: var(--accent-dim);
+  background: var(--node-a-bg);
+  border-color: var(--node-a-border);
 }
 
 .node-cell.b {
-  background: #1A1430;
-  border-color: #3A2C5C;
+  background: var(--node-b-bg);
+  border-color: var(--node-b-border);
 }
 
 .node-cell.c {
-  background: #241B0A;
-  border-color: #5C4A1C;
+  background: var(--node-c-bg);
+  border-color: var(--node-c-border);
 }
 
 .node-cell.empty {
@@ -352,21 +352,21 @@ td.strong {
 }
 
 .tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.zone-b {
-  color: #C9A6FF;
-  border-color: #3A2C5C;
-  background: #1A1430;
+  color: var(--tag-purple-text);
+  border-color: var(--tag-purple-border);
+  background: var(--tag-purple-bg);
 }
 
 .tag.zone-c {
-  color: #FFC97A;
-  border-color: #5C4A1C;
-  background: #241B0A;
+  color: var(--tag-amber-text);
+  border-color: var(--tag-amber-border);
+  background: var(--tag-amber-bg);
 }
 
 .status-text {

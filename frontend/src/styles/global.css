@@ -11,6 +11,22 @@ html, body {
   color: var(--text-hi);
   font-family: var(--sans);
   font-size: 14px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* 主题切换过渡效果 */
+*, *::before, *::after {
+  transition: background-color 0.2s ease,
+              border-color 0.2s ease,
+              box-shadow 0.2s ease;
+}
+
+/* 排除不需要过渡的元素 */
+.no-transition,
+.no-transition *,
+.no-transition *::before,
+.no-transition *::after {
+  transition: none !important;
 }
 
 /* 滚动条样式 */
@@ -20,8 +36,12 @@ html, body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2A3140;
+  background: var(--bar-bg);
   border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
 }
 
 ::-webkit-scrollbar-track {
@@ -54,7 +74,7 @@ button {
 
 .dot.ok {
   background: var(--accent);
-  box-shadow: 0 0 6px #3FE0A599;
+  box-shadow: 0 0 6px var(--accent-glow);
 }
 
 .dot.warn {
@@ -109,7 +129,7 @@ button {
 .bar-wrap {
   width: 90px;
   height: 5px;
-  background: #262C38;
+  background: var(--bar-bg);
   border-radius: 3px;
   overflow: hidden;
   display: inline-block;
@@ -129,4 +149,16 @@ button {
 
 .bar-fill.err {
   background: var(--err);
+}
+
+/* 卡片样式 */
+.card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
 }

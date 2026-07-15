@@ -272,7 +272,7 @@ tr.tr-hover:hover td {
 .bar-wrap {
   width: 90px;
   height: 5px;
-  background: #262C38;
+  background: var(--bar-bg);
   border-radius: 3px;
   overflow: hidden;
   display: inline-block;

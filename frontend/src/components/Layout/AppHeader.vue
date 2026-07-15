@@ -11,6 +11,14 @@
       搜索集群 / 节点 / 服务实例
       <kbd>⌘K</kbd>
     </div>
+    <div class="theme-switch" @click="toggleTheme" :title="theme === 'light' ? '切换到深色模式' : '切换到浅色模式'">
+      <el-icon v-if="theme === 'light'" :size="18">
+        <Moon />
+      </el-icon>
+      <el-icon v-else :size="18">
+        <Sunny />
+      </el-icon>
+    </div>
     <div class="identity">
       <div class="avatar">{{ userInitial }}</div>
       <div>
@@ -24,12 +32,16 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useTheme } from '@/composables/useTheme'
+import { Moon, Sunny } from '@element-plus/icons-vue'
 
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
 const userInitial = computed(() => {
   return user.value?.display_name?.charAt(0) || 'U'
 })
+
+const { theme, toggleTheme } = useTheme()
 </script>
 
 <style scoped>
@@ -63,7 +75,7 @@ const userInitial = computed(() => {
   font-family: var(--mono);
   font-size: 11px;
   font-weight: 600;
-  color: #08140F;
+  color: var(--bg-deep);
 }
 
 .brand .sub {
@@ -82,7 +94,7 @@ const userInitial = computed(() => {
   font-size: 11px;
   color: var(--accent);
   border: 1px solid var(--accent-dim);
-  background: #0F261D;
+  background: var(--accent-dim);
   padding: 3px 9px;
   border-radius: 20px;
   letter-spacing: 0.4px;
@@ -105,10 +117,11 @@ const userInitial = computed(() => {
   margin-left: auto;
   font-family: var(--mono);
   font-size: 10px;
-  background: #262C38;
+  background: var(--bg-panel);
   padding: 1px 5px;
   border-radius: 3px;
   color: var(--text-dim);
+  border: 1px solid var(--line);
 }
 
 .identity {
@@ -123,18 +136,51 @@ const userInitial = computed(() => {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: #2A3142;
+  background: var(--bg-panel-2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
   font-size: 11px;
   color: var(--text-hi);
+  border: 1px solid var(--line);
 }
 
 .identity .ldap-tag {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text-dim);
+}
+
+.theme-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--text-mid);
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line);
+}
+
+.theme-switch:hover {
+  background: var(--bg-panel);
+  color: var(--text-hi);
+  border-color: var(--accent);
+}
+
+.theme-switch:active {
+  transform: scale(0.95);
+}
+
+.theme-switch .el-icon {
+  transition: transform 0.3s ease;
+}
+
+.theme-switch:hover .el-icon {
+  transform: rotate(15deg);
 }
 </style>

@@ -278,21 +278,21 @@ tr.tr-hover:hover td {
 }
 
 .tag.vm {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.src-cmdb {
-  color: #7FFFC2;
-  border-color: var(--accent-dim);
-  background: #0F261D;
+  color: var(--tag-green-text);
+  border-color: var(--tag-green-border);
+  background: var(--tag-green-bg);
 }
 
 .status-text {
@@ -340,11 +340,11 @@ tr.tr-hover:hover td {
 .pg-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
-  color: #CFFCE9;
+  color: var(--active-text);
 }
 
 .pg-btn:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
   color: var(--text-hi);
 }
 

@@ -118,24 +118,26 @@
 }
 
 .nav-item.active {
-  background: #13261F;
+  background: var(--accent-dim);
   color: var(--accent);
-  border-color: var(--accent-dim);
+  border-color: var(--accent);
 }
 
 .nav-item .badge {
   margin-left: auto;
   font-family: var(--mono);
   font-size: 10px;
-  background: #262C38;
+  background: var(--bg-panel-2);
   color: var(--text-dim);
   padding: 1px 6px;
   border-radius: 10px;
+  border: 1px solid var(--line);
 }
 
 .nav-item.active .badge {
-  background: var(--accent-dim);
-  color: #CFFCE9;
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
 }
 
 .sidebar-foot {
