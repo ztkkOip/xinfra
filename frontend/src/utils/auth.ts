@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'xinfra_token'
-const USER_KEY = 'xinfra_user'
+const TOKEN_KEY = 'authserver_token'
+const USER_KEY = 'authserver_user'
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY)

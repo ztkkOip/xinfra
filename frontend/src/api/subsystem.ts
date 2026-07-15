@@ -1,4 +1,6 @@
 import type { ApiResponse } from '@/types/api'
+import { getToken, removeToken } from '@/utils/auth'
+import { redirectToSSO } from '@/utils/sso'
 
 export interface Subsystem {
   id: number
@@ -15,7 +17,6 @@ export interface SSOResponse {
   expires_in: number
 }
 
-// Mock 数据
 const mockSubsystems: Subsystem[] = [
   {
     id: 1,
@@ -74,33 +75,59 @@ const mockSubsystems: Subsystem[] = [
 ]
 
 export const subsystemApi = {
-  // 获取子系统列表
   getSubsystems(): Promise<ApiResponse<Subsystem[]>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          code: 0,
-          message: 'success',
-          data: mockSubsystems,
-        })
-      }, 300)
+    return Promise.resolve({
+      code: 0,
+      message: 'success',
+      data: mockSubsystems,
     })
   },
 
-  // 获取 SSO 跳转 URL
-  getSSOUrl(id: number): Promise<ApiResponse<SSOResponse>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const subsystem = mockSubsystems.find((s) => s.id === id)
-        resolve({
-          code: 0,
-          message: 'success',
-          data: {
-            sso_url: subsystem?.url + '/sso/callback?code=mock-code&state=mock-state',
-            expires_in: 300,
-          },
-        })
-      }, 200)
+  async getSSOUrl(id: number): Promise<ApiResponse<SSOResponse>> {
+    const subsystem = mockSubsystems.find((s) => s.id === id)
+    if (!subsystem) {
+      throw new Error('subsystem not found')
+    }
+    if (subsystem.name !== 'Wayne' && subsystem.name !== 'CloudDM') {
+      return {
+        code: 0,
+        message: 'success',
+        data: {
+          sso_url: subsystem.url,
+          expires_in: 300,
+        },
+      }
+    }
+
+    const token = getToken()
+    const openApp = subsystem.name === 'CloudDM' ? 'clouddm' : 'wayne'
+    const path = subsystem.name === 'CloudDM' ? '/auth/api/v1/clouddm/login' : '/auth/api/v1/wayen/login'
+    const response = await fetch(path, {
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
     })
+    const data = await response.json().catch(() => ({}))
+    if (response.status === 401) {
+      removeToken()
+      redirectToSSO(openApp)
+      throw new Error('unauthorized')
+    }
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`)
+    }
+    if (!data.target_url) {
+      throw new Error(`${subsystem.name} 跳转地址为空`)
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        sso_url: data.target_url,
+        expires_in: 300,
+      },
+    }
   },
 }
