@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="cols-2">
+    <div class="cols-2-equal">
       <div class="panel">
         <div class="panel-head">
           <h3>VictoriaMetrics · 指标概览</h3>
@@ -94,123 +94,5 @@ const logs = ref([
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.cols-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-bottom: 18px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-}
-
-.panel-body {
-  padding: 4px 0;
-}
-
-.log-stream {
-  padding: 14px 16px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-.strong {
-  color: var(--text-hi);
-  font-weight: 500;
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
-}
-
-.task-log-line {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  padding: 2px 0;
-  color: var(--text-mid);
-}
-
-.task-log-line .t {
-  color: var(--text-dim);
-  margin-right: 10px;
-}
-
-.task-log-line.ok {
-  color: var(--accent);
-}
+/* .page-head, .cols-2-equal, .panel, table, .status-text, .log-stream, .task-log-line 已在 global.css 中定义 */
 </style>

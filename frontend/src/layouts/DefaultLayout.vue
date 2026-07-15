@@ -15,8 +15,8 @@ import AppMain from '@/components/Layout/AppMain.vue'
 <style scoped>
 .shell {
   display: grid;
-  grid-template-columns: 226px 1fr;
-  grid-template-rows: 56px 1fr;
+  grid-template-columns: 282px 1fr;
+  grid-template-rows: 70px 1fr;
   height: 100vh;
 }
 </style>

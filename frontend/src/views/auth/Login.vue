@@ -39,8 +39,12 @@ onMounted(() => redirectToSSO())
   width: 400px;
   background: var(--bg-panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 40px;
+}
+
+.login-btn {
+  width: 100%;
 }
 
 .login-header {
@@ -61,15 +65,15 @@ onMounted(() => redirectToSSO())
 .login-header .brand .mark {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), #1C8F69);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-end));
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
   font-size: 16px;
   font-weight: 600;
-  color: #08140F;
+  color: var(--bg-deep);
 }
 
 .login-header h2 {
@@ -108,7 +112,7 @@ onMounted(() => redirectToSSO())
 }
 
 :deep(.el-input__wrapper:hover) {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
 }
 
 :deep(.el-input__wrapper.is-focus) {
@@ -122,11 +126,11 @@ onMounted(() => redirectToSSO())
 :deep(.el-button--primary) {
   background: var(--accent);
   border-color: var(--accent);
-  color: #06150F;
+  color: var(--bg-deep);
   font-weight: 600;
 }
 
 :deep(.el-button--primary:hover) {
-  background: #55E8B3;
+  opacity: 0.9;
 }
 </style>

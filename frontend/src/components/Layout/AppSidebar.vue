@@ -81,7 +81,7 @@
 }
 
 .nav-label {
-  font-size: 10.5px;
+  font-size: 13px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -94,10 +94,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 10px 10px;
   border-radius: 6px;
   color: var(--text-mid);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 2px;
@@ -108,7 +108,7 @@
 .nav-item .ic {
   width: 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 16px;
   opacity: 0.85;
 }
 
@@ -118,31 +118,33 @@
 }
 
 .nav-item.active {
-  background: #13261F;
+  background: var(--accent-dim);
   color: var(--accent);
-  border-color: var(--accent-dim);
+  border-color: var(--accent);
 }
 
 .nav-item .badge {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 10px;
-  background: #262C38;
+  font-size: 12px;
+  background: var(--bg-panel-2);
   color: var(--text-dim);
   padding: 1px 6px;
   border-radius: 10px;
+  border: 1px solid var(--line);
 }
 
 .nav-item.active .badge {
-  background: var(--accent-dim);
-  color: #CFFCE9;
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
 }
 
 .sidebar-foot {
   margin-top: auto;
   padding: 10px;
   border-top: 1px solid var(--line-soft);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
 }

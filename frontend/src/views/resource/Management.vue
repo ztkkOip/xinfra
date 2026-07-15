@@ -31,7 +31,7 @@
       </div>
       <div class="stat-card">
         <div class="label">最近一次同步</div>
-        <div class="value" style="color: var(--accent); font-size: 16px">● 正常</div>
+        <div class="value accent-pill">● 正常</div>
         <div class="delta">07:39:10 · 新增 3 条</div>
       </div>
     </div>
@@ -58,7 +58,7 @@
         <el-option label="maas" value="maas" />
         <el-option label="未分配" value="unassigned" />
       </el-select>
-      <el-input placeholder="搜索 hostname / asset_number / IP" style="flex: 1" />
+      <el-input placeholder="搜索 hostname / asset_number / IP" class="search-input" />
     </div>
 
     <div class="panel">
@@ -84,11 +84,11 @@
           <tbody>
             <tr v-for="item in resources" :key="item.hostname" class="tr-hover">
               <td class="strong mono">{{ item.hostname }}</td>
-              <td class="mono" style="font-size: 11px">{{ item.asset_number }}</td>
+              <td class="mono text-xs">{{ item.asset_number }}</td>
               <td><span class="tag" :class="item.type === '物理机' ? '' : 'vm'">{{ item.type }}</span></td>
               <td><span class="tag zone-a">{{ item.location }}</span></td>
               <td class="mono">{{ item.ip }}</td>
-              <td class="mono" style="font-size: 11px">{{ item.spec }}</td>
+              <td class="mono text-xs">{{ item.spec }}</td>
               <td class="mono">{{ item.business_line }}</td>
               <td><span class="tag src-cmdb">{{ item.source }}</span></td>
               <td class="status-text ok">● {{ item.status }}</td>
@@ -127,234 +127,17 @@ const resources = ref([
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px 16px;
-}
-
-.stat-card .label {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-card .value {
-  font-family: var(--mono);
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.stat-card .delta {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 4px;
-}
-
-.stat-card .delta.up {
-  color: var(--accent);
-}
-
-.stat-card .delta.warn {
-  color: var(--warn);
-}
-
-.las-toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-  align-items: center;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-}
-
-.panel-body {
-  padding: 4px 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-th {
-  text-align: left;
-  color: var(--text-dim);
-  font-weight: 500;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-.strong {
-  color: var(--text-hi);
-  font-weight: 500;
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  color: var(--text-mid);
-}
+/* 公共样式已在 global.css 中定义 */
 
 .tag.vm {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
-}
-
-.tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
 }
 
 .tag.src-cmdb {
-  color: #7FFFC2;
-  border-color: var(--accent-dim);
-  background: #0F261D;
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-top: 1px solid var(--line-soft);
-  font-size: 11.5px;
-  color: var(--text-dim);
-}
-
-.pg-btns {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.pg-btn {
-  min-width: 26px;
-  height: 26px;
-  padding: 0 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  color: var(--text-mid);
-  font-family: var(--mono);
-  font-size: 11px;
-  background: var(--bg-panel-2);
-  cursor: pointer;
-}
-
-.pg-btn.active {
-  background: var(--accent-dim);
-  border-color: var(--accent-dim);
-  color: #CFFCE9;
-}
-
-.pg-btn:hover {
-  border-color: #3A4356;
-  color: var(--text-hi);
-}
-
-.pg-btn.disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.pg-sep {
-  color: var(--text-dim);
-  padding: 0 2px;
+  color: var(--tag-green-text);
+  border-color: var(--tag-green-border);
+  background: var(--tag-green-bg);
 }
 </style>

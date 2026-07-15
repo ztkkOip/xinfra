@@ -27,26 +27,26 @@ const props = defineProps<{
 
 const bgColor = computed(() => {
   const colors: Record<string, string> = {
-    W: '#1C2A3A',
-    DM: '#1C3A2E',
-    CC: '#3A1C28',
-    AP: '#1C2A3A',
-    QP: '#241B0A',
-    GF: '#1B202B',
+    W: 'var(--logo-w-bg)',
+    DM: 'var(--logo-dm-bg)',
+    CC: 'var(--logo-cc-bg)',
+    AP: 'var(--logo-ap-bg)',
+    QP: 'var(--logo-qp-bg)',
+    GF: 'var(--logo-gf-bg)',
   }
-  return colors[props.system.icon] || '#262C38'
+  return colors[props.system.icon] || 'var(--bg-panel-2)'
 })
 
 const iconColor = computed(() => {
   const colors: Record<string, string> = {
-    W: '#7FB8FF',
-    DM: '#7FFFC2',
-    CC: '#FF8E9C',
-    AP: '#8EC8FF',
-    QP: '#FFC97A',
-    GF: '#F2B544',
+    W: 'var(--tag-blue-text)',
+    DM: 'var(--tag-green-text)',
+    CC: 'var(--err)',
+    AP: 'var(--tag-blue-text)',
+    QP: 'var(--tag-amber-text)',
+    GF: 'var(--warn)',
   }
-  return colors[props.system.icon] || '#9AA3B5'
+  return colors[props.system.icon] || 'var(--text-mid)'
 })
 
 const description = computed(() => {
@@ -85,7 +85,7 @@ const handleClick = async () => {
 }
 
 .ext-card:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
 }
 
 .ext-top {

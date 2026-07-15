@@ -189,11 +189,11 @@ tr.tr-hover:hover td {
 .pg-btn.active {
   background: var(--accent-dim);
   border-color: var(--accent-dim);
-  color: #CFFCE9;
+  color: var(--active-text);
 }
 
 .pg-btn:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
   color: var(--text-hi);
 }
 
