@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	_ "github.com/1024XEngineer/xinfra/server/docs"
 	"github.com/1024XEngineer/xinfra/server/internal/config"
 	"github.com/1024XEngineer/xinfra/server/internal/database"
 	"github.com/1024XEngineer/xinfra/server/internal/router"
