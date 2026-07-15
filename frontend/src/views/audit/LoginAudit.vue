@@ -33,9 +33,13 @@ const auditData = ref<LoginAudit[]>([])
 const total = ref(0)
 
 const fetchData = async () => {
-  const { data } = await auditApi.getLoginAudit()
-  auditData.value = data.items
-  total.value = data.total
+  try {
+    const { data } = await auditApi.getLoginAudit()
+    auditData.value = data.items
+    total.value = data.total
+  } catch {
+    // 错误已由 request 拦截器统一处理
+  }
 }
 
 const refresh = () => {

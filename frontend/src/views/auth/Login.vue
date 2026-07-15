@@ -84,8 +84,8 @@ const handleLogin = async () => {
     await login(form.username, form.password)
     ElMessage.success('登录成功')
     router.push('/')
-  } catch (error: any) {
-    ElMessage.error(error.message || '登录失败')
+  } catch {
+    // 错误已由 request 拦截器统一处理
   } finally {
     loading.value = false
   }
