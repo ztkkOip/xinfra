@@ -81,7 +81,7 @@
 }
 
 .nav-label {
-  font-size: 10.5px;
+  font-size: 13px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -94,10 +94,10 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 10px;
+  padding: 10px 10px;
   border-radius: 6px;
   color: var(--text-mid);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   margin-bottom: 2px;
@@ -108,7 +108,7 @@
 .nav-item .ic {
   width: 16px;
   text-align: center;
-  font-size: 13px;
+  font-size: 16px;
   opacity: 0.85;
 }
 
@@ -126,7 +126,7 @@
 .nav-item .badge {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   background: var(--bg-panel-2);
   color: var(--text-dim);
   padding: 1px 6px;
@@ -144,7 +144,7 @@
   margin-top: auto;
   padding: 10px;
   border-top: 1px solid var(--line-soft);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
 }

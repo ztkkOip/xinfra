@@ -1,7 +1,7 @@
 <template>
   <header class="topbar">
     <div class="brand">
-      <div class="mark">xi</div>
+      <img src="/logo-qiniu.png" alt="logo" class="mark-img" />
       xinfra <span class="sub">统一基础设施平台</span>
     </div>
     <span class="env-pill">● 生产环境</span>
@@ -61,27 +61,20 @@ const { theme, toggleTheme } = useTheme()
   gap: 9px;
   font-weight: 600;
   letter-spacing: 0.3px;
-  font-size: 15px;
+  font-size: 18px;
 }
 
-.brand .mark {
-  width: 22px;
-  height: 22px;
-  border-radius: 5px;
-  background: linear-gradient(135deg, var(--accent), #1C8F69);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--bg-deep);
+.brand .mark-img {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: contain;
 }
 
 .brand .sub {
   color: var(--text-dim);
   font-weight: 400;
-  font-size: 12px;
+  font-size: 15px;
   margin-left: 4px;
 }
 
@@ -91,7 +84,7 @@ const { theme, toggleTheme } = useTheme()
 
 .env-pill {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--accent);
   border: 1px solid var(--accent-dim);
   background: var(--accent-dim);
@@ -109,14 +102,14 @@ const { theme, toggleTheme } = useTheme()
   border-radius: 6px;
   padding: 6px 10px;
   color: var(--text-dim);
-  font-size: 12.5px;
-  width: 240px;
+  font-size: 15px;
+  width: 280px;
 }
 
 .search-box kbd {
   margin-left: auto;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   background: var(--bg-panel);
   padding: 1px 5px;
   border-radius: 3px;
@@ -128,27 +121,27 @@ const { theme, toggleTheme } = useTheme()
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 12.5px;
+  font-size: 15px;
   color: var(--text-mid);
 }
 
 .identity .avatar {
-  width: 26px;
-  height: 26px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--bg-panel-2);
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 14px;
   color: var(--text-hi);
   border: 1px solid var(--line);
 }
 
 .identity .ldap-tag {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--text-dim);
 }
 
