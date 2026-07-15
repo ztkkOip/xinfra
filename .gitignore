@@ -51,5 +51,6 @@ docker-compose.override.yml
 
 # Documentation & local dev config (not tracked in repo)
 docs/
+!server/docs/
 CLAUDE.md
 AGENTS.md
