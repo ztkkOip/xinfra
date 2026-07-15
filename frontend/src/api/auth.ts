@@ -1,4 +1,5 @@
 import type { ApiResponse } from '@/types/api'
+import { getToken } from '@/utils/auth'
 
 export interface LoginRequest {
   username: string
@@ -19,53 +20,37 @@ export interface LoginResponse {
   user: UserInfo
 }
 
-// Mock 数据
-const mockUser: UserInfo = {
-  id: 1,
-  username: 'admin',
-  display_name: '王晓东',
-  email: 'admin@qiniu.com',
-  business_line: 'kodo',
-}
-
 export const authApi = {
-  // 登录
   login(_data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    // MVP 阶段使用 Mock 数据
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          code: 0,
-          message: 'success',
-          data: {
-            token: 'mock-jwt-token-' + Date.now(),
-            expires_in: 3600,
-            user: mockUser,
-          },
-        })
-      }, 500)
-    })
+    return Promise.reject(new Error('password login is disabled'))
   },
 
-  // 登出
   logout(): Promise<ApiResponse<null>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ code: 0, message: 'success', data: null })
-      }, 200)
-    })
+    return Promise.resolve({ code: 0, message: 'success', data: null })
   },
 
-  // 获取用户信息
-  getUserInfo(): Promise<ApiResponse<UserInfo>> {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          code: 0,
-          message: 'success',
-          data: mockUser,
-        })
-      }, 200)
+  async getUserInfo(): Promise<ApiResponse<UserInfo>> {
+    const token = getToken()
+    const response = await fetch('/auth/api/v1/users/me', {
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
     })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`)
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        id: data.id,
+        username: data.username,
+        display_name: data.display_name || data.username,
+        email: data.email || '',
+        business_line: data.business_line || '',
+      },
+    }
   },
 }

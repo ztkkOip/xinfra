@@ -1,0 +1,14 @@
+.cache/
+.env
+.env.*
+!.env.example
+.DS_Store
+*.tar
+bin/
+/server
+web/node_modules/
+web/dist/
+certs/
+scripts/
+data/
+docs/

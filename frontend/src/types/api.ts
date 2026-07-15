@@ -1,6 +1,6 @@
 /**
  * 后端统一响应格式类型定义
- * 对应 server/internal/handler/response.go
+ * 对应 server/internal/response/response.go
  */
 
 /** 统一 JSON 响应信封 */

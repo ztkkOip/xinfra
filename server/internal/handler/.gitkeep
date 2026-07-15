@@ -1,8 +1,0 @@
-# HTTP 处理器层（Controller）
-
-存放请求处理器，负责接收请求、校验参数、调用 Service：
-- auth.go: 认证处理器，处理登录/登出/用户信息请求
-- audit.go: 审计处理器，处理登录审计/运维操作审计查询请求
-- subsystem.go: 子系统处理器，处理子系统列表/SSO URL 生成请求
-- task.go: 任务处理器，处理 Ansible 任务创建/状态查询请求
-- response.go: 统一响应，定义标准 JSON 响应格式和错误码

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
+import { consumeSSOToken, redirectToSSO } from '@/utils/sso'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -98,10 +99,12 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, _from, next) => {
+  consumeSSOToken()
   const token = getToken()
 
   if (to.meta.requiresAuth !== false && !token) {
-    next('/login')
+    redirectToSSO()
+    return
   } else if (to.path === '/login' && token) {
     next('/')
   } else {

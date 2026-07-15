@@ -20,6 +20,7 @@
 import { ref, onMounted } from 'vue'
 import { subsystemApi, type Subsystem } from '@/api/subsystem'
 import SubsystemCard from '@/components/SubsystemCard.vue'
+import { consumeOpenApp } from '@/utils/sso'
 
 const subsystems = ref<Subsystem[]>([])
 
@@ -27,6 +28,15 @@ onMounted(async () => {
   try {
     const { data } = await subsystemApi.getSubsystems()
     subsystems.value = data
+    const openApp = consumeOpenApp()
+    if (openApp) {
+      const targetName = openApp === 'clouddm' ? 'CloudDM' : 'Wayne'
+      const target = data.find((item) => item.name === targetName)
+      if (target) {
+        const response = await subsystemApi.getSSOUrl(target.id)
+        window.location.assign(response.data.sso_url)
+      }
+    }
   } catch {
     // 错误已由 request 拦截器统一处理
   }
