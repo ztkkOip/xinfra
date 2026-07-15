@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"log"
-	"net/http"
 	"runtime/debug"
 
 	"github.com/1024XEngineer/xinfra/server/internal/handler"
