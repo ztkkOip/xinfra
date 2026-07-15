@@ -1,7 +1,7 @@
 package database
 
 import (
-	"authserver/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"

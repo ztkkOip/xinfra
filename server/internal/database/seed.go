@@ -1,7 +1,7 @@
 package database
 
 import (
-	"authserver/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
 
 	"gorm.io/gorm"
 )

@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"authserver/internal/auth"
-	"authserver/internal/model"
-	"authserver/internal/service"
+	"github.com/1024XEngineer/xinfra/server/internal/auth"
+	"github.com/1024XEngineer/xinfra/server/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

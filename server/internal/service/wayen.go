@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	"authserver/internal/config"
-	"authserver/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/model"
 
 	"gorm.io/gorm"
 )

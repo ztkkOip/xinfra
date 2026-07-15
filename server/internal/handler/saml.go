@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"authserver/internal/config"
-	"authserver/internal/service"
-	"authserver/internal/sso"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/service"
+	"github.com/1024XEngineer/xinfra/server/internal/sso"
 
 	"github.com/gin-gonic/gin"
 )

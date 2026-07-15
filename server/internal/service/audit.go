@@ -3,7 +3,7 @@ package service
 import (
 	"encoding/json"
 
-	"authserver/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/model"
 
 	"gorm.io/gorm"
 )

@@ -1,9 +1,9 @@
 package router
 
 import (
-	"authserver/internal/config"
-	"authserver/internal/handler"
-	"authserver/internal/service"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/handler"
+	"github.com/1024XEngineer/xinfra/server/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"

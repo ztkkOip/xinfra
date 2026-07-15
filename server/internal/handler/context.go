@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"authserver/internal/auth"
-	"authserver/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/auth"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
 
 	"github.com/gin-gonic/gin"
 )

@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"authserver/internal/auth"
-	"authserver/internal/config"
-	"authserver/internal/model"
-	"authserver/internal/sso"
+	"github.com/1024XEngineer/xinfra/server/internal/auth"
+	"github.com/1024XEngineer/xinfra/server/internal/config"
+	"github.com/1024XEngineer/xinfra/server/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/sso"
 
 	"gorm.io/gorm"
 )
