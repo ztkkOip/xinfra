@@ -1,8 +1,0 @@
-# 业务逻辑层
-
-存放核心业务逻辑，编排 Repository：
-- auth.go: 认证服务，LDAP 认证、本地降级认证、JWT 生成
-- ldap.go: LDAP 服务，封装 LDAP 连接、查询、认证逻辑
-- audit.go: 审计服务，记录登录审计、运维操作审计
-- subsystem.go: 子系统服务，子系统查询、OAuth 2.0 SSO URL 生成
-- ansible.go: Ansible 调度服务，创建任务、执行 Playbook、推送日志

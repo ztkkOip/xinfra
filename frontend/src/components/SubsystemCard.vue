@@ -64,7 +64,7 @@ const description = computed(() => {
 const handleClick = async () => {
   if (props.system.sso_enabled) {
     const { data } = await subsystemApi.getSSOUrl(props.system.id)
-    window.open(data.sso_url, '_blank')
+    window.location.assign(data.sso_url)
   } else {
     window.open(props.system.url, '_blank')
   }

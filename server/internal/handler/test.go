@@ -6,6 +6,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/1024XEngineer/xinfra/server/internal/response"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -18,7 +20,7 @@ import (
 // @Success      200  {object}  Response{data=object{time=string}}
 // @Router       /ping [get]
 func Ping(c *gin.Context) {
-	Success(c, gin.H{"time": time.Now().Format(time.RFC3339)})
+	response.Success(c, gin.H{"time": time.Now().Format(time.RFC3339)})
 }
 
 // TestSuccess 测试成功响应
@@ -30,7 +32,7 @@ func Ping(c *gin.Context) {
 // @Success      200  {object}  Response{data=object{username=string,role=string}}
 // @Router       /test/success [get]
 func TestSuccess(c *gin.Context) {
-	Success(c, gin.H{
+	response.Success(c, gin.H{
 		"username": "testuser",
 		"role":     "admin",
 	})
@@ -50,11 +52,11 @@ func TestError(c *gin.Context) {
 	codeStr := c.Param("code")
 	code, err := strconv.Atoi(codeStr)
 	if err != nil {
-		BadRequest(c, "错误码必须是数字")
+		response.BadRequest(c, "错误码必须是数字")
 		return
 	}
 	details := fmt.Sprintf("这是错误码 %d 的测试响应", code)
-	Error(c, http.StatusOK, code, details)
+	response.Error(c, http.StatusOK, code, details)
 }
 
 // Test500 测试 500 错误
@@ -66,7 +68,7 @@ func TestError(c *gin.Context) {
 // @Success      500  {object}  Response
 // @Router       /test/500 [get]
 func Test500(c *gin.Context) {
-	InternalError(c, "模拟服务器内部错误")
+	response.InternalError(c, "模拟服务器内部错误")
 }
 
 // Test401 测试 401 错误
@@ -78,7 +80,7 @@ func Test500(c *gin.Context) {
 // @Success      401  {object}  Response
 // @Router       /test/401 [get]
 func Test401(c *gin.Context) {
-	Unauthorized(c, "模拟 Token 过期")
+	response.Unauthorized(c, "模拟 Token 过期")
 }
 
 // Test403 测试 403 错误
@@ -90,7 +92,7 @@ func Test401(c *gin.Context) {
 // @Success      403  {object}  Response
 // @Router       /test/403 [get]
 func Test403(c *gin.Context) {
-Forbidden(c, "模拟无权限")
+	response.Forbidden(c, "模拟无权限")
 }
 
 // TestTimeout 测试超时响应
@@ -104,7 +106,7 @@ Forbidden(c, "模拟无权限")
 // @Router       /test/timeout [get]
 func TestTimeout(c *gin.Context) {
 	time.Sleep(15 * time.Second)
-	Success(c, "这条消息不应该出现")
+	response.Success(c, "这条消息不应该出现")
 }
 
 // TestPaginated 测试分页响应
@@ -121,5 +123,5 @@ func TestPaginated(c *gin.Context) {
 		{"id": 2, "name": "item-2"},
 		{"id": 3, "name": "item-3"},
 	}
-	SuccessWithPaginated(c, 100, items)
+	response.SuccessWithPaginated(c, 100, items)
 }

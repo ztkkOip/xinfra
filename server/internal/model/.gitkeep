@@ -1,6 +1,0 @@
-# 数据模型层
-
-存放数据库表结构和业务实体定义：
-- user.go: 用户模型，对应 users 表，定义用户字段和状态枚举
-- audit.go: 审计模型，对应 login_audit / ops_audit 表
-- subsystem.go: 子系统模型，对应 subsystems 表，定义子系统信息

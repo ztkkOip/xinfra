@@ -1,5 +1,6 @@
 import axios, { type AxiosResponse, type AxiosError } from 'axios'
 import { getToken, removeToken } from '@/utils/auth'
+import { redirectToSSO } from '@/utils/sso'
 import { ElMessage } from 'element-plus'
 import type { ApiResponse } from '@/types/api'
 import { codeMessageMap } from '@/types/api'
@@ -60,7 +61,7 @@ request.interceptors.response.use(
 
       if (status === 401) {
         removeToken()
-        window.location.href = '/login'
+        redirectToSSO()
         ElMessage.error(backendMessage || '未授权，请重新登录')
       } else {
         const message = backendMessage || httpMessageMap[status] || `请求失败 (${status})`

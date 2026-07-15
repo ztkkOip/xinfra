@@ -1,4 +1,0 @@
-# WebSocket 实时推送模块
-
-存放 WebSocket 连接管理相关代码：
-- hub.go: WebSocket Hub，管理客户端连接，广播 Ansible 任务日志

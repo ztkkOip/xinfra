@@ -1,4 +1,0 @@
-# 数据库迁移脚本
-
-存放按版本管理的表结构变更脚本：
-- 001_init.sql: 初始化迁移，创建 users / subsystems / audit / ansible_tasks 表
