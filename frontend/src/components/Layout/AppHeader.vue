@@ -17,6 +17,7 @@
         <div>{{ user?.display_name || '未登录' }}</div>
         <div class="ldap-tag">LDAP · {{ user?.business_line || '' }}业务线</div>
       </div>
+      <el-button class="logout-button" text @click="handleLogout">退出</el-button>
     </div>
   </header>
 </template>
@@ -24,12 +25,18 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useAuth } from '@/composables/useAuth'
 
 const authStore = useAuthStore()
+const { logout } = useAuth()
 const user = computed(() => authStore.user)
 const userInitial = computed(() => {
   return user.value?.display_name?.charAt(0) || 'U'
 })
+
+const handleLogout = () => {
+  logout()
+}
 </script>
 
 <style scoped>
@@ -136,5 +143,16 @@ const userInitial = computed(() => {
   font-family: var(--mono);
   font-size: 10px;
   color: var(--text-dim);
+}
+
+.logout-button {
+  color: var(--text-dim);
+  font-size: 12px;
+  padding: 4px 6px;
+}
+
+.logout-button:hover {
+  color: var(--text-hi);
+  background: var(--bg-panel-2);
 }
 </style>
