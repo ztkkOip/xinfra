@@ -10,8 +10,6 @@ data:
         server_name _;
 
         client_max_body_size 10m;
-        root /usr/share/nginx/html;
-        index index.html;
 
         location = /healthz {
             proxy_pass ${AUTHSERVER_BACKEND_UPSTREAM};
@@ -81,7 +79,7 @@ data:
         }
 
         location / {
-            try_files $uri $uri/ /index.html;
+            return 404;
         }
     }
 ---
@@ -102,7 +100,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: docker.io/library/authserver-nginx:1.2.3
+          image: nginx:1.29-alpine
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 80
