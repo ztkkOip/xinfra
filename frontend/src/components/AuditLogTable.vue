@@ -52,15 +52,13 @@ interface Column {
   class?: string
 }
 
-withDefaults(defineProps<{
+defineProps<{
   title: string
   columns: Column[]
   data: any[]
   total: number
   pageSize?: number
-}>(), {
-  pageSize: 10,
-})
+}>()
 
 const statusMap: Record<string, string> = {
   success: '成功',
