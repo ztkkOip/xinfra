@@ -24,8 +24,12 @@ import SubsystemCard from '@/components/SubsystemCard.vue'
 const subsystems = ref<Subsystem[]>([])
 
 onMounted(async () => {
-  const { data } = await subsystemApi.getSubsystems()
-  subsystems.value = data
+  try {
+    const { data } = await subsystemApi.getSubsystems()
+    subsystems.value = data
+  } catch {
+    // 错误已由 request 拦截器统一处理
+  }
 })
 </script>
 

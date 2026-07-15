@@ -1,4 +1,4 @@
-import request from './request'
+import type { ApiResponse } from '@/types/api'
 
 export interface Subsystem {
   id: number
@@ -8,6 +8,11 @@ export interface Subsystem {
   url: string
   status: 'integrated' | 'integrating'
   sso_enabled: boolean
+}
+
+export interface SSOResponse {
+  sso_url: string
+  expires_in: number
 }
 
 // Mock 数据
@@ -70,7 +75,7 @@ const mockSubsystems: Subsystem[] = [
 
 export const subsystemApi = {
   // 获取子系统列表
-  getSubsystems(): Promise<any> {
+  getSubsystems(): Promise<ApiResponse<Subsystem[]>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
@@ -83,7 +88,7 @@ export const subsystemApi = {
   },
 
   // 获取 SSO 跳转 URL
-  getSSOUrl(id: number): Promise<any> {
+  getSSOUrl(id: number): Promise<ApiResponse<SSOResponse>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         const subsystem = mockSubsystems.find((s) => s.id === id)
