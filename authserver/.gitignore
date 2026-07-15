@@ -5,7 +5,7 @@
 .DS_Store
 *.tar
 bin/
-/server
+server
 web/node_modules/
 web/dist/
 certs/
