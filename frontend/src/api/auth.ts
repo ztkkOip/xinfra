@@ -1,4 +1,4 @@
-import request from './request'
+import type { ApiResponse } from '@/types/api'
 
 export interface LoginRequest {
   username: string
@@ -30,7 +30,7 @@ const mockUser: UserInfo = {
 
 export const authApi = {
   // 登录
-  login(data: LoginRequest): Promise<any> {
+  login(_data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
     // MVP 阶段使用 Mock 数据
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -48,16 +48,16 @@ export const authApi = {
   },
 
   // 登出
-  logout(): Promise<any> {
+  logout(): Promise<ApiResponse<null>> {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve({ code: 0, message: 'success' })
+        resolve({ code: 0, message: 'success', data: null })
       }, 200)
     })
   },
 
   // 获取用户信息
-  getUserInfo(): Promise<any> {
+  getUserInfo(): Promise<ApiResponse<UserInfo>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({

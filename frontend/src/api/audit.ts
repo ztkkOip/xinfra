@@ -1,4 +1,4 @@
-import request from './request'
+import type { ApiResponse, PaginatedData } from '@/types/api'
 
 export interface LoginAudit {
   id: number
@@ -39,7 +39,7 @@ const mockOpsAudits: OpsAudit[] = [
 
 export const auditApi = {
   // 获取登录审计
-  getLoginAudit(params?: any): Promise<any> {
+  getLoginAudit(_params?: any): Promise<ApiResponse<PaginatedData<LoginAudit>>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
@@ -55,7 +55,7 @@ export const auditApi = {
   },
 
   // 获取运维操作审计
-  getOpsAudit(params?: any): Promise<any> {
+  getOpsAudit(_params?: any): Promise<ApiResponse<PaginatedData<OpsAudit>>> {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({
