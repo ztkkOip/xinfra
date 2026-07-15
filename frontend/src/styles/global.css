@@ -162,3 +162,486 @@ button {
 .card:hover {
   box-shadow: var(--shadow-md);
 }
+
+/* ========== 页面标题区 ========== */
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.page-head h1 {
+  font-size: 19px;
+  margin: 0 0 4px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.page-head p {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 12.5px;
+}
+
+/* ========== 面板 ========== */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  margin-bottom: 18px;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.panel-head h3 {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.panel-head .meta {
+  font-size: 11.5px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  text-decoration: none;
+}
+
+.panel-body {
+  padding: 4px 0;
+}
+
+.panel-body.padded {
+  padding: 16px;
+}
+
+/* ========== 统计卡片行 ========== */
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card .label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card .value {
+  font-family: var(--mono);
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.stat-card .value.accent-pill {
+  color: var(--accent);
+  font-size: 16px;
+}
+
+.stat-card .value.warn {
+  color: var(--warn);
+}
+
+.stat-card .value.err {
+  color: var(--err);
+}
+
+.stat-card .value.accent {
+  color: var(--accent);
+}
+
+.stat-card .delta {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}
+
+.stat-card .delta.up {
+  color: var(--accent);
+}
+
+.stat-card .delta.warn {
+  color: var(--warn);
+}
+
+.stat-card .delta.err {
+  color: var(--err);
+}
+
+/* ========== 双栏布局 ========== */
+.cols-2 {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 18px;
+}
+
+.cols-2-equal {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+
+/* ========== 表格 ========== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+th {
+  text-align: left;
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  color: var(--text-mid);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr.tr-hover:hover td {
+  background: var(--bg-panel-2);
+}
+
+tr.tr-hover.active td {
+  background: var(--bg-panel-2);
+}
+
+.strong {
+  color: var(--text-hi);
+  font-weight: 500;
+}
+
+.text-xs {
+  font-size: 11px;
+}
+
+.text-dim {
+  color: var(--text-dim);
+}
+
+.search-input {
+  flex: 1;
+}
+
+/* ========== 标签 ========== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  color: var(--text-mid);
+}
+
+.tag.zone-a {
+  color: var(--tag-blue-text);
+  border-color: var(--tag-blue-border);
+  background: var(--tag-blue-bg);
+}
+
+.tag.zone-b {
+  color: var(--tag-purple-text);
+  border-color: var(--tag-purple-border);
+  background: var(--tag-purple-bg);
+}
+
+.tag.zone-c {
+  color: var(--tag-amber-text);
+  border-color: var(--tag-amber-border);
+  background: var(--tag-amber-bg);
+}
+
+/* ========== 状态文本 ========== */
+.status-text {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+.status-text.ok {
+  color: var(--accent);
+}
+
+.status-text.warn {
+  color: var(--warn);
+}
+
+.status-text.err {
+  color: var(--err);
+}
+
+.status-text.idle {
+  color: var(--text-dim);
+}
+
+/* ========== 进度条 ========== */
+.bar-wrap {
+  width: 90px;
+  height: 5px;
+  background: var(--bar-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--accent);
+}
+
+.bar-fill.warn {
+  background: var(--warn);
+}
+
+.bar-fill.err {
+  background: var(--err);
+}
+
+/* ========== 分页 ========== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-soft);
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+.pg-btns {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.pg-btn {
+  min-width: 26px;
+  height: 26px;
+  padding: 0 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  color: var(--text-mid);
+  font-family: var(--mono);
+  font-size: 11px;
+  background: var(--bg-panel-2);
+  cursor: pointer;
+}
+
+.pg-btn.active {
+  background: var(--accent-dim);
+  border-color: var(--accent-dim);
+  color: var(--active-text);
+}
+
+.pg-btn:hover {
+  border-color: var(--hover-border);
+  color: var(--text-hi);
+}
+
+.pg-btn.disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.pg-sep {
+  color: var(--text-dim);
+  padding: 0 2px;
+}
+
+/* ========== 日志流 ========== */
+.log-stream {
+  padding: 14px 16px;
+}
+
+.task-log-line {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  padding: 2px 0;
+  color: var(--text-mid);
+}
+
+.task-log-line .t {
+  color: var(--text-dim);
+  margin-right: 10px;
+}
+
+.task-log-line.ok {
+  color: var(--accent);
+}
+
+.task-log-line.tag-ok {
+  color: var(--tag-blue-text);
+}
+
+/* ========== 工具栏 ========== */
+.las-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  align-items: center;
+}
+
+/* ========== 子系统/扩展卡片网格 ========== */
+.ext-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.svc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+/* ========== Apollo / 外部服务卡片 ========== */
+.ext-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  max-width: 560px;
+}
+
+.ext-top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.ext-logo {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.ext-logo.ap-logo {
+  background: var(--logo-ap-bg);
+  color: var(--tag-blue-text);
+}
+
+.ext-sub {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+}
+
+/* ========== 环境状态标签 ========== */
+.env-pill {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--accent);
+  border: 1px solid var(--accent-dim);
+  background: var(--accent-dim);
+  padding: 3px 9px;
+  border-radius: 20px;
+  letter-spacing: 0.4px;
+}
+
+/* ========== SSO 行 ========== */
+.sso-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.sso-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* ========== 响应式断点 ========== */
+
+/* 平板 */
+@media (max-width: 1024px) {
+  .stat-row {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .cols-2,
+  .cols-2-equal {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 移动端 */
+@media (max-width: 768px) {
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .stat-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cols-2,
+  .cols-2-equal {
+    grid-template-columns: 1fr;
+  }
+
+  .las-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .ext-grid,
+  .svc-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-body table {
+    display: block;
+    overflow-x: auto;
+  }
+}

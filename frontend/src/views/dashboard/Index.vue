@@ -31,7 +31,7 @@
       </div>
       <div class="stat-card">
         <div class="label">进行中任务</div>
-        <div class="value" style="color: var(--warn)">2</div>
+        <div class="value warn">2</div>
         <div class="delta warn">1 个待关注</div>
       </div>
     </div>
@@ -46,7 +46,7 @@
           <div class="topo-cluster">
             <div class="tname">
               <span class="tag zone-a">IDC-华北机房</span>
-              <span class="mono" style="color: var(--text-dim)">46节点</span>
+              <span class="mono text-dim">46节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 24" :key="i" :class="['node-cell', i <= 18 ? 'a' : '']"></div>
@@ -55,7 +55,7 @@
           <div class="topo-cluster">
             <div class="tname">
               <span class="tag zone-b">IDC-华东机房</span>
-              <span class="mono" style="color: var(--text-dim)">52节点</span>
+              <span class="mono text-dim">52节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 24" :key="i" :class="['node-cell', i <= 20 ? 'b' : '']"></div>
@@ -64,7 +64,7 @@
           <div class="topo-cluster">
             <div class="tname">
               <span class="tag zone-c">阿里云-华南</span>
-              <span class="mono" style="color: var(--text-dim)">30节点</span>
+              <span class="mono text-dim">30节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 18" :key="i" :class="['node-cell', i <= 12 ? 'c' : '']"></div>
@@ -127,107 +127,7 @@ const refresh = () => {
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-  letter-spacing: 0.2px;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px 16px;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card .label {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-card .value {
-  font-family: var(--mono);
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.stat-card .delta {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 4px;
-}
-
-.stat-card .delta.up {
-  color: var(--accent);
-}
-
-.stat-card .delta.warn {
-  color: var(--warn);
-}
-
-.cols-2 {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr;
-  gap: 18px;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-bottom: 18px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-  text-decoration: none;
-}
-
-.panel-body {
-  padding: 4px 0;
-}
+/* 公共样式(.page-head, .stat-row, .cols-2, .panel, table, .tag, .status-text)已在 global.css 中定义 */
 
 .topo {
   padding: 18px 16px;
@@ -238,7 +138,7 @@ const refresh = () => {
 .topo-cluster {
   flex: 1;
   border: 1px dashed var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 12px;
 }
 
@@ -297,93 +197,5 @@ const refresh = () => {
   gap: 16px;
   font-size: 11px;
   color: var(--text-dim);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-th {
-  text-align: left;
-  color: var(--text-dim);
-  font-weight: 500;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-td.strong {
-  color: var(--text-hi);
-  font-weight: 500;
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  color: var(--text-mid);
-}
-
-.tag.zone-a {
-  color: var(--tag-blue-text);
-  border-color: var(--tag-blue-border);
-  background: var(--tag-blue-bg);
-}
-
-.tag.zone-b {
-  color: var(--tag-purple-text);
-  border-color: var(--tag-purple-border);
-  background: var(--tag-purple-bg);
-}
-
-.tag.zone-c {
-  color: var(--tag-amber-text);
-  border-color: var(--tag-amber-border);
-  background: var(--tag-amber-bg);
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
-}
-
-.status-text.err {
-  color: var(--err);
 }
 </style>

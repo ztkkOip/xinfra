@@ -43,35 +43,12 @@ const handleDeploy = (service: any) => {
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.svc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
+/* .page-head, .svc-grid 已在 global.css 中定义 */
 
 .svc-card {
   background: var(--bg-panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
   transition: border-color 0.15s;

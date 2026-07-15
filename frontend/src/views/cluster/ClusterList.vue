@@ -64,7 +64,7 @@
               <td class="strong mono">{{ node.name }}</td>
               <td class="mono">{{ node.ip }}</td>
               <td><span class="tag biz" :style="{ color: node.labelColor, borderColor: node.labelBorder }">{{ node.label }}</span></td>
-              <td class="mono" style="font-size: 11px">{{ node.taint }}</td>
+              <td class="mono text-xs">{{ node.taint }}</td>
               <td class="mono">{{ node.spec }}</td>
               <td><span class="bar-wrap"><span class="bar-fill" :class="node.cpuClass" :style="{ width: node.cpu + '%' }"></span></span>{{ node.cpu }}%</td>
               <td :class="['status-text', node.statusClass]">● {{ node.status }}</td>
@@ -94,162 +94,9 @@ const nodes = ref([
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-bottom: 18px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-}
-
-.panel-body {
-  padding: 4px 0;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-th {
-  text-align: left;
-  color: var(--text-dim);
-  font-weight: 500;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-.strong {
-  color: var(--text-hi);
-  font-weight: 500;
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  color: var(--text-mid);
-}
-
-.tag.zone-a {
-  color: var(--tag-blue-text);
-  border-color: var(--tag-blue-border);
-  background: var(--tag-blue-bg);
-}
-
-.tag.zone-b {
-  color: var(--tag-purple-text);
-  border-color: var(--tag-purple-border);
-  background: var(--tag-purple-bg);
-}
-
-.tag.zone-c {
-  color: var(--tag-amber-text);
-  border-color: var(--tag-amber-border);
-  background: var(--tag-amber-bg);
-}
+/* 公共样式已在 global.css 中定义 */
 
 .tag.biz {
   color: var(--text-mid);
-}
-
-.bar-wrap {
-  width: 90px;
-  height: 5px;
-  background: var(--bar-bg);
-  border-radius: 3px;
-  overflow: hidden;
-  display: inline-block;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
-}
-
-.bar-fill.warn {
-  background: var(--warn);
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
 }
 </style>

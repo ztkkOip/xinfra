@@ -7,7 +7,7 @@
       </div>
     </div>
 
-    <div class="cols-2">
+    <div class="cols-2-equal">
       <div class="panel">
         <div class="panel-head">
           <h3>任务列表</h3>
@@ -18,7 +18,7 @@
               <tr v-for="task in tasks" :key="task.id" class="tr-hover" :class="{ active: task.id === selectedTask }" @click="selectedTask = task.id">
                 <td :class="['status-text', task.statusClass]">● {{ task.status }}</td>
                 <td class="strong">{{ task.name }}</td>
-                <td class="mono" style="font-size: 11px; color: var(--text-dim)">{{ task.playbook }}</td>
+                <td class="mono text-xs text-dim">{{ task.playbook }}</td>
               </tr>
             </tbody>
           </table>
@@ -83,136 +83,11 @@ const logs = ref([
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.cols-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-}
-
-.panel-body {
-  padding: 4px 0;
-}
+/* 公共样式已在 global.css 中定义 */
 
 .log-stream {
-  padding: 14px 16px;
   max-height: 340px;
   overflow-y: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-tr.tr-hover.active td {
-  background: var(--bg-panel-2);
-}
-
-.strong {
-  color: var(--text-hi);
-  font-weight: 500;
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
-}
-
-.status-text.err {
-  color: var(--err);
-}
-
-.task-log-line {
-  font-family: var(--mono);
-  font-size: 11.5px;
-  padding: 2px 0;
-  color: var(--text-mid);
-}
-
-.task-log-line .t {
-  color: var(--text-dim);
-  margin-right: 10px;
-}
-
-.task-log-line.ok {
-  color: var(--accent);
-}
-
-.task-log-line.tag-ok {
-  color: var(--tag-blue-text);
 }
 
 .blink {
@@ -222,58 +97,5 @@ tr.tr-hover.active td {
 
 @keyframes blink {
   50% { opacity: 0; }
-}
-
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  border-top: 1px solid var(--line-soft);
-  font-size: 11.5px;
-  color: var(--text-dim);
-}
-
-.pg-btns {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.pg-btn {
-  min-width: 26px;
-  height: 26px;
-  padding: 0 6px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--line);
-  border-radius: 5px;
-  color: var(--text-mid);
-  font-family: var(--mono);
-  font-size: 11px;
-  background: var(--bg-panel-2);
-  cursor: pointer;
-}
-
-.pg-btn.active {
-  background: var(--accent-dim);
-  border-color: var(--accent-dim);
-  color: var(--active-text);
-}
-
-.pg-btn:hover {
-  border-color: var(--hover-border);
-  color: var(--text-hi);
-}
-
-.pg-btn.disabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.pg-sep {
-  color: var(--text-dim);
-  padding: 0 2px;
 }
 </style>

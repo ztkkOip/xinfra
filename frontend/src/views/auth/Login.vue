@@ -40,7 +40,7 @@
             size="large"
             :loading="loading"
             @click="handleLogin"
-            style="width: 100%"
+            class="login-btn"
           >
             登录
           </el-button>
@@ -105,8 +105,12 @@ const handleLogin = async () => {
   width: 400px;
   background: var(--bg-panel);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   padding: 40px;
+}
+
+.login-btn {
+  width: 100%;
 }
 
 .login-header {
@@ -127,8 +131,8 @@ const handleLogin = async () => {
 .login-header .brand .mark {
   width: 36px;
   height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, var(--accent), #1C8F69);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, var(--accent), var(--accent-end));
   display: flex;
   align-items: center;
   justify-content: center;
