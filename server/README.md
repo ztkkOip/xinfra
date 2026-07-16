@@ -68,19 +68,18 @@ mysql -uroot -p < docs/mysql-init.sql
 
 如果你使用的是 Docker Desktop、OrbStack、Colima 或容器里的 MySQL，应用访问 MySQL 时来源 IP 可能不是 `localhost`，而是类似 `192.168.65.1`。这时 MySQL 账号需要允许远程来源，`docs/mysql-init.sql` 已经包含 `'auth'@'%'`。
 
-如果要自动创建本地管理员账号，在 `.env` 里设置：
+默认启用 SSO：
 
 ```bash
-BOOTSTRAP_ADMIN_USERNAME=admin
-BOOTSTRAP_ADMIN_PASSWORD='your-password'
+SSO_ENABLED=true
 ```
 
-也可以直接使用环境变量：
+如果只是本地开发测试，可以关闭 SSO，前端会显示用户名登录框。后端只校验用户名非空；用户不存在时会自动创建本地用户，第一位用户会自动成为管理员：
 
 ```bash
 MYSQL_DSN='auth:auth@tcp(127.0.0.1:3306)/authserver?charset=utf8mb4&parseTime=True&loc=Local' \
 JWT_SECRET='change-this-secret' \
-BOOTSTRAP_ADMIN_PASSWORD='your-password' \
+SSO_ENABLED=false \
 go run ./cmd/server
 ```
 
@@ -151,7 +150,8 @@ bash scripts/restart-authserver.sh nginx
 |---|---|---|
 | `GET` | `/healthz` | 服务健康检查 |
 | `GET` | `/readyz` | 数据库连接检查 |
-| `POST` | `/api/v1/login` | 本地登录 |
+| `GET` | `/auth/api/v1/config` | 前端登录模式配置，返回 `sso_enabled` |
+| `POST` | `/auth/api/v1/login` | 本地开发测试登录，仅 `SSO_ENABLED=false` 时可用，只需用户名 |
 | `POST` | `/api/v1/login/ldap` | LDAP 登录预留 |
 | `GET` | `/api/v1/login/:provider` | SSO 跳转预留 |
 | `GET` | `/api/v1/login/:provider/callback` | SSO 回调预留 |

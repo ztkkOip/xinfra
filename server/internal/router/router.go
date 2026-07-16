@@ -72,6 +72,7 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	wayneRoleBindingService := service.NewWayneRoleBindingService(deps.Config)
 
 	healthHandler := handler.NewHealthHandler(deps.DB)
+	authHandler := handler.NewAuthHandler(deps.Config, authService)
 	userHandler := handler.NewUserHandler()
 	wayenHandler := handler.NewWayenHandler(deps.DB, wayenService, auditService)
 	wayneRoleBindingHandler := handler.NewWayneRoleBindingHandler(wayneRoleBindingService, auditService)
@@ -89,6 +90,8 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 
 	v1 := r.Group("/auth/api/v1")
 	{
+		v1.GET("/config", authHandler.Config)
+		v1.POST("/login", authHandler.LocalLogin)
 		v1.GET("/login/internal-sso", samlHandler.Login)
 		v1.POST("/logout", samlHandler.Logout)
 		v1.GET("/saml/metadata", samlHandler.Metadata)

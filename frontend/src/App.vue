@@ -4,6 +4,7 @@
 
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { authApi } from '@/api/auth'
 import { getToken } from '@/utils/auth'
 import { redirectToSSO } from '@/utils/sso'
 import { useAuthStore } from '@/stores/auth'
@@ -20,7 +21,12 @@ onMounted(async () => {
     await authStore.refreshUser()
   } catch {
     authStore.clearAuth()
-    redirectToSSO()
+    const { data } = await authApi.getConfig()
+    if (data.sso_enabled) {
+      redirectToSSO()
+    } else {
+      window.location.assign('/login')
+    }
   }
 })
 </script>

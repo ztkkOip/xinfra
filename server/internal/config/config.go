@@ -19,6 +19,7 @@ type Config struct {
 	PublicBaseURL            string
 	MySQLDSN                 string
 	AutoMigrate              bool
+	SSOEnabled               bool
 	JWTSecret                string
 	JWTIssuer                string
 	JWTTTLMinutes            int
@@ -68,6 +69,7 @@ func Load() Config {
 		PublicBaseURL:            publicBaseURL,
 		MySQLDSN:                 env("MYSQL_DSN", "auth:auth@tcp(127.0.0.1:3306)/authserver?charset=utf8mb4&parseTime=True&loc=Local"),
 		AutoMigrate:              envBool("AUTO_MIGRATE", true),
+		SSOEnabled:               envBool("SSO_ENABLED", true),
 		JWTSecret:                env("JWT_SECRET", "change-this-secret"),
 		JWTIssuer:                env("JWT_ISSUER", "authserver"),
 		JWTTTLMinutes:            envInt("JWT_TTL_MINUTES", 120),

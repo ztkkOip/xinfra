@@ -39,6 +39,55 @@ func NewAuthService(cfg config.Config, db *gorm.DB, audit *AuditService) *AuthSe
 	return &AuthService{cfg: cfg, db: db, audit: audit}
 }
 
+func (s *AuthService) LocalLogin(username, clientIP, userAgent string) (*LoginResult, error) {
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return nil, ErrInvalidCredential
+	}
+
+	var result *LoginResult
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		user, err := findOrCreateLocalUser(tx, username)
+		if err != nil {
+			return err
+		}
+		if user.Status != "active" {
+			s.audit.Write(AuditEntry{ActorUserID: user.ID, ActorUsername: user.Username, ClientIP: clientIP, UserAgent: userAgent, Action: "local.login.failed", Decision: "deny", Reason: "user_disabled"})
+			return ErrUserDisabled
+		}
+
+		token, tokenID, expiresAt, err := auth.Sign(s.cfg.JWTSecret, s.cfg.JWTIssuer, s.cfg.JWTTTL(), user.ID, user.Username, user.Email, user.IsAdmin)
+		if err != nil {
+			return err
+		}
+
+		now := time.Now()
+		if err := tx.Model(&model.User{}).Where("id = ?", user.ID).Update("last_login_at", now).Error; err != nil {
+			return err
+		}
+		if err := tx.Create(&model.AccessToken{
+			UserID:    user.ID,
+			TokenID:   tokenID,
+			TokenType: "access",
+			ClientIP:  clientIP,
+			UserAgent: userAgent,
+			ExpiresAt: expiresAt,
+		}).Error; err != nil {
+			return err
+		}
+
+		user.LastLoginAt = &now
+		result = &LoginResult{Token: token, TokenID: tokenID, ExpiresAt: expiresAt, User: user}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	s.audit.Write(AuditEntry{ActorUserID: result.User.ID, ActorUsername: result.User.Username, ClientIP: clientIP, UserAgent: userAgent, Action: "local.login.success", Decision: "allow"})
+	return result, nil
+}
+
 func (s *AuthService) SAMLLogin(info *sso.SAMLDebugInfo, clientIP, userAgent string) (*LoginResult, error) {
 	subject := strings.TrimSpace(info.NameID)
 	email := firstSAMLAttribute(info.Attributes,
@@ -117,6 +166,41 @@ func (s *AuthService) SAMLLogin(info *sso.SAMLDebugInfo, clientIP, userAgent str
 
 	s.audit.Write(AuditEntry{ActorUserID: result.User.ID, ActorUsername: result.User.Username, ClientIP: clientIP, UserAgent: userAgent, Action: "saml.login.success", Decision: "allow"})
 	return result, nil
+}
+
+func findOrCreateLocalUser(tx *gorm.DB, username string) (model.User, error) {
+	email := ""
+	if looksLikeEmail(username) {
+		email = username
+	}
+
+	var user model.User
+	query := tx.Where("username = ? AND deleted_at IS NULL", username)
+	if email != "" {
+		query = query.Or("email = ? AND deleted_at IS NULL", email)
+	}
+	if err := query.First(&user).Error; err == nil {
+		return user, nil
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		return model.User{}, err
+	}
+
+	var count int64
+	if err := tx.Model(&model.User{}).Where("deleted_at IS NULL").Count(&count).Error; err != nil {
+		return model.User{}, err
+	}
+	user = model.User{
+		Username:    username,
+		DisplayName: username,
+		Email:       email,
+		Source:      "local",
+		Status:      "active",
+		IsAdmin:     count == 0,
+	}
+	if err := tx.Create(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
 }
 
 func findOrCreateSAMLUser(tx *gorm.DB, subject, email, displayName string) (model.User, error) {

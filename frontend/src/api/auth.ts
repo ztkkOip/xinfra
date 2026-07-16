@@ -3,7 +3,7 @@ import { getToken } from '@/utils/auth'
 
 export interface LoginRequest {
   username: string
-  password: string
+  password?: string
 }
 
 export interface UserInfo {
@@ -20,9 +20,48 @@ export interface LoginResponse {
   user: UserInfo
 }
 
+export interface AuthConfig {
+  sso_enabled: boolean
+}
+
 export const authApi = {
-  login(_data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
-    return Promise.reject(new Error('password login is disabled'))
+  async getConfig(): Promise<ApiResponse<AuthConfig>> {
+    const response = await fetch('/auth/api/v1/config', {
+      headers: {
+        Accept: 'application/json',
+      },
+    })
+    const data = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`)
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        sso_enabled: data.sso_enabled !== false,
+      },
+    }
+  },
+
+  async login(data: LoginRequest): Promise<ApiResponse<LoginResponse>> {
+    const response = await fetch('/auth/api/v1/login', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username: data.username }),
+    })
+    const result = await response.json().catch(() => ({}))
+    if (!response.ok) {
+      throw new Error(result.error || `HTTP ${response.status}`)
+    }
+    return {
+      code: 0,
+      message: 'success',
+      data: result,
+    }
   },
 
   async logout(): Promise<ApiResponse<null>> {

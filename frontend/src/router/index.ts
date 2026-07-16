@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
 import { consumeSSOToken, redirectToSSO } from '@/utils/sso'
 import { useAuthStore } from '@/stores/auth'
+import { authApi } from '@/api/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -113,6 +114,10 @@ router.beforeEach(async (to) => {
   const token = authStore.token || getToken()
 
   if (to.meta.requiresAuth !== false && !token) {
+    const { data } = await authApi.getConfig()
+    if (!data.sso_enabled) {
+      return { path: '/login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
+    }
     redirectToSSO()
     return false
   }
@@ -121,6 +126,10 @@ router.beforeEach(async (to) => {
       await authStore.refreshUser()
     } catch {
       authStore.clearAuth()
+      const { data } = await authApi.getConfig()
+      if (!data.sso_enabled) {
+        return { path: '/login', query: to.fullPath === '/' ? {} : { redirect: to.fullPath } }
+      }
       redirectToSSO()
       return false
     }
