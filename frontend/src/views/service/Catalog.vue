@@ -30,11 +30,11 @@ import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 
 const services = ref([
-  { name: 'MySQL', icon: 'My', bgColor: '#1C2E4A', iconColor: '#7FB8FF', description: '一主多从，自动注册进 open-cdm 数据源，支持 LDAP 账号统一审核 SQL 上线。', playbook: 'roles/mysql-deploy', version: 'v8.0.36' },
-  { name: 'Redis', icon: 'Rd', bgColor: '#3A1C28', iconColor: '#FF8E9C', description: '支持 Standalone / Sentinel / Cluster，部署完成后自动注册进 CacheCloud。', playbook: 'roles/redis-deploy', version: 'v7.2' },
-  { name: 'openresty', icon: 'Or', bgColor: '#1C3A2E', iconColor: '#7FFFC2', description: '容器化部署在 K8s 内，作为业务边缘网关，支持灰度路由配置。', playbook: 'roles/openresty-deploy', version: 'v1.25' },
-  { name: 'dpvs', icon: 'Dp', bgColor: '#3A2E1C', iconColor: '#FFC97A', description: '四层负载均衡，直接管理宿主机网络命名空间，不纳入容器编排。', playbook: 'roles/dpvs-deploy', version: 'v1.9' },
-  { name: 'PgSQL', icon: 'Pg', bgColor: '#2E1C3A', iconColor: '#C9A6FF', description: '流复制主从架构，规划中 · 第二期接入 open-cdm 统一审核体系。', playbook: 'roles/pgsql-deploy', version: '规划中' },
+  { name: 'MySQL', icon: 'My', bgColor: 'var(--tag-blue-bg)', iconColor: 'var(--tag-blue-text)', description: '一主多从，自动注册进 open-cdm 数据源，支持 LDAP 账号统一审核 SQL 上线。', playbook: 'roles/mysql-deploy', version: 'v8.0.36' },
+  { name: 'Redis', icon: 'Rd', bgColor: 'var(--logo-cc-bg)', iconColor: 'var(--err)', description: '支持 Standalone / Sentinel / Cluster，部署完成后自动注册进 CacheCloud。', playbook: 'roles/redis-deploy', version: 'v7.2' },
+  { name: 'openresty', icon: 'Or', bgColor: 'var(--logo-dm-bg)', iconColor: 'var(--tag-green-text)', description: '容器化部署在 K8s 内，作为业务边缘网关，支持灰度路由配置。', playbook: 'roles/openresty-deploy', version: 'v1.25' },
+  { name: 'dpvs', icon: 'Dp', bgColor: 'var(--logo-qp-bg)', iconColor: 'var(--tag-amber-text)', description: '四层负载均衡，直接管理宿主机网络命名空间，不纳入容器编排。', playbook: 'roles/dpvs-deploy', version: 'v1.9' },
+  { name: 'PgSQL', icon: 'Pg', bgColor: 'var(--tag-purple-bg)', iconColor: 'var(--tag-purple-text)', description: '流复制主从架构，规划中 · 第二期接入 open-cdm 统一审核体系。', playbook: 'roles/pgsql-deploy', version: '规划中' },
 ])
 
 const handleDeploy = (service: any) => {
@@ -43,42 +43,19 @@ const handleDeploy = (service: any) => {
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.svc-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
-}
+/* .page-head, .svc-grid 已在 global.css 中定义 */
 
 .svc-card {
   background: var(--bg-panel);
   border: 1px solid var(--line);
-  border-radius: 8px;
+  border-radius: var(--radius-lg);
   padding: 16px;
   cursor: pointer;
   transition: border-color 0.15s;
 }
 
 .svc-card:hover {
-  border-color: #3A4356;
+  border-color: var(--hover-border);
 }
 
 .svc-top {

@@ -31,7 +31,7 @@
       </div>
       <div class="stat-card">
         <div class="label">同步状态</div>
-        <div class="value" style="color: var(--accent); font-size: 16px">● 正常</div>
+        <div class="value accent-pill">● 正常</div>
         <div class="delta">最近发布 09:12:30</div>
       </div>
     </div>
@@ -41,10 +41,10 @@
         <h3>统一入口</h3>
         <span class="meta">Apollo Portal · LDAP 单点登录</span>
       </div>
-      <div class="panel-body" style="padding: 16px">
+      <div class="panel-body padded">
         <div class="ext-card">
           <div class="ext-top">
-            <div class="ext-logo" style="background: #1C2A3A; color: #8EC8FF">AP</div>
+            <div class="ext-logo ap-logo">AP</div>
             <div>
               <h4>Apollo Portal</h4>
               <div class="ext-sub">apollo.xinfra.internal</div>
@@ -81,7 +81,7 @@
             <tr v-for="cluster in clusters" :key="cluster.name" class="tr-hover">
               <td><span class="tag" :class="cluster.zoneClass">{{ cluster.name }}</span></td>
               <td class="mono">cluster={{ cluster.cluster }}</td>
-              <td class="mono" style="font-size: 11px">{{ cluster.address }}</td>
+              <td class="mono text-xs">{{ cluster.address }}</td>
               <td class="mono">{{ cluster.type }}</td>
               <td class="mono">{{ cluster.biz }}</td>
               <td class="mono">{{ cluster.items }}</td>
@@ -109,137 +109,11 @@ const clusters = ref([
 </script>
 
 <style scoped>
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-
-.page-head h1 {
-  font-size: 19px;
-  margin: 0 0 4px;
-  font-weight: 700;
-}
-
-.page-head p {
-  margin: 0;
-  color: var(--text-dim);
-  font-size: 12.5px;
-}
-
-.env-pill {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--accent);
-  border: 1px solid var(--accent-dim);
-  background: #0F261D;
-  padding: 3px 9px;
-  border-radius: 20px;
-  letter-spacing: 0.4px;
-}
-
-.stat-row {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.stat-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 14px 16px;
-}
-
-.stat-card .label {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-card .value {
-  font-family: var(--mono);
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.stat-card .delta {
-  font-size: 11px;
-  color: var(--text-dim);
-  margin-top: 4px;
-}
-
-.panel {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  margin-bottom: 18px;
-}
-
-.panel-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 13px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-.panel-head h3 {
-  margin: 0;
-  font-size: 13.5px;
-  font-weight: 600;
-}
-
-.panel-head .meta {
-  font-size: 11.5px;
-  color: var(--text-dim);
-  font-family: var(--mono);
-}
-
-.panel-body {
-  padding: 4px 0;
-}
-
-.ext-card {
-  background: var(--bg-panel);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 18px;
-  max-width: 560px;
-}
-
-.ext-top {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.ext-logo {
-  width: 38px;
-  height: 38px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  font-weight: 700;
-  font-size: 13px;
-}
+/* 公共样式已在 global.css 中定义 */
 
 h4 {
   margin: 0;
   font-size: 14px;
-}
-
-.ext-sub {
-  font-size: 11px;
-  color: var(--text-dim);
-  font-family: var(--mono);
 }
 
 p {
@@ -247,103 +121,5 @@ p {
   color: var(--text-mid);
   line-height: 1.6;
   margin: 0 0 10px;
-}
-
-.sso-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 11px;
-  color: var(--text-dim);
-}
-
-.sso-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent);
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12.5px;
-}
-
-th {
-  text-align: left;
-  color: var(--text-dim);
-  font-weight: 500;
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
-  padding: 9px 16px;
-  border-bottom: 1px solid var(--line-soft);
-}
-
-td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--text-mid);
-}
-
-tr:last-child td {
-  border-bottom: none;
-}
-
-tr.tr-hover:hover td {
-  background: var(--bg-panel-2);
-}
-
-.mono {
-  font-family: var(--mono);
-}
-
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-family: var(--mono);
-  font-size: 10.5px;
-  padding: 2px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-  color: var(--text-mid);
-}
-
-.tag.zone-a {
-  color: #8EC8FF;
-  border-color: #1C3A5C;
-  background: #0E1C2C;
-}
-
-.tag.zone-b {
-  color: #C9A6FF;
-  border-color: #3A2C5C;
-  background: #1A1430;
-}
-
-.tag.zone-c {
-  color: #FFC97A;
-  border-color: #5C4A1C;
-  background: #241B0A;
-}
-
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
-}
-
-.status-text.idle {
-  color: var(--text-dim);
 }
 </style>
