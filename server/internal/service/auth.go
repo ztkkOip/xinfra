@@ -169,16 +169,11 @@ func (s *AuthService) SAMLLogin(info *sso.SAMLDebugInfo, clientIP, userAgent str
 }
 
 func findOrCreateLocalUser(tx *gorm.DB, username string) (model.User, error) {
-	email := ""
-	if looksLikeEmail(username) {
-		email = username
-	}
+	email := username
 
 	var user model.User
 	query := tx.Where("username = ? AND deleted_at IS NULL", username)
-	if email != "" {
-		query = query.Or("email = ? AND deleted_at IS NULL", email)
-	}
+	query = query.Or("email = ? AND deleted_at IS NULL", email)
 	if err := query.First(&user).Error; err == nil {
 		return user, nil
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
