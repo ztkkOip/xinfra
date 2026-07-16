@@ -143,6 +143,53 @@ func TestDecodeSAMLResponseDecryptsEncryptedAssertion(t *testing.T) {
 	}
 }
 
+func TestDecodeSAMLResponseDecryptsGCMEncryptedAssertion(t *testing.T) {
+	t.Parallel()
+
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key: %v", err)
+	}
+	keyFile := writeTestPrivateKey(t, key)
+
+	assertion := `<saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+  <saml:Subject><saml:NameID>bob@example.com</saml:NameID></saml:Subject>
+  <saml:AttributeStatement>
+    <saml:Attribute Name="email"><saml:AttributeValue>bob@example.com</saml:AttributeValue></saml:Attribute>
+  </saml:AttributeStatement>
+</saml:Assertion>`
+	sessionKey := []byte("0123456789abcdef0123456789abcdef")
+	encryptedAssertion := encryptTestAssertionGCM(t, []byte(assertion), sessionKey)
+	encryptedKey, err := rsa.EncryptOAEP(sha1.New(), rand.Reader, &key.PublicKey, sessionKey, nil)
+	if err != nil {
+		t.Fatalf("encrypt key: %v", err)
+	}
+	response := `<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+  <saml:EncryptedAssertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+      <xenc:EncryptionMethod Algorithm="` + xmlEncAES256GCM + `"></xenc:EncryptionMethod>
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <xenc:EncryptedKey>
+          <xenc:CipherData><xenc:CipherValue>` + base64.StdEncoding.EncodeToString(encryptedKey) + `</xenc:CipherValue></xenc:CipherData>
+        </xenc:EncryptedKey>
+      </ds:KeyInfo>
+      <xenc:CipherData><xenc:CipherValue>` + base64.StdEncoding.EncodeToString(encryptedAssertion) + `</xenc:CipherValue></xenc:CipherData>
+    </xenc:EncryptedData>
+  </saml:EncryptedAssertion>
+</samlp:Response>`
+
+	info, err := DecodeSAMLResponse(base64.StdEncoding.EncodeToString([]byte(response)), keyFile)
+	if err != nil {
+		t.Fatalf("DecodeSAMLResponse returned error: %v", err)
+	}
+	if info.NameID != "bob@example.com" {
+		t.Fatalf("unexpected name id: %q", info.NameID)
+	}
+	if got := info.Attributes["email"]; len(got) != 1 || got[0] != "bob@example.com" {
+		t.Fatalf("unexpected email attribute: %#v", got)
+	}
+}
+
 func writeTestPrivateKey(t *testing.T, key *rsa.PrivateKey) string {
 	t.Helper()
 	file, err := os.CreateTemp(t.TempDir(), "sp-*.key")
@@ -171,6 +218,24 @@ func encryptTestAssertion(t *testing.T, plain, key []byte) []byte {
 	out := make([]byte, len(iv)+len(plain))
 	copy(out, iv)
 	cipher.NewCBCEncrypter(block, iv).CryptBlocks(out[len(iv):], plain)
+	return out
+}
+
+func encryptTestAssertionGCM(t *testing.T, plain, key []byte) []byte {
+	t.Helper()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		t.Fatalf("init cipher: %v", err)
+	}
+	aead, err := cipher.NewGCM(block)
+	if err != nil {
+		t.Fatalf("init gcm: %v", err)
+	}
+	nonce := bytes.Repeat([]byte{2}, aead.NonceSize())
+	cipherText := aead.Seal(nil, nonce, plain, nil)
+	out := make([]byte, len(nonce)+len(cipherText))
+	copy(out, nonce)
+	copy(out[len(nonce):], cipherText)
 	return out
 }
 

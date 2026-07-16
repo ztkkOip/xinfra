@@ -2,8 +2,6 @@ import { useAuthStore } from '@/stores/auth'
 import { authApi } from '@/api/auth'
 import { redirectToSSO } from '@/utils/sso'
 
-const SSO_SIGNOUT_URL = 'http://bo-staging-sso-internal.jfcs-k8s-qa1.qiniu.io/signout'
-
 export function useAuth() {
   const authStore = useAuthStore()
 
@@ -15,9 +13,12 @@ export function useAuth() {
   }
 
   const logout = async () => {
-    await authApi.logout()
-    authStore.clearAuth()
-    window.location.assign(SSO_SIGNOUT_URL)
+    try {
+      await authApi.logout()
+    } finally {
+      authStore.clearAuth()
+      window.location.assign('/login?logged_out=1')
+    }
   }
 
   const checkAuth = () => {

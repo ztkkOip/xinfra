@@ -2,7 +2,15 @@ import { setToken } from '@/utils/auth'
 
 const SSO_LOGIN_PATH = '/auth/api/v1/login/internal-sso'
 
-export function relayState(openApp = ''): string {
+export function relayState(openApp = '', fallbackPath = ''): string {
+  if (fallbackPath) {
+    const target = new URL(fallbackPath, window.location.origin)
+    if (openApp) {
+      target.searchParams.set('open_app', openApp)
+    }
+    return `${target.pathname}${target.search}${target.hash}` || '/'
+  }
+
   const url = new URL(window.location.href)
   url.searchParams.delete('sso_token')
   url.searchParams.delete('open_app')
@@ -12,8 +20,8 @@ export function relayState(openApp = ''): string {
   return `${url.pathname}${url.search}${url.hash}` || '/'
 }
 
-export function redirectToSSO(openApp = ''): void {
-  window.location.assign(`${SSO_LOGIN_PATH}?relay_state=${encodeURIComponent(relayState(openApp))}`)
+export function redirectToSSO(openApp = '', fallbackPath = ''): void {
+  window.location.assign(`${SSO_LOGIN_PATH}?relay_state=${encodeURIComponent(relayState(openApp, fallbackPath))}`)
 }
 
 export function consumeSSOToken(): string {

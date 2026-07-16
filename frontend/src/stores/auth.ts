@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
+import { authApi } from '@/api/auth'
 import { getToken, setToken, removeToken, getUser, setUser, removeUser } from '@/utils/auth'
 
 export const useAuthStore = defineStore('auth', () => {
@@ -11,6 +12,23 @@ export const useAuthStore = defineStore('auth', () => {
     user.value = newUser
     setToken(newToken)
     setUser(newUser)
+  }
+
+  function setSessionToken(newToken: string) {
+    token.value = newToken
+    setToken(newToken)
+  }
+
+  async function refreshUser() {
+    const currentToken = token.value || getToken()
+    if (!currentToken) {
+      clearAuth()
+      return null
+    }
+    setSessionToken(currentToken)
+    const response = await authApi.getUserInfo()
+    setAuth(currentToken, response.data)
+    return response.data
   }
 
   function clearAuth() {
@@ -28,6 +46,8 @@ export const useAuthStore = defineStore('auth', () => {
     token,
     user,
     setAuth,
+    setSessionToken,
+    refreshUser,
     clearAuth,
     isLoggedIn,
   }

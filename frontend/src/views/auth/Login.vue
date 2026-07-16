@@ -6,12 +6,10 @@
           <div class="mark">xi</div>
           xinfra
         </div>
-        <h2>统一基础设施平台</h2>
-        <p>正在跳转到 SSO 登录</p>
+        <h2>{{ title }}</h2>
+        <p>{{ subtitle }}</p>
       </div>
-      <el-button type="primary" size="large" style="width: 100%" @click="redirectToSSO()">
-        重新跳转
-      </el-button>
+      <el-button type="primary" size="large" style="width: 100%" @click="redirectToSSO('', '/')">{{ buttonText }}</el-button>
       <div class="login-footer">
         <p>统一 LDAP 账号，同账号同密码</p>
       </div>
@@ -20,10 +18,21 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { redirectToSSO } from '@/utils/sso'
 
-onMounted(() => redirectToSSO())
+const route = useRoute()
+const loggedOut = computed(() => route.query.logged_out === '1')
+const title = computed(() => loggedOut.value ? '已退出登录' : '统一基础设施平台')
+const subtitle = computed(() => loggedOut.value ? '本地登录态已清除' : '正在跳转到 SSO 登录')
+const buttonText = computed(() => loggedOut.value ? '重新登录' : '重新跳转')
+
+onMounted(() => {
+  if (!loggedOut.value) {
+    redirectToSSO('', '/')
+  }
+})
 </script>
 
 <style scoped>

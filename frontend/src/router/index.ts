@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
 import { consumeSSOToken, redirectToSSO } from '@/utils/sso'
+import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -31,6 +32,12 @@ const router = createRouter({
           name: 'Subsystem',
           component: () => import('@/views/subsystem/Navigation.vue'),
           meta: { title: '子系统导航' },
+        },
+        {
+          path: 'subsystem/authz',
+          name: 'SubsystemAuthz',
+          component: () => import('@/views/subsystem/Authorization.vue'),
+          meta: { title: '子系统赋权' },
         },
         {
           path: 'audit/login',
@@ -97,19 +104,31 @@ const router = createRouter({
   ],
 })
 
-// 路由守卫
-router.beforeEach((to, _from, next) => {
-  consumeSSOToken()
-  const token = getToken()
+router.beforeEach(async (to) => {
+  const authStore = useAuthStore()
+  const ssoToken = consumeSSOToken()
+  if (ssoToken) {
+    authStore.setSessionToken(ssoToken)
+  }
+  const token = authStore.token || getToken()
 
   if (to.meta.requiresAuth !== false && !token) {
     redirectToSSO()
-    return
-  } else if (to.path === '/login' && token) {
-    next('/')
-  } else {
-    next()
+    return false
   }
+  if (token && (!authStore.user || ssoToken)) {
+    try {
+      await authStore.refreshUser()
+    } catch {
+      authStore.clearAuth()
+      redirectToSSO()
+      return false
+    }
+  }
+  if (to.path === '/login' && token) {
+    return '/'
+  }
+  return true
 })
 
 export default router

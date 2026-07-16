@@ -283,6 +283,64 @@ Wayne 会把回调地址拼成：
 因此 `OAUTH_WAYNE_REDIRECT_URI` 必须和 Wayne 实际回调地址完全一致。浏览器访问 Wayne OAuth 登录入口后，如果 AuthServer 还没有登录态，会先跳内部 SAML；SAML 成功后再回到 OAuth authorize，签发 code 给 Wayne。
 `WAYEN_OAUTH_REF` 是 AuthServer 发起 Wayne 登录时写入 Wayne `next` 参数的登录完成页，默认 `/portal/namespace/1/app`，对应 Wayne `DemoNamespaceId = 1` 的默认 namespace。不要配置成 `oauth` 或 `/oauth`，否则 Wayne 回调会把它当成前端路由跳到 `/oauth`。
 
+## Wayne 授权代理接口
+
+AuthServer 的 Wayne 授权代理接口不要求调用方传 Wayne user ID。后端会从当前 `authserver_token` 里取 `email`，把它作为 Wayne username 传给 Wayne internal API。
+
+对外接口：
+
+```text
+GET    /auth/api/v1/wayne/namespaces
+GET    /auth/api/v1/wayne/groups
+GET    /auth/api/v1/wayne/users/me/roles
+GET    /auth/api/v1/wayne/namespaces/:namespaceid/operator-permissions
+GET    /auth/api/v1/wayne/apps/:appid/operator-permissions
+PUT    /auth/api/v1/wayne/namespaces/:namespaceid/roles
+DELETE /auth/api/v1/wayne/namespaces/:namespaceid/roles
+PUT    /auth/api/v1/wayne/apps/:appid/roles
+DELETE /auth/api/v1/wayne/apps/:appid/roles
+```
+
+示例：
+
+```http
+PUT /auth/api/v1/wayne/namespaces/1/roles
+Authorization: Bearer <authserver_token>
+Content-Type: application/json
+
+{
+  "groupIds": [10, 11],
+  "replace": false,
+  "requestId": "req-001",
+  "reason": "grant namespace access"
+}
+```
+
+AuthServer 转发到 Wayne internal API 时会使用 token email：
+
+```text
+PUT /api/v1/internal/namespaces/1/users/<token-email>/roles
+```
+
+并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。
+
+相关配置：
+
+```env
+WAYNE_INTERNAL_API_BASE_URL=http://wayne-backend.demo.svc.cluster.local:8080
+WAYNE_SERVICE_NAME=xinfra
+WAYNE_SERVICE_API_SECRET_KEY=<wayne-service-secret>
+```
+
+Wayne internal API 签名规则：
+
+```text
+bodyHash = SHA256_HEX(rawBody)
+payload = METHOD + "\n" + URI + "\n" + timestamp + "\n" + nonce + "\n" + bodyHash
+signature = HMAC_SHA256_HEX(secret, payload)
+X-Wayne-Signature = "sha256=" + signature
+```
+
 管理员可查看当前 SAML metadata 配置：
 
 ```text

@@ -25,8 +25,21 @@ export const authApi = {
     return Promise.reject(new Error('password login is disabled'))
   },
 
-  logout(): Promise<ApiResponse<null>> {
-    return Promise.resolve({ code: 0, message: 'success', data: null })
+  async logout(): Promise<ApiResponse<null>> {
+    const token = getToken()
+    const response = await fetch('/auth/api/v1/logout', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      credentials: 'include',
+    })
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}))
+      throw new Error(data.error || `HTTP ${response.status}`)
+    }
+    return { code: 0, message: 'success', data: null }
   },
 
   async getUserInfo(): Promise<ApiResponse<UserInfo>> {
