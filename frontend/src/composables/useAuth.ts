@@ -13,9 +13,12 @@ export function useAuth() {
   }
 
   const logout = async () => {
-    await authApi.logout()
-    authStore.clearAuth()
-    redirectToSSO()
+    try {
+      await authApi.logout()
+    } finally {
+      authStore.clearAuth()
+      window.location.assign('/login?logged_out=1')
+    }
   }
 
   const checkAuth = () => {

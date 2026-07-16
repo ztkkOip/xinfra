@@ -68,19 +68,18 @@ mysql -uroot -p < docs/mysql-init.sql
 
 如果你使用的是 Docker Desktop、OrbStack、Colima 或容器里的 MySQL，应用访问 MySQL 时来源 IP 可能不是 `localhost`，而是类似 `192.168.65.1`。这时 MySQL 账号需要允许远程来源，`docs/mysql-init.sql` 已经包含 `'auth'@'%'`。
 
-如果要自动创建本地管理员账号，在 `.env` 里设置：
+默认启用 SSO：
 
 ```bash
-BOOTSTRAP_ADMIN_USERNAME=admin
-BOOTSTRAP_ADMIN_PASSWORD='your-password'
+SSO_ENABLED=true
 ```
 
-也可以直接使用环境变量：
+如果只是本地开发测试，可以关闭 SSO，前端会显示用户名登录框。后端只校验用户名非空；用户不存在时会自动创建本地用户，第一位用户会自动成为管理员：
 
 ```bash
 MYSQL_DSN='auth:auth@tcp(127.0.0.1:3306)/authserver?charset=utf8mb4&parseTime=True&loc=Local' \
 JWT_SECRET='change-this-secret' \
-BOOTSTRAP_ADMIN_PASSWORD='your-password' \
+SSO_ENABLED=false \
 go run ./cmd/server
 ```
 
@@ -151,7 +150,8 @@ bash scripts/restart-authserver.sh nginx
 |---|---|---|
 | `GET` | `/healthz` | 服务健康检查 |
 | `GET` | `/readyz` | 数据库连接检查 |
-| `POST` | `/api/v1/login` | 本地登录 |
+| `GET` | `/auth/api/v1/config` | 前端登录模式配置，返回 `sso_enabled` |
+| `POST` | `/auth/api/v1/login` | 本地开发测试登录，仅 `SSO_ENABLED=false` 时可用，只需用户名 |
 | `POST` | `/api/v1/login/ldap` | LDAP 登录预留 |
 | `GET` | `/api/v1/login/:provider` | SSO 跳转预留 |
 | `GET` | `/api/v1/login/:provider/callback` | SSO 回调预留 |
@@ -282,6 +282,64 @@ Wayne 会把回调地址拼成：
 
 因此 `OAUTH_WAYNE_REDIRECT_URI` 必须和 Wayne 实际回调地址完全一致。浏览器访问 Wayne OAuth 登录入口后，如果 AuthServer 还没有登录态，会先跳内部 SAML；SAML 成功后再回到 OAuth authorize，签发 code 给 Wayne。
 `WAYEN_OAUTH_REF` 是 AuthServer 发起 Wayne 登录时写入 Wayne `next` 参数的登录完成页，默认 `/portal/namespace/1/app`，对应 Wayne `DemoNamespaceId = 1` 的默认 namespace。不要配置成 `oauth` 或 `/oauth`，否则 Wayne 回调会把它当成前端路由跳到 `/oauth`。
+
+## Wayne 授权代理接口
+
+AuthServer 的 Wayne 授权代理接口不要求调用方传 Wayne user ID。后端会从当前 `authserver_token` 里取 `email`，把它作为 Wayne username 传给 Wayne internal API。
+
+对外接口：
+
+```text
+GET    /auth/api/v1/wayne/namespaces
+GET    /auth/api/v1/wayne/groups
+GET    /auth/api/v1/wayne/users/me/roles
+GET    /auth/api/v1/wayne/namespaces/:namespaceid/operator-permissions
+GET    /auth/api/v1/wayne/apps/:appid/operator-permissions
+PUT    /auth/api/v1/wayne/namespaces/:namespaceid/roles
+DELETE /auth/api/v1/wayne/namespaces/:namespaceid/roles
+PUT    /auth/api/v1/wayne/apps/:appid/roles
+DELETE /auth/api/v1/wayne/apps/:appid/roles
+```
+
+示例：
+
+```http
+PUT /auth/api/v1/wayne/namespaces/1/roles
+Authorization: Bearer <authserver_token>
+Content-Type: application/json
+
+{
+  "groupIds": [10, 11],
+  "replace": false,
+  "requestId": "req-001",
+  "reason": "grant namespace access"
+}
+```
+
+AuthServer 转发到 Wayne internal API 时会使用 token email：
+
+```text
+PUT /api/v1/internal/namespaces/1/users/<token-email>/roles
+```
+
+并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。
+
+相关配置：
+
+```env
+WAYNE_INTERNAL_API_BASE_URL=http://wayne-backend.demo.svc.cluster.local:8080
+WAYNE_SERVICE_NAME=xinfra
+WAYNE_SERVICE_API_SECRET_KEY=<wayne-service-secret>
+```
+
+Wayne internal API 签名规则：
+
+```text
+bodyHash = SHA256_HEX(rawBody)
+payload = METHOD + "\n" + URI + "\n" + timestamp + "\n" + nonce + "\n" + bodyHash
+signature = HMAC_SHA256_HEX(secret, payload)
+X-Wayne-Signature = "sha256=" + signature
+```
 
 管理员可查看当前 SAML metadata 配置：
 

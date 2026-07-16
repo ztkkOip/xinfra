@@ -61,7 +61,16 @@ request.interceptors.response.use(
 
       if (status === 401) {
         removeToken()
-        redirectToSSO()
+        fetch('/auth/api/v1/config', { headers: { Accept: 'application/json' } })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.sso_enabled === false) {
+              window.location.assign('/login')
+            } else {
+              redirectToSSO()
+            }
+          })
+          .catch(() => redirectToSSO())
         ElMessage.error(backendMessage || '未授权，请重新登录')
       } else {
         const message = backendMessage || httpMessageMap[status] || `请求失败 (${status})`

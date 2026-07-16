@@ -6,24 +6,90 @@
           <div class="mark">xi</div>
           xinfra
         </div>
-        <h2>统一基础设施平台</h2>
-        <p>正在跳转到 SSO 登录</p>
+        <h2>{{ title }}</h2>
+        <p>{{ subtitle }}</p>
       </div>
-      <el-button type="primary" size="large" style="width: 100%" @click="redirectToSSO()">
-        重新跳转
+      <div v-if="!ssoEnabled" class="local-login">
+        <el-input
+          v-model="username"
+          size="large"
+          placeholder="输入用户名"
+          @keyup.enter="handleLocalLogin"
+        />
+      </div>
+      <el-button type="primary" size="large" class="login-btn" :loading="loading" @click="handleLoginClick">
+        {{ buttonText }}
       </el-button>
       <div class="login-footer">
-        <p>统一 LDAP 账号，同账号同密码</p>
+        <p>{{ footerText }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { redirectToSSO } from '@/utils/sso'
+import { useAuth } from '@/composables/useAuth'
+import { authApi } from '@/api/auth'
 
-onMounted(() => redirectToSSO())
+const route = useRoute()
+const router = useRouter()
+const { login } = useAuth()
+const loading = ref(false)
+const username = ref('')
+const ssoEnabled = ref(true)
+const loggedOut = computed(() => route.query.logged_out === '1')
+const title = computed(() => loggedOut.value ? '已退出登录' : '统一基础设施平台')
+const subtitle = computed(() => {
+  if (!ssoEnabled.value) {
+    return '开发测试模式，输入用户名登录'
+  }
+  return loggedOut.value ? '本地登录态已清除' : '正在跳转到 SSO 登录'
+})
+const buttonText = computed(() => {
+  if (!ssoEnabled.value) {
+    return '登录'
+  }
+  return loggedOut.value ? '重新登录' : '重新跳转'
+})
+const footerText = computed(() => ssoEnabled.value ? '统一 LDAP 账号，同账号同密码' : 'SSO 已关闭，仅用于开发测试')
+
+onMounted(async () => {
+  const { data } = await authApi.getConfig()
+  ssoEnabled.value = data.sso_enabled
+  if (ssoEnabled.value && !loggedOut.value) {
+    redirectToSSO('', '/')
+  }
+})
+
+const handleLoginClick = () => {
+  if (ssoEnabled.value) {
+    redirectToSSO('', '/')
+    return
+  }
+  handleLocalLogin()
+}
+
+const handleLocalLogin = async () => {
+  const value = username.value.trim()
+  if (!value) {
+    return
+  }
+  loading.value = true
+  try {
+    await login(value, '')
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    if (redirect.startsWith('/auth/')) {
+      window.location.assign(redirect)
+      return
+    }
+    router.replace(redirect)
+  } finally {
+    loading.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -45,6 +111,10 @@ onMounted(() => redirectToSSO())
 
 .login-btn {
   width: 100%;
+}
+
+.local-login {
+  margin-bottom: 14px;
 }
 
 .login-header {

@@ -27,6 +27,13 @@ import (
 const (
 	samlHTTPRedirectBinding = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
 	samlHTTPPostBinding     = "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+
+	xmlEncAES128CBC = "http://www.w3.org/2001/04/xmlenc#aes128-cbc"
+	xmlEncAES192CBC = "http://www.w3.org/2001/04/xmlenc#aes192-cbc"
+	xmlEncAES256CBC = "http://www.w3.org/2001/04/xmlenc#aes256-cbc"
+	xmlEncAES128GCM = "http://www.w3.org/2009/xmlenc11#aes128-gcm"
+	xmlEncAES192GCM = "http://www.w3.org/2009/xmlenc11#aes192-gcm"
+	xmlEncAES256GCM = "http://www.w3.org/2009/xmlenc11#aes256-gcm"
 )
 
 type LoginConfig struct {
@@ -178,7 +185,7 @@ func decryptEncryptedAssertion(encrypted encryptedAssertion, privateKeyFile stri
 	if err != nil {
 		return "", assertion{}, fmt.Errorf("decode saml encrypted assertion: %w", err)
 	}
-	plain, err := decryptAESCBC(encryptedValue, sessionKey)
+	plain, err := decryptAssertionCipherValue(encryptedValue, sessionKey, encrypted.EncryptedData.EncryptionMethod.Algorithm)
 	if err != nil {
 		return "", assertion{}, err
 	}
@@ -216,6 +223,17 @@ func readRSAPrivateKey(path string) (*rsa.PrivateKey, error) {
 	return key, nil
 }
 
+func decryptAssertionCipherValue(value, key []byte, algorithm string) ([]byte, error) {
+	switch strings.TrimSpace(algorithm) {
+	case "", xmlEncAES128CBC, xmlEncAES192CBC, xmlEncAES256CBC:
+		return decryptAESCBC(value, key)
+	case xmlEncAES128GCM, xmlEncAES192GCM, xmlEncAES256GCM:
+		return decryptAESGCM(value, key)
+	default:
+		return nil, fmt.Errorf("unsupported saml assertion encryption algorithm: %s", algorithm)
+	}
+}
+
 func decryptAESCBC(value, key []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -231,6 +249,27 @@ func decryptAESCBC(value, key []byte) ([]byte, error) {
 	plain, err = pkcs7Unpad(plain, block.BlockSize())
 	if err != nil {
 		return nil, err
+	}
+	return plain, nil
+}
+
+func decryptAESGCM(value, key []byte) ([]byte, error) {
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, fmt.Errorf("init saml assertion cipher: %w", err)
+	}
+	aead, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, fmt.Errorf("init saml assertion gcm: %w", err)
+	}
+	if len(value) <= aead.NonceSize()+aead.Overhead() {
+		return nil, errors.New("invalid saml encrypted assertion gcm length")
+	}
+	nonce := value[:aead.NonceSize()]
+	cipherText := value[aead.NonceSize():]
+	plain, err := aead.Open(nil, nonce, cipherText, nil)
+	if err != nil {
+		return nil, fmt.Errorf("decrypt saml assertion gcm: %w", err)
 	}
 	return plain, nil
 }

@@ -53,8 +53,12 @@ func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) 
 	if email == "" {
 		return nil, ErrWayenEmailMissing
 	}
-	if strings.TrimSpace(s.cfg.OAuthRedirectURI) != "" && strings.TrimSpace(s.cfg.WayenTargetURL) != "" {
-		target, err := s.oauthLoginURL(s.cfg.OAuthRedirectURI, s.cfg.WayenTargetURL)
+	oauthLoginURL := strings.TrimSpace(s.cfg.WayenOAuthLoginURL)
+	if oauthLoginURL == "" {
+		oauthLoginURL = strings.TrimSpace(s.cfg.OAuthRedirectURI)
+	}
+	if oauthLoginURL != "" && strings.TrimSpace(s.cfg.WayenTargetURL) != "" {
+		target, err := s.oauthLoginURL(oauthLoginURL, s.cfg.WayenTargetURL)
 		if err != nil {
 			return nil, err
 		}

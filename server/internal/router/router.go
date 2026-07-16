@@ -69,10 +69,13 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	auditService := service.NewAuditService(deps.DB)
 	authService := service.NewAuthService(deps.Config, deps.DB, auditService)
 	wayenService := service.NewWayenService(deps.Config, deps.DB)
+	wayneRoleBindingService := service.NewWayneRoleBindingService(deps.Config)
 
 	healthHandler := handler.NewHealthHandler(deps.DB)
+	authHandler := handler.NewAuthHandler(deps.Config, authService)
 	userHandler := handler.NewUserHandler()
 	wayenHandler := handler.NewWayenHandler(deps.DB, wayenService, auditService)
+	wayneRoleBindingHandler := handler.NewWayneRoleBindingHandler(wayneRoleBindingService, auditService)
 	clouddmHandler := handler.NewCloudDMHandler(deps.Config, auditService)
 	samlHandler := handler.NewSAMLHandler(deps.Config, authService)
 	oauthHandler := handler.NewOAuthHandler(deps.Config, deps.DB, auditService)
@@ -87,7 +90,10 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 
 	v1 := r.Group("/auth/api/v1")
 	{
+		v1.GET("/config", authHandler.Config)
+		v1.POST("/login", authHandler.LocalLogin)
 		v1.GET("/login/internal-sso", samlHandler.Login)
+		v1.POST("/logout", samlHandler.Logout)
 		v1.GET("/saml/metadata", samlHandler.Metadata)
 		v1.POST("/saml/acs", samlHandler.ACS)
 
@@ -97,6 +103,15 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 		protected.GET("/wayen/login", wayenHandler.Login)
 		protected.GET("/wayen/credential", wayenHandler.GetCredential)
 		protected.PUT("/wayen/credential", wayenHandler.SaveCredential)
+		protected.GET("/wayne/namespaces", wayneRoleBindingHandler.ListNamespaces)
+		protected.GET("/wayne/groups", wayneRoleBindingHandler.ListGroups)
+		protected.GET("/wayne/users/me/roles", wayneRoleBindingHandler.GetCurrentUserRoles)
+		protected.GET("/wayne/namespaces/:namespaceid/operator-permissions", wayneRoleBindingHandler.NamespaceOperatorPermissions)
+		protected.GET("/wayne/apps/:appid/operator-permissions", wayneRoleBindingHandler.AppOperatorPermissions)
+		protected.PUT("/wayne/namespaces/:namespaceid/roles", wayneRoleBindingHandler.BindNamespace)
+		protected.DELETE("/wayne/namespaces/:namespaceid/roles", wayneRoleBindingHandler.UnbindNamespace)
+		protected.PUT("/wayne/apps/:appid/roles", wayneRoleBindingHandler.BindApp)
+		protected.DELETE("/wayne/apps/:appid/roles", wayneRoleBindingHandler.UnbindApp)
 		protected.GET("/clouddm/login", clouddmHandler.Login)
 	}
 }

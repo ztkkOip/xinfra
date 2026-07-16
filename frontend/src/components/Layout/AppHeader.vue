@@ -25,6 +25,7 @@
         <div>{{ user?.display_name || '未登录' }}</div>
         <div class="ldap-tag">LDAP · {{ user?.business_line || '' }}业务线</div>
       </div>
+      <el-button class="logout-button" text @click="handleLogout">退出</el-button>
     </div>
   </header>
 </template>
@@ -33,15 +34,21 @@
 import { computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
+import { useAuth } from '@/composables/useAuth'
 import { Moon, Sunny } from '@element-plus/icons-vue'
 
 const authStore = useAuthStore()
+const { logout } = useAuth()
 const user = computed(() => authStore.user)
 const userInitial = computed(() => {
   return user.value?.display_name?.charAt(0) || 'U'
 })
 
 const { theme, toggleTheme } = useTheme()
+
+const handleLogout = () => {
+  logout()
+}
 </script>
 
 <style scoped>
@@ -143,6 +150,17 @@ const { theme, toggleTheme } = useTheme()
   font-family: var(--mono);
   font-size: 12px;
   color: var(--text-dim);
+}
+
+.logout-button {
+  color: var(--text-dim);
+  font-size: 14px;
+  padding: 4px 6px;
+}
+
+.logout-button:hover {
+  color: var(--text-hi);
+  background: var(--bg-panel-2);
 }
 
 .theme-switch {

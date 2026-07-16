@@ -47,6 +47,9 @@
       <router-link to="/subsystem" class="nav-item" active-class="active">
         <span class="ic">↗</span>子系统导航
       </router-link>
+      <router-link to="/subsystem/authz" class="nav-item" active-class="active">
+        <span class="ic">▦</span>子系统赋权
+      </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">审计</div>

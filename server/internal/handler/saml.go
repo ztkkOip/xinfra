@@ -62,6 +62,22 @@ func (h *SAMLHandler) Login(c *gin.Context) {
 	c.Redirect(http.StatusFound, redirectURL)
 }
 
+func (h *SAMLHandler) Logout(c *gin.Context) {
+	expired := time.Unix(0, 0)
+	for _, path := range []string{"/auth/", "/"} {
+		http.SetCookie(c.Writer, &http.Cookie{
+			Name:     AuthSessionCookieName,
+			Value:    "",
+			Path:     path,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   -1,
+			Expires:  expired,
+		})
+	}
+	c.JSON(http.StatusOK, gin.H{"ok": true})
+}
+
 func (h *SAMLHandler) ACS(c *gin.Context) {
 	if err := c.Request.ParseForm(); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -97,15 +113,12 @@ func (h *SAMLHandler) ACS(c *gin.Context) {
 
 func ssoRedirectURL(relayState, token string) string {
 	target := strings.TrimSpace(relayState)
-	if target == "" || !strings.HasPrefix(target, "/auth/") {
-		target = "/auth/"
-	}
-	if strings.HasPrefix(target, "//") {
-		target = "/auth/"
+	if target == "" {
+		target = "/"
 	}
 	parsed, err := url.Parse(target)
-	if err != nil || parsed.IsAbs() {
-		parsed = &url.URL{Path: "/auth/"}
+	if err != nil || parsed.IsAbs() || !strings.HasPrefix(target, "/") || strings.HasPrefix(target, "//") || strings.HasPrefix(parsed.Path, "/auth/api/") {
+		parsed = &url.URL{Path: "/"}
 	}
 	values := parsed.Query()
 	values.Set("sso_token", token)

@@ -56,6 +56,9 @@ func (h *OAuthHandler) Authorize(c *gin.Context) {
 	user, ok := h.sessionUser(c)
 	if !ok {
 		loginURL := "/auth/api/v1/login/internal-sso?relay_state=" + url.QueryEscape(c.Request.URL.RequestURI())
+		if !h.cfg.SSOEnabled {
+			loginURL = "/login?redirect=" + url.QueryEscape(c.Request.URL.RequestURI())
+		}
 		c.Redirect(http.StatusFound, loginURL)
 		return
 	}
