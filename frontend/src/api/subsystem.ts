@@ -112,7 +112,15 @@ export const subsystemApi = {
     const data = await response.json().catch(() => ({}))
     if (response.status === 401) {
       removeToken()
-      redirectToSSO(openApp)
+      const configResponse = await fetch('/auth/api/v1/config', {
+        headers: { Accept: 'application/json' },
+      }).catch(() => null)
+      const config = await configResponse?.json().catch(() => ({}))
+      if (config?.sso_enabled === false) {
+        window.location.assign(`/login?redirect=${encodeURIComponent(`/subsystem?open_app=${openApp}`)}`)
+      } else {
+        redirectToSSO(openApp)
+      }
       throw new Error('unauthorized')
     }
     if (!response.ok) {

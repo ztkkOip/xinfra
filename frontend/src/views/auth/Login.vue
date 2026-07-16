@@ -81,6 +81,10 @@ const handleLocalLogin = async () => {
   try {
     await login(value, '')
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    if (redirect.startsWith('/auth/')) {
+      window.location.assign(redirect)
+      return
+    }
     router.replace(redirect)
   } finally {
     loading.value = false
