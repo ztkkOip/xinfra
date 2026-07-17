@@ -30,7 +30,10 @@
     <div class="nav-group">
       <div class="nav-label">可观测性</div>
       <router-link to="/monitor" class="nav-item" active-class="active">
-        <span class="ic">◎</span>监控 / 日志 / 告警
+        <span class="ic">◎</span>监控
+      </router-link>
+      <router-link to="/alert" class="nav-item" active-class="active">
+        <span class="ic">⚡</span>告警
       </router-link>
     </div>
     <div class="nav-group">
