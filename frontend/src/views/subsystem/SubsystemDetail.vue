@@ -112,7 +112,7 @@ const detailDesc = computed(() => {
     CloudDM: '数据库 SQL 上线统一审核，支持 LDAP 用户组到角色的自动映射。变更记录可追溯，审计合规。',
     CacheCloud: 'Redis 实例全生命周期管理，登录与监控运维统一入口。按业务线隔离实例，统一密码管理。',
     Apollo: '统一管理多机房 Config Service Cluster 的配置发布、灰度、回滚与变更审计，所有机房配置项均可在此单一入口检索与编辑。',
-    qpass: '夜莺、Zabbix、VictoriaMetrics 告警统一收敛与值班通知，按 P0/P1 分级推送。值班表自动轮转。',
+    qpass: '七牛云内部系统。',
     Grafana: '对接 VictoriaMetrics 数据源，K8s / 容器 / 业务指标统一仪表盘展示。预置核心看板，支持自定义。',
   }
   return descs[system.value.name] || system.value.description
