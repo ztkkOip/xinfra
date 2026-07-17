@@ -97,7 +97,7 @@ const route = useRoute()
 const authStore = useAuthStore()
 const businessLineStore = useBusinessLineStore()
 const portalExpanded = ref(true)
-const isPlatformAdmin = computed(() => authStore.user?.is_admin === true)
+const isPlatformAdmin = computed(() => authStore.isAdmin)
 const isBusinessLineAdmin = computed(() => businessLineStore.isCurrentAdmin)
 
 const subsystems = [

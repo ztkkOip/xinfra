@@ -3,117 +3,177 @@
     <div class="page-head">
       <div>
         <h1>子系统赋权</h1>
-        <p>Wayne / CloudDM 入口权限、默认角色与授权状态</p>
+        <p>{{ currentBusinessLineName }} · Wayne namespace 角色授权</p>
       </div>
-      <el-button type="primary">新增授权</el-button>
+      <div class="head-actions">
+        <el-button :loading="loading" @click="reloadAll">刷新</el-button>
+        <el-button v-if="hasWayneRoleBindingPermission" type="primary" :disabled="!canOperate || !selectedUserId || !selectedNamespaceId" :loading="saving" @click="saveRoles">
+          保存授权
+        </el-button>
+      </div>
     </div>
 
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">接入子系统</div>
-        <div class="value">2</div>
-        <div class="delta">Wayne · CloudDM</div>
+        <div class="value">{{ enabledSystemCount }}</div>
+        <div class="delta">{{ systemSummary }}</div>
       </div>
       <div class="stat-card">
-        <div class="label">授权主体</div>
-        <div class="value">6</div>
-        <div class="delta">用户 3 · 用户组 3</div>
+        <div class="label">Wayne Namespace</div>
+        <div class="value">{{ wayneNamespaces.length }}</div>
+        <div class="delta">当前业务线映射</div>
       </div>
       <div class="stat-card">
-        <div class="label">待审批</div>
-        <div class="value" style="color: var(--warn)">2</div>
-        <div class="delta">最近提交 10:18</div>
+        <div class="label">可选角色</div>
+        <div class="value">{{ wayneRoles.length }}</div>
+        <div class="delta">{{ roleSummary }}</div>
       </div>
       <div class="stat-card">
-        <div class="label">默认授权</div>
-        <div class="value" style="font-size: 16px; color: var(--accent)">● 生效</div>
-        <div class="delta">新用户默认只读</div>
+        <div class="label">当前操作权限</div>
+        <div class="value state-value" :class="{ ok: canOperate, warn: !canOperate }">● {{ operatorStateText }}</div>
+        <div class="delta">{{ operatorStateDetail }}</div>
       </div>
-    </div>
-
-    <div class="toolbar">
-      <el-select v-model="filters.system" placeholder="全部子系统" style="width: 150px">
-        <el-option label="全部子系统" value="" />
-        <el-option label="Wayne" value="Wayne" />
-        <el-option label="CloudDM" value="CloudDM" />
-      </el-select>
-      <el-select v-model="filters.type" placeholder="全部主体" style="width: 150px">
-        <el-option label="全部主体" value="" />
-        <el-option label="用户" value="user" />
-        <el-option label="用户组" value="group" />
-      </el-select>
-      <el-select v-model="filters.status" placeholder="全部状态" style="width: 150px">
-        <el-option label="全部状态" value="" />
-        <el-option label="已生效" value="active" />
-        <el-option label="待审批" value="pending" />
-        <el-option label="已停用" value="disabled" />
-      </el-select>
-      <el-input v-model="filters.keyword" placeholder="搜索账号 / 用户组 / 角色" style="flex: 1" />
     </div>
 
     <div class="matrix">
-      <div v-for="system in systems" :key="system.name" class="system-card">
+      <div class="system-card">
         <div class="system-top">
-          <div class="logo" :class="system.className">{{ system.icon }}</div>
+          <div class="logo wayne">W</div>
           <div>
-            <h3>{{ system.name }}</h3>
-            <p>{{ system.defaultPolicy }}</p>
+            <h3>Wayne</h3>
+            <p>业务线 namespace 角色绑定，默认新用户初始化为访客</p>
           </div>
         </div>
         <div class="role-grid">
-          <div v-for="role in system.roles" :key="role.name" class="role-cell">
+          <div v-for="role in wayneRoles" :key="role.id" class="role-cell">
             <span>{{ role.name }}</span>
-            <strong>{{ role.count }}</strong>
+            <strong>#{{ role.id }}</strong>
+          </div>
+          <div v-if="!wayneRoles.length" class="role-cell empty-cell">暂无角色</div>
+        </div>
+      </div>
+
+      <div class="system-card muted-card">
+        <div class="system-top">
+          <div class="logo clouddm">DM</div>
+          <div>
+            <h3>CloudDM</h3>
+            <p>接口预留，当前不开放授权操作</p>
           </div>
         </div>
+        <div class="role-grid">
+          <div class="role-cell">
+            <span>状态</span>
+            <strong>未启用</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="hasWayneRoleBindingPermission" class="panel auth-panel">
+      <div class="panel-head">
+        <h3>Wayne 授权操作</h3>
+        <span class="meta">数据源：AuthServer · Wayne internal API</span>
+      </div>
+      <div class="form-grid">
+        <el-form label-position="top">
+          <el-form-item label="用户">
+            <el-select v-model="selectedUserId" filterable placeholder="选择用户" :loading="loadingUsers" @change="loadSelectedUserRoles">
+              <el-option v-for="user in users" :key="user.uid" :label="user.username" :value="user.uid" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Wayne Namespace">
+            <el-select v-model="selectedNamespaceId" filterable placeholder="选择 namespace" :loading="loadingNamespaces" @change="syncSelectedRoleIds">
+              <el-option
+                v-for="namespace in wayneNamespaces"
+                :key="namespace.id"
+                :disabled="!namespace.can_bind && !namespace.can_unbind"
+                :label="namespaceLabel(namespace)"
+                :value="namespace.id"
+              />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="Wayne 角色">
+            <el-select v-model="selectedRoleIds" multiple filterable collapse-tags collapse-tags-tooltip placeholder="选择角色">
+              <el-option v-for="role in wayneRoles" :key="role.id" :label="role.name" :value="role.id" />
+            </el-select>
+          </el-form-item>
+          <div class="button-row">
+            <el-button type="primary" :disabled="!canOperate || !selectedUserId || !selectedNamespaceId || !selectedRoleIds.length" :loading="saving" @click="saveRoles">
+              保存角色
+            </el-button>
+            <el-button :disabled="!canUnbindSelected || !selectedUserId || !selectedNamespaceId" :loading="clearing" @click="clearRoles">
+              清空角色
+            </el-button>
+            <el-button :disabled="!canOperate || !selectedUserId" :loading="initializing" @click="initVisitor">
+              初始化访客
+            </el-button>
+          </div>
+        </el-form>
+
+        <div class="hint-panel">
+          <div class="hint-title">授权规则</div>
+          <p>当前账号必须是平台管理员或当前业务线管理员。</p>
+          <p>保存前会再次校验 Wayne namespace 的授权能力。</p>
+          <p>用户加入业务线时后端会自动初始化 Wayne 访客角色。</p>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="panel readonly-panel">
+      <div class="panel-head">
+        <h3>当前权限</h3>
+        <span class="meta">只读模式</span>
+      </div>
+      <div class="readonly-body">
+        当前账号没有 Wayne namespace 角色绑定权限，只展示现有权限。
       </div>
     </div>
 
     <div class="panel">
       <div class="panel-head">
-        <h3>授权列表</h3>
-        <span class="meta">数据源：AuthServer · 子系统授权</span>
+        <h3>当前用户 Wayne 角色</h3>
+        <span class="meta">{{ selectedUsername || '未选择用户' }}</span>
       </div>
       <div class="panel-body">
         <table>
           <thead>
             <tr>
-              <th>授权主体</th>
-              <th>类型</th>
-              <th>子系统</th>
-              <th>角色 / 范围</th>
-              <th>来源</th>
-              <th>状态</th>
-              <th>最近变更</th>
-              <th>操作</th>
+              <th>Namespace</th>
+              <th>Kube Namespace</th>
+              <th>当前角色</th>
+              <th>授权能力</th>
+              <th v-if="hasWayneRoleBindingPermission">操作</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in filteredGrants" :key="item.id" class="tr-hover">
+            <tr v-for="namespace in wayneNamespaces" :key="namespace.id" class="tr-hover">
               <td>
-                <div class="principal">
-                  <span class="avatar">{{ item.initial }}</span>
-                  <div>
-                    <div class="strong">{{ item.principal }}</div>
-                    <div class="sub mono">{{ item.detail }}</div>
-                  </div>
-                </div>
+                <div class="strong">{{ namespace.name || '-' }}</div>
+                <div class="sub mono">id={{ namespace.id }}</div>
               </td>
-              <td><span class="tag">{{ item.type === 'user' ? '用户' : '用户组' }}</span></td>
-              <td class="mono">{{ item.system }}</td>
+              <td class="mono">{{ namespace.kubeNamespace || '-' }}</td>
               <td>
-                <span class="role">{{ item.role }}</span>
-                <span class="scope mono">{{ item.scope }}</span>
+                <span v-if="roleNamesForNamespace(namespace.id).length" class="role-list">
+                  <span v-for="role in roleNamesForNamespace(namespace.id)" :key="role" class="role">{{ role }}</span>
+                </span>
+                <span v-else class="scope">未绑定</span>
               </td>
-              <td class="mono">{{ item.source }}</td>
-              <td :class="['status-text', item.statusClass]">● {{ item.statusText }}</td>
-              <td class="mono">{{ item.updatedAt }}</td>
               <td>
+                <span v-if="namespace.permission_error" class="status-text warn">● {{ namespace.permission_error }}</span>
+                <span v-else-if="namespace.can_bind" class="status-text ok">● 可授权</span>
+                <span v-else class="status-text idle">● 无授权权限</span>
+              </td>
+              <td v-if="hasWayneRoleBindingPermission">
                 <div class="actions">
-                  <button type="button">编辑</button>
-                  <button type="button" class="danger">停用</button>
+                  <button type="button" @click="chooseNamespace(namespace.id)">选择</button>
+                  <button type="button" class="danger" :disabled="!namespace.can_unbind || !selectedUserId" @click="clearNamespaceRoles(namespace.id)">清空</button>
                 </div>
               </td>
+            </tr>
+            <tr v-if="!wayneNamespaces.length">
+              <td :colspan="hasWayneRoleBindingPermission ? 5 : 4" class="empty-row">当前业务线没有绑定 Wayne namespace</td>
             </tr>
           </tbody>
         </table>
@@ -123,62 +183,272 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { subsystemAuthApi, type SubsystemAuthSystem, type WayneBusinessLineNamespace, type WayneRole, type WayneUserRoles } from '@/api/subsystemAuth'
+import { userApi, type UserOption } from '@/api/user'
+import { useAuthStore } from '@/stores/auth'
+import { useBusinessLineStore } from '@/stores/businessLine'
 
-const filters = reactive({
-  system: '',
-  type: '',
-  status: '',
-  keyword: '',
+const authStore = useAuthStore()
+const businessLineStore = useBusinessLineStore()
+
+const systems = ref<SubsystemAuthSystem[]>([])
+const users = ref<UserOption[]>([])
+const wayneRoles = ref<WayneRole[]>([])
+const wayneNamespaces = ref<WayneBusinessLineNamespace[]>([])
+const userRoles = ref<WayneUserRoles | null>(null)
+const selectedUserId = ref<number | null>(null)
+const selectedNamespaceId = ref<number | null>(null)
+const selectedRoleIds = ref<number[]>([])
+const loading = ref(false)
+const loadingUsers = ref(false)
+const loadingNamespaces = ref(false)
+const saving = ref(false)
+const clearing = ref(false)
+const initializing = ref(false)
+
+const isPlatformAdmin = computed(() => authStore.isAdmin)
+const canManageBusinessLine = computed(() => isPlatformAdmin.value || businessLineStore.isCurrentAdmin)
+const currentBusinessLineId = computed(() => businessLineStore.current?.id || null)
+const currentBusinessLineName = computed(() => businessLineStore.current?.name || '未选择业务线')
+const selectedUser = computed(() => users.value.find((user) => user.uid === selectedUserId.value))
+const selectedUsername = computed(() => selectedUser.value?.username || '')
+const selectedNamespace = computed(() => wayneNamespaces.value.find((item) => item.id === selectedNamespaceId.value))
+const canOperate = computed(() => canManageBusinessLine.value && Boolean(selectedNamespace.value?.can_bind))
+const canUnbindSelected = computed(() => canManageBusinessLine.value && Boolean(selectedNamespace.value?.can_unbind))
+const hasWayneRoleBindingPermission = computed(() =>
+  canManageBusinessLine.value && wayneNamespaces.value.some((item) => item.can_bind || item.can_unbind),
+)
+const enabledSystemCount = computed(() => systems.value.filter((item) => item.enabled).length)
+const systemSummary = computed(() => systems.value.map((item) => `${item.name}${item.enabled ? '' : '(未启用)'}`).join(' · ') || 'Wayne')
+const roleSummary = computed(() => wayneRoles.value.map((item) => item.name).join(' · ') || '暂无')
+const operatorStateText = computed(() => {
+	if (!canManageBusinessLine.value) return '无业务线权限'
+	if (!wayneNamespaces.value.length) return '未绑定 namespace'
+	if (hasWayneRoleBindingPermission.value) return '可授权'
+	return '只读'
+})
+const operatorStateDetail = computed(() => {
+	if (!canManageBusinessLine.value) return '需要平台管理员或当前业务线管理员'
+	if (!wayneNamespaces.value.length) return '先在业务线分配中绑定 Wayne namespace'
+	if (!hasWayneRoleBindingPermission.value) return '没有 Wayne 角色绑定权限'
+	return `${wayneNamespaces.value.filter((item) => item.can_bind).length} 个 namespace 可授权`
 })
 
-const systems = [
-  {
-    name: 'Wayne',
-    icon: 'W',
-    className: 'wayne',
-    defaultPolicy: '默认 namespace 只读 · DemoGroupId=23',
-    roles: [
-      { name: '只读', count: 18 },
-      { name: '发布', count: 6 },
-      { name: '管理员', count: 2 },
-    ],
+watch(
+  () => businessLineStore.current?.id,
+  async () => {
+    selectedNamespaceId.value = null
+    selectedRoleIds.value = []
+    userRoles.value = null
+    await loadBusinessLineData()
   },
-  {
-    name: 'CloudDM',
-    icon: 'DM',
-    className: 'clouddm',
-    defaultPolicy: 'OIDC 登录 · SQL 审核角色映射',
-    roles: [
-      { name: '查询', count: 21 },
-      { name: '审核', count: 5 },
-      { name: '管理员', count: 1 },
-    ],
-  },
-]
+)
 
-const grants = [
-  { id: 1, principal: 'eastsales@qiniu.com', initial: 'E', detail: 'eastsales', type: 'user', system: 'Wayne', role: '默认只读', scope: 'namespace=demo', source: 'SSO 自动初始化', status: 'active', statusText: '已生效', statusClass: 'ok', updatedAt: '2026-07-15 10:12' },
-  { id: 2, principal: 'platform-admin', initial: 'P', detail: 'LDAP group', type: 'group', system: 'Wayne', role: '管理员', scope: 'all namespaces', source: '手动授权', status: 'active', statusText: '已生效', statusClass: 'ok', updatedAt: '2026-07-14 18:40' },
-  { id: 3, principal: 'dba-reviewers', initial: 'D', detail: 'LDAP group', type: 'group', system: 'CloudDM', role: 'SQL 审核', scope: 'prod / staging', source: '手动授权', status: 'active', statusText: '已生效', statusClass: 'ok', updatedAt: '2026-07-14 16:05' },
-  { id: 4, principal: 'las-dev', initial: 'L', detail: 'LDAP group', type: 'group', system: 'CloudDM', role: '查询', scope: 'las schemas', source: '审批流', status: 'pending', statusText: '待审批', statusClass: 'warn', updatedAt: '2026-07-15 10:18' },
-  { id: 5, principal: 'ops-user1@qiniu.com', initial: 'O', detail: 'ops-user1', type: 'user', system: 'Wayne', role: '发布', scope: 'namespace=demo', source: '审批流', status: 'pending', statusText: '待审批', statusClass: 'warn', updatedAt: '2026-07-15 09:55' },
-  { id: 6, principal: 'temp-sql@qiniu.com', initial: 'T', detail: 'temp-sql', type: 'user', system: 'CloudDM', role: '查询', scope: 'expired', source: '临时授权', status: 'disabled', statusText: '已停用', statusClass: 'idle', updatedAt: '2026-07-13 20:30' },
-]
+watch(selectedNamespaceId, () => {
+  syncSelectedRoleIds()
+})
 
-const filteredGrants = computed(() => {
-  const keyword = filters.keyword.trim().toLowerCase()
-  return grants.filter((item) => {
-    if (filters.system && item.system !== filters.system) return false
-    if (filters.type && item.type !== filters.type) return false
-    if (filters.status && item.status !== filters.status) return false
-    if (!keyword) return true
-    return [item.principal, item.detail, item.system, item.role, item.scope]
-      .join(' ')
-      .toLowerCase()
-      .includes(keyword)
+onMounted(async () => {
+  await reloadAll()
+})
+
+async function reloadAll() {
+  loading.value = true
+  try {
+    await ensureBusinessLinesLoaded()
+    await Promise.all([loadSystems(), loadUsers(), loadWayneRoles(), loadBusinessLineData()])
+    if (selectedUserId.value) {
+      await loadSelectedUserRoles()
+    }
+  } finally {
+    loading.value = false
+  }
+}
+
+async function ensureBusinessLinesLoaded() {
+  if (businessLineStore.current?.id && businessLineStore.businessLines.length) {
+    return
+  }
+  await businessLineStore.loadMine().catch(() => {})
+}
+
+async function loadSystems() {
+  try {
+    systems.value = await subsystemAuthApi.listSystems()
+  } catch {
+    systems.value = [
+      { key: 'wayne', name: 'Wayne', enabled: true },
+      { key: 'clouddm', name: 'CloudDM', enabled: false },
+    ]
+  }
+}
+
+async function loadUsers() {
+  loadingUsers.value = true
+  try {
+    users.value = await userApi.list()
+    if (!selectedUserId.value && users.value.length) {
+      selectedUserId.value = users.value[0].uid
+      await loadSelectedUserRoles()
+    }
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '查询用户失败')
+  } finally {
+    loadingUsers.value = false
+  }
+}
+
+async function loadWayneRoles() {
+  try {
+    wayneRoles.value = await subsystemAuthApi.listWayneRoles()
+  } catch (error) {
+    wayneRoles.value = []
+    ElMessage.error(error instanceof Error ? error.message : '查询 Wayne 角色失败')
+  }
+}
+
+async function loadBusinessLineData() {
+  const businessLineId = currentBusinessLineId.value
+  if (!businessLineId || !canManageBusinessLine.value) {
+    wayneNamespaces.value = []
+    return
+  }
+  loadingNamespaces.value = true
+  try {
+    wayneNamespaces.value = await subsystemAuthApi.listWayneNamespaces(businessLineId)
+    if (!selectedNamespaceId.value && wayneNamespaces.value.length) {
+      selectedNamespaceId.value = wayneNamespaces.value[0].id
+    }
+  } catch (error) {
+    wayneNamespaces.value = []
+    ElMessage.error(error instanceof Error ? error.message : '查询 Wayne namespace 失败')
+  } finally {
+    loadingNamespaces.value = false
+  }
+}
+
+async function loadSelectedUserRoles() {
+  if (!selectedUsername.value) {
+    userRoles.value = null
+    selectedRoleIds.value = []
+    return
+  }
+  try {
+    userRoles.value = await subsystemAuthApi.getWayneUserRoles(selectedUsername.value)
+    syncSelectedRoleIds()
+  } catch (error) {
+    userRoles.value = null
+    selectedRoleIds.value = []
+    ElMessage.error(error instanceof Error ? error.message : '查询用户 Wayne 角色失败')
+  }
+}
+
+function syncSelectedRoleIds() {
+  const namespaceId = selectedNamespaceId.value
+  if (!namespaceId || !userRoles.value?.namespaces) {
+    selectedRoleIds.value = []
+    return
+  }
+  const binding = userRoles.value.namespaces.find((item) => Number(item.namespace?.id) === namespaceId)
+  selectedRoleIds.value = (binding?.groups || []).map((item) => Number(item.id)).filter(Boolean)
+}
+
+async function saveRoles() {
+  const businessLineId = currentBusinessLineId.value
+  const namespaceId = selectedNamespaceId.value
+  const username = selectedUsername.value
+  if (!businessLineId || !namespaceId || !username || !selectedRoleIds.value.length) {
+    ElMessage.warning('请选择用户、namespace 和角色')
+    return
+  }
+  saving.value = true
+  try {
+    await subsystemAuthApi.bindWayneNamespaceRoles(businessLineId, namespaceId, username, {
+      groupIds: selectedRoleIds.value,
+      replace: true,
+      requestId: requestId('wayne-bind'),
+      reason: '子系统赋权',
+    })
+    ElMessage.success('Wayne 角色已保存')
+    await loadSelectedUserRoles()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '保存 Wayne 角色失败')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function clearRoles() {
+  const namespaceId = selectedNamespaceId.value
+  if (!namespaceId) return
+  await clearNamespaceRoles(namespaceId)
+}
+
+async function clearNamespaceRoles(namespaceId: number) {
+  const businessLineId = currentBusinessLineId.value
+  const username = selectedUsername.value
+  if (!businessLineId || !username) {
+    ElMessage.warning('请选择用户')
+    return
+  }
+  await ElMessageBox.confirm('确认清空该用户在此 Wayne namespace 下的角色？', '清空角色', {
+    type: 'warning',
+    confirmButtonText: '清空',
+    cancelButtonText: '取消',
   })
-})
+  clearing.value = true
+  try {
+    await subsystemAuthApi.unbindWayneNamespaceRoles(businessLineId, namespaceId, username, {
+      requestId: requestId('wayne-clear'),
+      reason: '子系统赋权清空角色',
+    })
+    ElMessage.success('Wayne 角色已清空')
+    await loadSelectedUserRoles()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '清空 Wayne 角色失败')
+  } finally {
+    clearing.value = false
+  }
+}
+
+async function initVisitor() {
+  const businessLineId = currentBusinessLineId.value
+  const userId = selectedUserId.value
+  if (!businessLineId || !userId) {
+    ElMessage.warning('请选择用户')
+    return
+  }
+  initializing.value = true
+  try {
+    await subsystemAuthApi.initWayneBusinessLineUser(businessLineId, userId)
+    ElMessage.success('已初始化 Wayne 访客角色')
+    await loadSelectedUserRoles()
+  } catch (error) {
+    ElMessage.error(error instanceof Error ? error.message : '初始化 Wayne 访客角色失败')
+  } finally {
+    initializing.value = false
+  }
+}
+
+function chooseNamespace(namespaceId: number) {
+  selectedNamespaceId.value = namespaceId
+}
+
+function roleNamesForNamespace(namespaceId: number): string[] {
+  const binding = userRoles.value?.namespaces?.find((item) => Number(item.namespace?.id) === namespaceId)
+  return (binding?.groups || []).map((item) => item.name).filter(Boolean)
+}
+
+function namespaceLabel(namespace: WayneBusinessLineNamespace) {
+  const ability = namespace.can_bind ? '可授权' : namespace.can_unbind ? '可清空' : '无权限'
+  return `${namespace.name || namespace.id} / ${namespace.kubeNamespace || '-'} · ${ability}`
+}
+
+function requestId(prefix: string) {
+  return `${prefix}-${Date.now()}`
+}
 </script>
 
 <style scoped>
@@ -199,6 +469,13 @@ const filteredGrants = computed(() => {
   margin: 0;
   color: var(--text-dim);
   font-size: 12.5px;
+}
+
+.head-actions,
+.button-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .stat-row {
@@ -229,17 +506,22 @@ const filteredGrants = computed(() => {
   font-weight: 600;
 }
 
+.state-value {
+  font-size: 16px !important;
+}
+
+.state-value.ok {
+  color: var(--ok);
+}
+
+.state-value.warn {
+  color: var(--warn);
+}
+
 .stat-card .delta {
   font-size: 11px;
   color: var(--text-dim);
   margin-top: 4px;
-}
-
-.toolbar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 14px;
-  align-items: center;
 }
 
 .matrix {
@@ -254,6 +536,10 @@ const filteredGrants = computed(() => {
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 16px;
+}
+
+.muted-card {
+  opacity: 0.76;
 }
 
 .system-top {
@@ -276,13 +562,13 @@ const filteredGrants = computed(() => {
 }
 
 .logo.wayne {
-  background: #1C2A3A;
-  color: #7FB8FF;
+  background: #1c2a3a;
+  color: #7fb8ff;
 }
 
 .logo.clouddm {
-  background: #1C3A2E;
-  color: #7FFFC2;
+  background: #1c3a2e;
+  color: #7fffc2;
 }
 
 .system-top h3 {
@@ -319,10 +605,20 @@ const filteredGrants = computed(() => {
   color: var(--text-hi);
 }
 
+.empty-cell {
+  justify-content: center;
+  color: var(--text-dim);
+}
+
 .panel {
   background: var(--bg-panel);
   border: 1px solid var(--line);
   border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.auth-panel {
+  padding-bottom: 4px;
 }
 
 .panel-head {
@@ -345,6 +641,42 @@ const filteredGrants = computed(() => {
   font-family: var(--mono);
 }
 
+.form-grid {
+  display: grid;
+  grid-template-columns: minmax(360px, 520px) 1fr;
+  gap: 20px;
+  padding: 16px;
+}
+
+.hint-panel {
+  border: 1px solid var(--line-soft);
+  background: var(--bg-panel-2);
+  border-radius: 8px;
+  padding: 14px;
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.hint-title {
+  color: var(--text-hi);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.hint-panel p {
+  margin: 6px 0;
+}
+
+.readonly-panel {
+  margin-bottom: 16px;
+}
+
+.readonly-body {
+  padding: 16px;
+  color: var(--text-dim);
+  font-size: 12.5px;
+}
+
 .panel-body {
   padding: 4px 0;
   overflow-x: auto;
@@ -352,7 +684,7 @@ const filteredGrants = computed(() => {
 
 table {
   width: 100%;
-  min-width: 980px;
+  min-width: 920px;
   border-collapse: collapse;
   font-size: 12.5px;
 }
@@ -375,7 +707,7 @@ td {
 }
 
 .tr-hover:hover {
-  background: #171D28;
+  background: #171d28;
 }
 
 .strong {
@@ -389,33 +721,35 @@ td {
   margin-top: 2px;
 }
 
-.principal {
+.role-list {
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: #2A3142;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--mono);
-  color: var(--text-hi);
-  font-size: 11px;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .role {
   color: var(--text-hi);
-  margin-right: 8px;
+  background: var(--bg-panel-2);
+  border: 1px solid var(--line-soft);
+  border-radius: 5px;
+  padding: 3px 7px;
 }
 
 .scope {
   color: var(--text-dim);
   font-size: 11px;
+}
+
+.status-text.ok {
+  color: var(--ok);
+}
+
+.status-text.warn {
+  color: var(--warn);
+}
+
+.status-text.idle {
+  color: var(--text-dim);
 }
 
 .actions {
@@ -432,12 +766,31 @@ td {
   font-size: 12px;
 }
 
-.actions button:hover {
+.actions button:hover:not(:disabled) {
   color: var(--text-hi);
-  border-color: #3A4356;
+  border-color: #3a4356;
+}
+
+.actions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .actions button.danger {
-  color: #FF9A95;
+  color: #ff9a95;
+}
+
+.empty-row {
+  text-align: center;
+  color: var(--text-dim);
+  padding: 26px 16px;
+}
+
+@media (max-width: 1180px) {
+  .stat-row,
+  .matrix,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
