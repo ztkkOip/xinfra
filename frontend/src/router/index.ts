@@ -35,6 +35,12 @@ const router = createRouter({
           meta: { title: '子系统导航' },
         },
         {
+          path: 'subsystem/detail/:name',
+          name: 'SubsystemDetail',
+          component: () => import('@/views/subsystem/SubsystemDetail.vue'),
+          meta: { title: '子系统详情' },
+        },
+        {
           path: 'subsystem/authz',
           name: 'SubsystemAuthz',
           component: () => import('@/views/subsystem/Authorization.vue'),

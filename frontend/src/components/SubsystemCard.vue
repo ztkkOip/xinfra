@@ -5,11 +5,11 @@
         {{ system.icon }}
       </div>
       <div>
-        <h4>{{ system.name }}</h4>
-        <div class="ext-sub">{{ system.description }}</div>
+        <h4>{{ system.label }} {{ system.name }}</h4>
+        <div class="ext-sub">{{ system.domain }}</div>
       </div>
     </div>
-    <p>{{ description }}</p>
+    <p>{{ system.description }}</p>
     <div class="sso-row">
       <span class="sso-dot" :class="{ warn: system.status === 'integrating' }"></span>
       {{ system.status === 'integrated' ? 'LDAP 原生配置接入 · 零代码' : 'LDAP 接入改造中' }}
@@ -47,18 +47,6 @@ const iconColor = computed(() => {
     GF: 'var(--warn)',
   }
   return colors[props.system.icon] || 'var(--text-mid)'
-})
-
-const description = computed(() => {
-  const descs: Record<string, string> = {
-    Wayne: '业务容器发布、命名空间与配额管理，复用 Wayne 原生多租户能力。',
-    CloudDM: '数据库 SQL 上线统一审核，支持 LDAP 用户组到角色的自动映射。',
-    CacheCloud: 'Redis 实例全生命周期管理，登录与监控运维统一入口。',
-    Apollo: '统一配置管理，按机房 Cluster 隔离，支持灰度发布、版本回滚与变更审计。',
-    qpass: '夜莺、Zabbix、VictoriaMetrics 告警统一收敛与值班通知，按 P0/P1 分级推送。',
-    Grafana: '对接 VictoriaMetrics 数据源，K8s / 容器 / 业务指标统一仪表盘展示。',
-  }
-  return descs[props.system.name] || ''
 })
 
 const handleClick = async () => {

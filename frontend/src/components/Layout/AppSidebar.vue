@@ -35,9 +35,28 @@
     </div>
     <div class="nav-group">
       <div class="nav-label">统一入口</div>
-      <router-link to="/subsystem" class="nav-item" active-class="active">
-        <span class="ic">↗</span>子系统导航
-      </router-link>
+      <div class="nav-item nav-expand" :class="{ active: isPortalActive }">
+        <router-link to="/subsystem" class="expand-label">
+          <span class="ic">↗</span>子系统导航
+        </router-link>
+        <span class="expand-toggle" @click="portalExpanded = !portalExpanded">
+          {{ portalExpanded ? '▾' : '▸' }}
+        </span>
+      </div>
+      <div v-show="portalExpanded" class="nav-children">
+        <router-link
+          v-for="sys in subsystems"
+          :key="sys.name"
+          :to="`/subsystem/detail/${sys.name.toLowerCase()}`"
+          class="nav-item nav-child"
+          active-class="active"
+        >
+          <span class="child-dot" :style="{ background: dotColor(sys.icon) }"></span>{{ sys.label }} {{ sys.name }}
+        </router-link>
+        <router-link to="/subsystem" class="nav-item nav-child" active-class="active">
+          <span class="ic" style="font-size:12px;">▦</span>全部总览
+        </router-link>
+      </div>
       <router-link to="/subsystem/authz" class="nav-item" active-class="active">
         <span class="ic">▦</span>子系统赋权
       </router-link>
@@ -58,6 +77,36 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const portalExpanded = ref(true)
+
+const subsystems = [
+  { name: 'Wayne', label: '多集群发布平台', icon: 'W' },
+  { name: 'CloudDM', label: 'SQL 审核平台', icon: 'DM' },
+  { name: 'CacheCloud', label: 'Redis 管理平台', icon: 'CC' },
+  { name: 'Apollo', label: '配置中心', icon: 'AP' },
+  { name: 'qpass', label: '七牛统一运维平台', icon: 'QP' },
+  { name: 'Grafana', label: '指标可视化平台', icon: 'GF' },
+]
+
+const isPortalActive = computed(() => {
+  return route.path.startsWith('/subsystem/detail/') || route.path === '/subsystem'
+})
+
+function dotColor(icon: string): string {
+  const colors: Record<string, string> = {
+    W: 'var(--tag-blue-text)',
+    DM: 'var(--tag-green-text)',
+    CC: 'var(--err)',
+    AP: 'var(--tag-blue-text)',
+    QP: 'var(--tag-amber-text)',
+    GF: 'var(--warn)',
+  }
+  return colors[icon] || 'var(--text-dim)'
+}
 </script>
 
 <style scoped>
@@ -117,6 +166,10 @@
   border-color: var(--accent);
 }
 
+.nav-item.active .expand-label {
+  color: var(--accent);
+}
+
 .nav-item .badge {
   margin-left: auto;
   font-family: var(--mono);
@@ -141,5 +194,51 @@
   font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
+}
+
+.nav-expand {
+  justify-content: flex-start;
+  padding: 0;
+  user-select: none;
+}
+
+.expand-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.expand-toggle {
+  padding: 10px;
+  font-size: 12px;
+  opacity: 0.6;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+}
+
+.expand-toggle:hover {
+  opacity: 1;
+  background: var(--bg-panel-2);
+}
+
+.nav-children {
+  padding-left: 8px;
+}
+
+.nav-child {
+  padding: 7px 10px 7px 26px;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.child-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 </style>
