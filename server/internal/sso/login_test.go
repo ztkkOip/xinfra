@@ -143,6 +143,47 @@ func TestDecodeSAMLResponseDecryptsEncryptedAssertion(t *testing.T) {
 	}
 }
 
+func TestDecodeSAMLResponseDecryptsEncryptedAssertionWithXMLCBCPadding(t *testing.T) {
+	t.Parallel()
+
+	key, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		t.Fatalf("generate key: %v", err)
+	}
+	keyFile := writeTestPrivateKey(t, key)
+
+	assertion := `<saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+  <saml:Subject><saml:NameID>carol@example.com</saml:NameID></saml:Subject>
+</saml:Assertion>`
+	sessionKey := []byte("0123456789abcdef")
+	encryptedAssertion := encryptTestAssertionXMLCBCPadding(t, []byte(assertion), sessionKey)
+	encryptedKey, err := rsa.EncryptOAEP(sha1.New(), rand.Reader, &key.PublicKey, sessionKey, nil)
+	if err != nil {
+		t.Fatalf("encrypt key: %v", err)
+	}
+	response := `<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol">
+  <saml:EncryptedAssertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">
+    <xenc:EncryptedData xmlns:xenc="http://www.w3.org/2001/04/xmlenc#">
+      <xenc:EncryptionMethod Algorithm="` + xmlEncAES128CBC + `"></xenc:EncryptionMethod>
+      <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+        <xenc:EncryptedKey>
+          <xenc:CipherData><xenc:CipherValue>` + base64.StdEncoding.EncodeToString(encryptedKey) + `</xenc:CipherValue></xenc:CipherData>
+        </xenc:EncryptedKey>
+      </ds:KeyInfo>
+      <xenc:CipherData><xenc:CipherValue>` + base64.StdEncoding.EncodeToString(encryptedAssertion) + `</xenc:CipherValue></xenc:CipherData>
+    </xenc:EncryptedData>
+  </saml:EncryptedAssertion>
+</samlp:Response>`
+
+	info, err := DecodeSAMLResponse(base64.StdEncoding.EncodeToString([]byte(response)), keyFile)
+	if err != nil {
+		t.Fatalf("DecodeSAMLResponse returned error: %v", err)
+	}
+	if info.NameID != "carol@example.com" {
+		t.Fatalf("unexpected name id: %q", info.NameID)
+	}
+}
+
 func TestDecodeSAMLResponseDecryptsGCMEncryptedAssertion(t *testing.T) {
 	t.Parallel()
 
@@ -221,6 +262,20 @@ func encryptTestAssertion(t *testing.T, plain, key []byte) []byte {
 	return out
 }
 
+func encryptTestAssertionXMLCBCPadding(t *testing.T, plain, key []byte) []byte {
+	t.Helper()
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		t.Fatalf("init cipher: %v", err)
+	}
+	plain = xmlEncCBCPad(plain, block.BlockSize())
+	iv := bytes.Repeat([]byte{3}, block.BlockSize())
+	out := make([]byte, len(iv)+len(plain))
+	copy(out, iv)
+	cipher.NewCBCEncrypter(block, iv).CryptBlocks(out[len(iv):], plain)
+	return out
+}
+
 func encryptTestAssertionGCM(t *testing.T, plain, key []byte) []byte {
 	t.Helper()
 	block, err := aes.NewCipher(key)
@@ -242,6 +297,20 @@ func encryptTestAssertionGCM(t *testing.T, plain, key []byte) []byte {
 func pkcs7Pad(value []byte, blockSize int) []byte {
 	padding := blockSize - len(value)%blockSize
 	return append(value, bytes.Repeat([]byte{byte(padding)}, padding)...)
+}
+
+func xmlEncCBCPad(value []byte, blockSize int) []byte {
+	padding := blockSize - len(value)%blockSize
+	if padding == 0 {
+		padding = blockSize
+	}
+	padded := make([]byte, len(value)+padding)
+	copy(padded, value)
+	for i := len(value); i < len(padded)-1; i++ {
+		padded[i] = byte(i % 251)
+	}
+	padded[len(padded)-1] = byte(padding)
+	return padded
 }
 
 func testIDPMetadataXML(entityID, redirectURL, postURL string) string {

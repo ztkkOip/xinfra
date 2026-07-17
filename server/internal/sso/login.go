@@ -246,7 +246,7 @@ func decryptAESCBC(value, key []byte) ([]byte, error) {
 	cipherText := value[block.BlockSize():]
 	plain := make([]byte, len(cipherText))
 	cipher.NewCBCDecrypter(block, iv).CryptBlocks(plain, cipherText)
-	plain, err = pkcs7Unpad(plain, block.BlockSize())
+	plain, err = xmlEncCBCUnpad(plain, block.BlockSize())
 	if err != nil {
 		return nil, err
 	}
@@ -274,18 +274,13 @@ func decryptAESGCM(value, key []byte) ([]byte, error) {
 	return plain, nil
 }
 
-func pkcs7Unpad(value []byte, blockSize int) ([]byte, error) {
+func xmlEncCBCUnpad(value []byte, blockSize int) ([]byte, error) {
 	if len(value) == 0 || len(value)%blockSize != 0 {
 		return nil, errors.New("invalid saml assertion padding length")
 	}
 	padding := int(value[len(value)-1])
 	if padding == 0 || padding > blockSize || padding > len(value) {
 		return nil, errors.New("invalid saml assertion padding")
-	}
-	for _, b := range value[len(value)-padding:] {
-		if int(b) != padding {
-			return nil, errors.New("invalid saml assertion padding bytes")
-		}
 	}
 	return value[:len(value)-padding], nil
 }

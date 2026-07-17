@@ -13,11 +13,13 @@ export function useAuth() {
   }
 
   const logout = async () => {
+    let logoutUrl = ''
     try {
-      await authApi.logout()
+      const response = await authApi.logout()
+      logoutUrl = response.data.logout_url || ''
     } finally {
       authStore.clearAuth()
-      window.location.assign('/login?logged_out=1')
+      window.location.assign(logoutUrl || '/login?logged_out=1')
     }
   }
 

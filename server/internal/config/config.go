@@ -28,6 +28,7 @@ type Config struct {
 	SAMLSPCert               string
 	SAMLSPKey                string
 	SAMLIDPMetaURL           string
+	SAMLLogoutURL            string
 	WayenLoginURL            string
 	WayenTargetURL           string
 	WayenUsernameKey         string
@@ -78,6 +79,7 @@ func Load() Config {
 		SAMLSPCert:               env("SAML_SP_CERT_FILE", "certs/sp.crt"),
 		SAMLSPKey:                env("SAML_SP_KEY_FILE", "certs/sp.key"),
 		SAMLIDPMetaURL:           env("SAML_IDP_METADATA_URL", "http://sso-internal.dev.qiniu.io/saml2/meta"),
+		SAMLLogoutURL:            trimURL(env("SAML_LOGOUT_URL", "")),
 		WayenLoginURL:            env("WAYEN_LOGIN_URL", ""),
 		WayenTargetURL:           env("WAYEN_TARGET_URL", ""),
 		WayenUsernameKey:         env("WAYEN_USERNAME_KEY", "email"),

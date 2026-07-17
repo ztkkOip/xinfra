@@ -75,7 +75,10 @@ func (h *SAMLHandler) Logout(c *gin.Context) {
 			Expires:  expired,
 		})
 	}
-	c.JSON(http.StatusOK, gin.H{"ok": true})
+	c.JSON(http.StatusOK, gin.H{
+		"ok":         true,
+		"logout_url": h.logoutURL(),
+	})
 }
 
 func (h *SAMLHandler) ACS(c *gin.Context) {
@@ -123,5 +126,22 @@ func ssoRedirectURL(relayState, token string) string {
 	values := parsed.Query()
 	values.Set("sso_token", token)
 	parsed.RawQuery = values.Encode()
+	return parsed.String()
+}
+
+func (h *SAMLHandler) logoutURL() string {
+	logoutURL := strings.TrimSpace(h.cfg.SAMLLogoutURL)
+	if logoutURL == "" {
+		return ""
+	}
+	parsed, err := url.Parse(logoutURL)
+	if err != nil {
+		return logoutURL
+	}
+	values := parsed.Query()
+	if values.Get("redirect") == "" {
+		values.Set("redirect", strings.TrimRight(h.cfg.PublicBaseURL, "/")+"/")
+		parsed.RawQuery = values.Encode()
+	}
 	return parsed.String()
 }
