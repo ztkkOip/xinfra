@@ -7,33 +7,24 @@
       </router-link>
     </div>
     <div class="nav-group">
-      <div class="nav-label">机房 &amp; 网络</div>
-      <router-link to="/resource/status" class="nav-item" active-class="active">
-        <span class="ic">⬡</span>资源状态看板
-      </router-link>
-      <router-link to="/cluster" class="nav-item" active-class="active">
-        <span class="ic">◆</span>集群 / 节点<span class="badge">7</span>
-      </router-link>
-    </div>
-    <div class="nav-group">
-      <div class="nav-label">资源管理</div>
-      <router-link to="/resource/mgmt" class="nav-item" active-class="active">
-        <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
-      </router-link>
-      <router-link to="/service/mgmt" class="nav-item" active-class="active">
-        <span class="ic">◈</span>服务管理<span class="badge">Consul</span>
-      </router-link>
-    </div>
-    <div class="nav-group">
-      <div class="nav-label">服务交付</div>
+      <div class="nav-label">业务交付</div>
       <router-link to="/service/catalog" class="nav-item" active-class="active">
-        <span class="ic">▤</span>基础服务目录
+        <span class="ic">▤</span>基础服务
       </router-link>
       <router-link to="/tasks" class="nav-item" active-class="active">
         <span class="ic">▧</span>任务中心<span class="badge">2</span>
       </router-link>
-      <router-link to="/config" class="nav-item" active-class="active">
-        <span class="ic">⚙</span>配置中心管理<span class="badge">Apollo</span>
+    </div>
+    <div class="nav-group">
+      <div class="nav-label">资源纳管</div>
+      <router-link to="/resource/mgmt" class="nav-item" active-class="active">
+        <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
+      </router-link>
+      <router-link to="/cluster" class="nav-item" active-class="active">
+        <span class="ic">◆</span>集群 / 容器池<span class="badge">3</span>
+      </router-link>
+      <router-link to="/tenants" class="nav-item" active-class="active">
+        <span class="ic">▦</span>业务线 / 配额
       </router-link>
     </div>
     <div class="nav-group">

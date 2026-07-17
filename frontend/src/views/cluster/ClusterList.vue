@@ -2,8 +2,8 @@
   <div>
     <div class="page-head">
       <div>
-        <h1>集群 / 节点</h1>
-        <p>按机房切分的 RKE2 集群，Calico BGP 扁平网络</p>
+        <h1>集群 / 容器池</h1>
+        <p>统一建设容器池 · RKE2 上建 Wayne 后新服务的标准发布流程 · Calico BGP 扁平网络</p>
       </div>
       <el-button type="primary">+ 加入新节点</el-button>
     </div>
