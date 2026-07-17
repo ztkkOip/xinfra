@@ -5,6 +5,7 @@
       xinfra <span class="sub">统一基础设施平台</span>
     </div>
     <span class="env-pill">● 生产环境</span>
+    <BusinessLineSwitcher />
     <div class="spacer"></div>
     <div class="search-box">
       <el-icon><Search /></el-icon>
@@ -23,7 +24,7 @@
       <div class="avatar">{{ userInitial }}</div>
       <div>
         <div>{{ user?.display_name || '未登录' }}</div>
-        <div class="ldap-tag">LDAP · {{ user?.business_line || '' }}业务线</div>
+        <div class="ldap-tag">LDAP · {{ user?.business_line || '' }}</div>
       </div>
       <el-button class="logout-button" text @click="handleLogout">退出</el-button>
     </div>
@@ -36,6 +37,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useTheme } from '@/composables/useTheme'
 import { useAuth } from '@/composables/useAuth'
 import { Moon, Sunny } from '@element-plus/icons-vue'
+import BusinessLineSwitcher from '@/components/BusinessLineSwitcher.vue'
 
 const authStore = useAuthStore()
 const { logout } = useAuth()
