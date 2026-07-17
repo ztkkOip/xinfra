@@ -11,28 +11,28 @@
       <router-link to="/service/catalog" class="nav-item" active-class="active">
         <span class="ic">▤</span>基础服务
       </router-link>
-      <router-link to="/tasks" class="nav-item" active-class="active">
+      <router-link to="/task/log" class="nav-item" active-class="active">
         <span class="ic">▧</span>任务日志<span class="badge">2</span>
       </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">资源纳管</div>
-      <router-link to="/resource/mgmt" class="nav-item" active-class="active">
+      <router-link to="/resource/management" class="nav-item" active-class="active">
         <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
       </router-link>
-      <router-link to="/cluster" class="nav-item" active-class="active">
+      <router-link to="/infrastructure/cluster" class="nav-item" active-class="active">
         <span class="ic">◆</span>集群与容器<span class="badge">3</span>
       </router-link>
-      <router-link to="/tenants" class="nav-item" active-class="active">
+      <router-link to="/business/quota" class="nav-item" active-class="active">
         <span class="ic">▦</span>业务配额
       </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">可观测性</div>
-      <router-link to="/monitor" class="nav-item" active-class="active">
+      <router-link to="/observable/monitoring" class="nav-item" active-class="active">
         <span class="ic">◎</span>监控看板
       </router-link>
-      <router-link to="/alert" class="nav-item" active-class="active">
+      <router-link to="/observable/alert" class="nav-item" active-class="active">
         <span class="ic">⚡</span>告警信息
       </router-link>
     </div>
@@ -60,7 +60,7 @@
           <span class="ic" style="font-size:12px;">▦</span>全部总览
         </router-link>
       </div>
-      <router-link to="/subsystem/authz" class="nav-item" active-class="active">
+      <router-link to="/subsystem/authorization" class="nav-item" active-class="active">
         <span class="ic">▦</span>子系统赋权
       </router-link>
     </div>
@@ -69,7 +69,7 @@
       <router-link to="/audit/login" class="nav-item" active-class="active">
         <span class="ic">📋</span>登录审计
       </router-link>
-      <router-link to="/audit/ops" class="nav-item" active-class="active">
+      <router-link to="/audit/operation" class="nav-item" active-class="active">
         <span class="ic">📝</span>运维操作审计
       </router-link>
     </div>

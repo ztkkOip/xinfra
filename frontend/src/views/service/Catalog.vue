@@ -249,7 +249,7 @@ const openWayne = async () => {
 const handleMysqlSubmit = () => {
   showMysqlModal.value = false
   ElMessage.success('MySQL 标准化交付已提交，完成后自动注册 CloudDM')
-  router.push({ name: 'Tasks' })
+  router.push({ name: 'TaskLog' })
 }
 </script>
 
