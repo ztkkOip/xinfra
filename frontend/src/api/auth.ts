@@ -24,6 +24,10 @@ export interface AuthConfig {
   sso_enabled: boolean
 }
 
+export interface LogoutResponse {
+  logout_url?: string
+}
+
 export const authApi = {
   async getConfig(): Promise<ApiResponse<AuthConfig>> {
     const response = await fetch('/auth/api/v1/config', {
@@ -64,7 +68,7 @@ export const authApi = {
     }
   },
 
-  async logout(): Promise<ApiResponse<null>> {
+  async logout(): Promise<ApiResponse<LogoutResponse>> {
     const token = getToken()
     const response = await fetch('/auth/api/v1/logout', {
       method: 'POST',
@@ -78,7 +82,14 @@ export const authApi = {
       const data = await response.json().catch(() => ({}))
       throw new Error(data.error || `HTTP ${response.status}`)
     }
-    return { code: 0, message: 'success', data: null }
+    const data = await response.json().catch(() => ({}))
+    return {
+      code: 0,
+      message: 'success',
+      data: {
+        logout_url: data.logout_url || '',
+      },
+    }
   },
 
   async getUserInfo(): Promise<ApiResponse<UserInfo>> {
