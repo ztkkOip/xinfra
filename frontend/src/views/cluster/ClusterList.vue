@@ -5,7 +5,7 @@
         <h1>集群与容器</h1>
         <p>统一建设容器池 · RKE2 上建 Wayne 后新服务的标准发布流程 · Calico BGP 扁平网络</p>
       </div>
-      <el-button type="primary">+ 加入新节点</el-button>
+      <el-button type="primary">同步</el-button>
     </div>
 
     <div class="panel">
