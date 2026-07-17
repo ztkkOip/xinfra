@@ -48,7 +48,7 @@ func NewWayenService(cfg config.Config, db *gorm.DB) *WayenService {
 	}
 }
 
-func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) {
+func (s *WayenService) Login(email, username, refOverride string) (*WayenLoginResult, error) {
 	email = strings.TrimSpace(email)
 	if email == "" {
 		return nil, ErrWayenEmailMissing
@@ -58,7 +58,7 @@ func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) 
 		oauthLoginURL = strings.TrimSpace(s.cfg.OAuthRedirectURI)
 	}
 	if oauthLoginURL != "" && strings.TrimSpace(s.cfg.WayenTargetURL) != "" {
-		target, err := s.oauthLoginURL(oauthLoginURL, s.cfg.WayenTargetURL)
+		target, err := s.oauthLoginURL(oauthLoginURL, s.cfg.WayenTargetURL, refOverride)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +111,7 @@ func (s *WayenService) Login(email, username string) (*WayenLoginResult, error) 
 	}, nil
 }
 
-func (s *WayenService) oauthLoginURL(redirectURI, targetURL string) (string, error) {
+func (s *WayenService) oauthLoginURL(redirectURI, targetURL, refOverride string) (string, error) {
 	parsed, err := url.Parse(strings.TrimSpace(redirectURI))
 	if err != nil {
 		return "", err
@@ -124,7 +124,7 @@ func (s *WayenService) oauthLoginURL(redirectURI, targetURL string) (string, err
 		next.Path = "/sign-in"
 	}
 	values := next.Query()
-	values.Set("ref", defaultConfigValue(s.cfg.WayenOAuthRef, "/portal/namespace/1/app"))
+	values.Set("ref", defaultConfigValue(refOverride, defaultConfigValue(s.cfg.WayenOAuthRef, "/portal/namespace/1/app")))
 	next.RawQuery = values.Encode()
 
 	query := parsed.Query()

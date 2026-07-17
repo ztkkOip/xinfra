@@ -63,6 +63,12 @@
       <router-link to="/subsystem/authz" class="nav-item" active-class="active">
         <span class="ic">▦</span>子系统赋权
       </router-link>
+      <router-link v-if="isPlatformAdmin" to="/business-line/manage" class="nav-item" active-class="active">
+        <span class="ic">▤</span>业务线管理
+      </router-link>
+      <router-link v-if="isBusinessLineAdmin" to="/business-line/assignment" class="nav-item" active-class="active">
+        <span class="ic">▥</span>业务线分配
+      </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">审计</div>
@@ -81,9 +87,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import { useBusinessLineStore } from '@/stores/businessLine'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const businessLineStore = useBusinessLineStore()
 const portalExpanded = ref(true)
+const isPlatformAdmin = computed(() => authStore.user?.is_admin === true)
+const isBusinessLineAdmin = computed(() => businessLineStore.isCurrentAdmin)
 
 const subsystems = [
   { name: 'Wayne', label: '多集群发布平台', icon: 'W' },
