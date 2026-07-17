@@ -5,7 +5,7 @@
         <h1>监控看板</h1>
         <p>物理机 / 虚机 / 基础服务状态汇总 · 夜莺（Nightingale）统一告警引擎对接 Zabbix + VictoriaMetrics · 最近更新于 18 秒前</p>
       </div>
-      <button class="btn btn-ghost">⟳ 刷新</button>
+      <el-button type="primary">刷新</el-button>
     </div>
 
     <div class="stat-row">

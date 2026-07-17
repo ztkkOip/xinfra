@@ -2,7 +2,7 @@
   <div>
     <div class="page-head">
       <div>
-        <h1>资源管理</h1>
+        <h1>机器管理</h1>
         <p>统一纳管物理机与虚机资源 · 基础数据来自 SINA CMDB</p>
       </div>
       <el-button type="primary">同步</el-button>
