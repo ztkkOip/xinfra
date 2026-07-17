@@ -71,7 +71,6 @@
       </router-link>
     </div>
     <div class="sidebar-foot">
-      xinfra v3 一期 · 七机房容器化<br>RKE2 · Calico BGP · Ceph · LAS<br>AWS TGW + WireGuard · LDAP 认证
     </div>
   </aside>
 </template>
