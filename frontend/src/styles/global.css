@@ -89,29 +89,6 @@ button {
   background: var(--text-dim);
 }
 
-/* 状态文本 */
-.status-text {
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-}
-
-.status-text.ok {
-  color: var(--accent);
-}
-
-.status-text.warn {
-  color: var(--warn);
-}
-
-.status-text.err {
-  color: var(--err);
-}
-
-.status-text.idle {
-  color: var(--text-dim);
-}
-
 /* 标签 */
 .tag {
   display: inline-flex;
@@ -387,8 +364,7 @@ tr.tr-hover.active td {
 /* ========== 状态文本 ========== */
 .status-text {
   font-size: 12px;
-  display: flex;
-  align-items: center;
+  white-space: nowrap;
 }
 
 .status-text.ok {
