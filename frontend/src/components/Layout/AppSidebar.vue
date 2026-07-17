@@ -7,46 +7,59 @@
       </router-link>
     </div>
     <div class="nav-group">
-      <div class="nav-label">机房 &amp; 网络</div>
-      <router-link to="/resource/status" class="nav-item" active-class="active">
-        <span class="ic">⬡</span>资源状态看板
+      <div class="nav-label">业务交付</div>
+      <router-link to="/service/catalog" class="nav-item" active-class="active">
+        <span class="ic">▤</span>基础服务
       </router-link>
-      <router-link to="/cluster" class="nav-item" active-class="active">
-        <span class="ic">◆</span>集群 / 节点<span class="badge">7</span>
+      <router-link to="/tasks" class="nav-item" active-class="active">
+        <span class="ic">▧</span>任务日志<span class="badge">2</span>
       </router-link>
     </div>
     <div class="nav-group">
-      <div class="nav-label">资源管理</div>
+      <div class="nav-label">资源纳管</div>
       <router-link to="/resource/mgmt" class="nav-item" active-class="active">
         <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
       </router-link>
-      <router-link to="/service/mgmt" class="nav-item" active-class="active">
-        <span class="ic">◈</span>服务管理<span class="badge">Consul</span>
+      <router-link to="/cluster" class="nav-item" active-class="active">
+        <span class="ic">◆</span>集群与容器<span class="badge">3</span>
       </router-link>
-    </div>
-    <div class="nav-group">
-      <div class="nav-label">服务交付</div>
-      <router-link to="/service/catalog" class="nav-item" active-class="active">
-        <span class="ic">▤</span>基础服务目录
-      </router-link>
-      <router-link to="/tasks" class="nav-item" active-class="active">
-        <span class="ic">▧</span>任务中心<span class="badge">2</span>
-      </router-link>
-      <router-link to="/config" class="nav-item" active-class="active">
-        <span class="ic">⚙</span>配置中心管理<span class="badge">Apollo</span>
+      <router-link to="/tenants" class="nav-item" active-class="active">
+        <span class="ic">▦</span>业务配额
       </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">可观测性</div>
       <router-link to="/monitor" class="nav-item" active-class="active">
-        <span class="ic">◎</span>监控 / 日志 / 告警
+        <span class="ic">◎</span>监控
+      </router-link>
+      <router-link to="/alert" class="nav-item" active-class="active">
+        <span class="ic">⚡</span>告警
       </router-link>
     </div>
     <div class="nav-group">
       <div class="nav-label">统一入口</div>
-      <router-link to="/subsystem" class="nav-item" active-class="active">
-        <span class="ic">↗</span>子系统导航
-      </router-link>
+      <div class="nav-item nav-expand" :class="{ active: isPortalActive }">
+        <router-link to="/subsystem" class="expand-label">
+          <span class="ic">↗</span>子系统导航
+        </router-link>
+        <span class="expand-toggle" @click="portalExpanded = !portalExpanded">
+          {{ portalExpanded ? '▾' : '▸' }}
+        </span>
+      </div>
+      <div v-show="portalExpanded" class="nav-children">
+        <router-link
+          v-for="sys in subsystems"
+          :key="sys.name"
+          :to="`/subsystem/detail/${sys.name.toLowerCase()}`"
+          class="nav-item nav-child"
+          active-class="active"
+        >
+          <span class="child-dot" :style="{ background: dotColor(sys.icon) }"></span>{{ sys.label }} {{ sys.name }}
+        </router-link>
+        <router-link to="/subsystem" class="nav-item nav-child" active-class="active">
+          <span class="ic" style="font-size:12px;">▦</span>全部总览
+        </router-link>
+      </div>
       <router-link to="/subsystem/authz" class="nav-item" active-class="active">
         <span class="ic">▦</span>子系统赋权
       </router-link>
@@ -61,12 +74,41 @@
       </router-link>
     </div>
     <div class="sidebar-foot">
-      xinfra v3 一期 · 七机房容器化<br>RKE2 · Calico BGP · Ceph · LAS<br>AWS TGW + WireGuard · LDAP 认证
     </div>
   </aside>
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const portalExpanded = ref(true)
+
+const subsystems = [
+  { name: 'Wayne', label: '多集群发布平台', icon: 'W' },
+  { name: 'CloudDM', label: 'SQL 审核平台', icon: 'DM' },
+  { name: 'CacheCloud', label: 'Redis 管理平台', icon: 'CC' },
+  { name: 'Apollo', label: '配置中心', icon: 'AP' },
+  { name: 'qpass', label: '七牛统一运维平台', icon: 'QP' },
+  { name: 'Grafana', label: '指标可视化平台', icon: 'GF' },
+]
+
+const isPortalActive = computed(() => {
+  return route.path.startsWith('/subsystem/detail/') || route.path === '/subsystem'
+})
+
+function dotColor(icon: string): string {
+  const colors: Record<string, string> = {
+    W: 'var(--tag-blue-text)',
+    DM: 'var(--tag-green-text)',
+    CC: 'var(--err)',
+    AP: 'var(--tag-blue-text)',
+    QP: 'var(--tag-amber-text)',
+    GF: 'var(--warn)',
+  }
+  return colors[icon] || 'var(--text-dim)'
+}
 </script>
 
 <style scoped>
@@ -126,6 +168,10 @@
   border-color: var(--accent);
 }
 
+.nav-item.active .expand-label {
+  color: var(--accent);
+}
+
 .nav-item .badge {
   margin-left: auto;
   font-family: var(--mono);
@@ -150,5 +196,51 @@
   font-size: 14px;
   color: var(--text-dim);
   line-height: 1.6;
+}
+
+.nav-expand {
+  justify-content: flex-start;
+  padding: 0;
+  user-select: none;
+}
+
+.expand-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  padding: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.expand-toggle {
+  padding: 10px;
+  font-size: 12px;
+  opacity: 0.6;
+  cursor: pointer;
+  border-radius: 0 6px 6px 0;
+}
+
+.expand-toggle:hover {
+  opacity: 1;
+  background: var(--bg-panel-2);
+}
+
+.nav-children {
+  padding-left: 8px;
+}
+
+.nav-child {
+  padding: 7px 10px 7px 26px;
+  font-size: 14px;
+  gap: 8px;
+}
+
+.child-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 </style>

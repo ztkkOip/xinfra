@@ -5,7 +5,7 @@
         <h1>资源管理</h1>
         <p>统一纳管物理机与虚机资源 · 基础数据来自 SINA CMDB</p>
       </div>
-      <el-button type="primary">+ 创建虚机</el-button>
+      <el-button type="primary">同步</el-button>
     </div>
 
     <div class="stat-row">

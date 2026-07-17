@@ -35,6 +35,12 @@ const router = createRouter({
           meta: { title: '子系统导航' },
         },
         {
+          path: 'subsystem/detail/:name',
+          name: 'SubsystemDetail',
+          component: () => import('@/views/subsystem/SubsystemDetail.vue'),
+          meta: { title: '子系统详情' },
+        },
+        {
           path: 'subsystem/authz',
           name: 'SubsystemAuthz',
           component: () => import('@/views/subsystem/Authorization.vue'),
@@ -68,7 +74,13 @@ const router = createRouter({
           path: 'cluster',
           name: 'Cluster',
           component: () => import('@/views/cluster/ClusterList.vue'),
-          meta: { title: '集群 / 节点' },
+          meta: { title: '集群与容器' },
+        },
+        {
+          path: 'tenants',
+          name: 'Tenants',
+          component: () => import('@/views/resource/Tenants.vue'),
+          meta: { title: '业务配额' },
         },
         {
           path: 'service/catalog',
@@ -98,7 +110,13 @@ const router = createRouter({
           path: 'monitor',
           name: 'Monitor',
           component: () => import('@/views/monitor/Monitor.vue'),
-          meta: { title: '监控 / 日志 / 告警' },
+          meta: { title: '监控' },
+        },
+        {
+          path: 'alert',
+          name: 'Alert',
+          component: () => import('@/views/monitor/Alert.vue'),
+          meta: { title: '告警' },
         },
       ],
     },
