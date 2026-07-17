@@ -33,6 +33,7 @@ const bgColor = computed(() => {
     AP: 'var(--logo-ap-bg)',
     QP: 'var(--logo-qp-bg)',
     GF: 'var(--logo-gf-bg)',
+    SS: 'var(--logo-ss-bg)',
   }
   return colors[props.system.icon] || 'var(--bg-panel-2)'
 })
@@ -45,6 +46,7 @@ const iconColor = computed(() => {
     AP: 'var(--tag-blue-text)',
     QP: 'var(--tag-amber-text)',
     GF: 'var(--warn)',
+    SS: 'var(--tag-cyan-text)',
   }
   return colors[props.system.icon] || 'var(--text-mid)'
 })

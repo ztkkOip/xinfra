@@ -88,6 +88,7 @@ const bgColor = computed(() => {
     AP: 'var(--logo-ap-bg)',
     QP: 'var(--logo-qp-bg)',
     GF: 'var(--logo-gf-bg)',
+    SS: 'var(--logo-ss-bg)',
   }
   return colors[system.value.icon] || 'var(--bg-panel-2)'
 })
@@ -101,6 +102,7 @@ const iconColor = computed(() => {
     AP: 'var(--tag-blue-text)',
     QP: 'var(--tag-amber-text)',
     GF: 'var(--warn)',
+    SS: 'var(--tag-cyan-text)',
   }
   return colors[system.value.icon] || 'var(--text-mid)'
 })
@@ -114,6 +116,7 @@ const detailDesc = computed(() => {
     Apollo: '统一管理多机房 Config Service Cluster 的配置发布、灰度、回滚与变更审计，所有机房配置项均可在此单一入口检索与编辑。',
     qpass: '七牛云内部系统。',
     Grafana: '对接 VictoriaMetrics 数据源，K8s / 容器 / 业务指标统一仪表盘展示。预置核心看板，支持自定义。',
+    Superset: '日志数据探索与可视化分析平台，支持多数据源接入和丰富的图表展示。用于日志数据分析和可视化报表。',
   }
   return descs[system.value.name] || system.value.description
 })

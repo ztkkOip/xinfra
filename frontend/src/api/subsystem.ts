@@ -93,6 +93,18 @@ const mockSubsystems: Subsystem[] = [
     status: 'integrated',
     sso_enabled: true,
   },
+  {
+    id: 7,
+    name: 'Superset',
+    label: '日志数据可视化',
+    description: '日志数据探索与可视化分析平台，支持多数据源接入和丰富的图表展示。',
+    icon: 'SS',
+    url: 'https://superset.xinfra.internal',
+    domain: 'superset.xinfra.internal',
+    category: '可观测性',
+    status: 'integrating',
+    sso_enabled: true,
+  },
 ]
 
 export const subsystemApi = {

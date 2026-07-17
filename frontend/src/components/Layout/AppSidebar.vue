@@ -92,6 +92,7 @@ const subsystems = [
   { name: 'Apollo', label: '配置中心', icon: 'AP' },
   { name: 'qpass', label: '七牛统一运维平台', icon: 'QP' },
   { name: 'Grafana', label: '指标可视化平台', icon: 'GF' },
+  { name: 'Superset', label: '日志数据可视化', icon: 'SS' },
 ]
 
 const isPortalActive = computed(() => {
@@ -106,6 +107,7 @@ function dotColor(icon: string): string {
     AP: 'var(--tag-blue-text)',
     QP: 'var(--tag-amber-text)',
     GF: 'var(--warn)',
+    SS: 'var(--tag-cyan-text)',
   }
   return colors[icon] || 'var(--text-dim)'
 }
