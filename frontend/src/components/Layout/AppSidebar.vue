@@ -12,7 +12,7 @@
         <span class="ic">▤</span>基础服务
       </router-link>
       <router-link to="/tasks" class="nav-item" active-class="active">
-        <span class="ic">▧</span>任务中心<span class="badge">2</span>
+        <span class="ic">▧</span>任务日志<span class="badge">2</span>
       </router-link>
     </div>
     <div class="nav-group">
