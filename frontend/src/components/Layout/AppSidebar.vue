@@ -17,8 +17,8 @@
     </div>
     <div class="nav-group">
       <div class="nav-label">资源纳管</div>
-      <router-link to="/resource/management" class="nav-item" active-class="active">
-        <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
+      <router-link to="/machine/management" class="nav-item" active-class="active">
+        <span class="ic">▥</span>机器管理<span class="badge">CMDB</span>
       </router-link>
       <router-link to="/infrastructure/cluster" class="nav-item" active-class="active">
         <span class="ic">◆</span>集群与容器<span class="badge">3</span>
