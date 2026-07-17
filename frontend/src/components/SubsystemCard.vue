@@ -11,19 +11,22 @@
     </div>
     <p>{{ system.description }}</p>
     <div class="sso-row">
-      <span class="sso-dot" :class="{ warn: system.status === 'integrating' }"></span>
-      {{ system.status === 'integrated' ? 'LDAP 原生配置接入 · 零代码' : 'LDAP 接入改造中' }}
+      <span class="sso-dot" :class="{ warn: system.status !== 'active' }"></span>
+      {{ system.status === 'active' ? 'LDAP 原生配置接入 · 在线' : 'LDAP 接入改造中' }}
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { subsystemApi, type Subsystem } from '@/api/subsystem'
+import { useRouter } from 'vue-router'
+import type { Subsystem } from '@/api/subsystem'
 
 const props = defineProps<{
   system: Subsystem
 }>()
+
+const router = useRouter()
 
 const bgColor = computed(() => {
   const colors: Record<string, string> = {
@@ -33,6 +36,7 @@ const bgColor = computed(() => {
     AP: 'var(--logo-ap-bg)',
     QP: 'var(--logo-qp-bg)',
     GF: 'var(--logo-gf-bg)',
+    SS: 'var(--logo-ss-bg)',
   }
   return colors[props.system.icon] || 'var(--bg-panel-2)'
 })
@@ -45,17 +49,13 @@ const iconColor = computed(() => {
     AP: 'var(--tag-blue-text)',
     QP: 'var(--tag-amber-text)',
     GF: 'var(--warn)',
+    SS: 'var(--tag-cyan-text)',
   }
   return colors[props.system.icon] || 'var(--text-mid)'
 })
 
-const handleClick = async () => {
-  if (props.system.sso_enabled) {
-    const { data } = await subsystemApi.getSSOUrl(props.system.id)
-    window.location.assign(data.sso_url)
-  } else {
-    window.open(props.system.url, '_blank')
-  }
+const handleClick = () => {
+  router.push(`/subsystem/detail/${props.system.name.toLowerCase()}`)
 }
 </script>
 

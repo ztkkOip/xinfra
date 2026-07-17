@@ -61,6 +61,11 @@
   --tag-green-bg: #E8FFEA;
   --tag-green-border: #9FD9A8;
 
+  /* 标签/徽章颜色 - 青色系 */
+  --tag-cyan-text: #0FC6C2;
+  --tag-cyan-bg: #E8FFFB;
+  --tag-cyan-border: #87E8DE;
+
   /* 节点单元格颜色 */
   --node-empty-bg: #F0F2F5;
   --node-a-bg: #E8FFEA;
@@ -90,6 +95,7 @@
   --logo-ap-bg: #E8F3FF;
   --logo-qp-bg: #FFF7E6;
   --logo-gf-bg: #F5F7FA;
+  --logo-ss-bg: #E8FFFB;
 
   /* 发光/阴影效果 */
   --accent-glow: rgba(0, 180, 42, 0.3);
@@ -158,6 +164,11 @@
   --tag-green-bg: #0F261D;
   --tag-green-border: var(--accent-dim);
 
+  /* 标签/徽章颜色 - 青色系 */
+  --tag-cyan-text: #5CFFFF;
+  --tag-cyan-bg: #0A2626;
+  --tag-cyan-border: #1A5C5C;
+
   /* 节点单元格颜色 */
   --node-empty-bg: #1E2532;
   --node-a-bg: #13261F;
@@ -187,6 +198,7 @@
   --logo-ap-bg: #1C2A3A;
   --logo-qp-bg: #241B0A;
   --logo-gf-bg: #1B202B;
+  --logo-ss-bg: #0A2626;
 
   /* 发光/阴影效果 */
   --accent-glow: rgba(63, 224, 165, 0.3);

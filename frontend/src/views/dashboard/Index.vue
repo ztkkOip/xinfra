@@ -82,7 +82,7 @@
       <div class="panel">
         <div class="panel-head">
           <h3>最近任务</h3>
-          <router-link to="/tasks" class="meta">查看全部 →</router-link>
+          <router-link to="/task/log" class="meta">查看全部 →</router-link>
         </div>
         <div class="panel-body">
           <table>
