@@ -74,13 +74,13 @@ const router = createRouter({
           path: 'cluster',
           name: 'Cluster',
           component: () => import('@/views/cluster/ClusterList.vue'),
-          meta: { title: '集群 / 容器池' },
+          meta: { title: '集群与容器' },
         },
         {
           path: 'tenants',
           name: 'Tenants',
           component: () => import('@/views/resource/Tenants.vue'),
-          meta: { title: '业务线 / 配额' },
+          meta: { title: '业务配额' },
         },
         {
           path: 'service/catalog',

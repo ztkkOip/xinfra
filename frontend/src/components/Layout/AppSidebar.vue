@@ -21,10 +21,10 @@
         <span class="ic">▥</span>资源管理<span class="badge">CMDB</span>
       </router-link>
       <router-link to="/cluster" class="nav-item" active-class="active">
-        <span class="ic">◆</span>集群 / 容器池<span class="badge">3</span>
+        <span class="ic">◆</span>集群与容器<span class="badge">3</span>
       </router-link>
       <router-link to="/tenants" class="nav-item" active-class="active">
-        <span class="ic">▦</span>业务线 / 配额
+        <span class="ic">▦</span>业务配额
       </router-link>
     </div>
     <div class="nav-group">

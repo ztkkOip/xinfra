@@ -2,7 +2,7 @@
   <div>
     <div class="page-head">
       <div>
-        <h1>业务线 / 配额</h1>
+        <h1>业务配额</h1>
         <p>按业务线划分资源配额与隔离策略 · RBAC 权限随业务线自动具备</p>
       </div>
       <el-button type="primary">+ 新增业务线</el-button>
