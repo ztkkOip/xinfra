@@ -20,6 +20,9 @@
       <router-link to="/machine/management" class="nav-item" active-class="active">
         <span class="ic">▥</span>机器管理<span class="badge">CMDB</span>
       </router-link>
+      <router-link to="/service/management" class="nav-item" active-class="active">
+        <span class="ic">◈</span>服务管理<span class="badge">Consul</span>
+      </router-link>
       <router-link to="/infrastructure/cluster" class="nav-item" active-class="active">
         <span class="ic">◆</span>集群与容器<span class="badge">3</span>
       </router-link>

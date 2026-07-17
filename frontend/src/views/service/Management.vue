@@ -5,7 +5,7 @@
         <h1>服务管理</h1>
         <p>同步全部机房 Consul 注册中心服务目录，统一查看服务名 / 服务 IP / 业务标签 / 实例数</p>
       </div>
-      <el-button>⟳ 立即同步</el-button>
+      <el-button type="primary">同步</el-button>
     </div>
 
     <div class="stat-row">
