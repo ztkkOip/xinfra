@@ -2,7 +2,9 @@ package handler
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/1024XEngineer/xinfra/server/internal/auth"
@@ -40,7 +42,12 @@ func (h *WayenHandler) Login(c *gin.Context) {
 		return
 	}
 
-	result, err := h.wayen.Login(email, claims.Username)
+	refOverride, ok := h.resolveWayneRef(c, claims)
+	if !ok {
+		return
+	}
+
+	result, err := h.wayen.Login(email, claims.Username, refOverride)
 	if err != nil {
 		h.writeAudit(c, claims.UserID, claims.Username, "deny", err.Error())
 		switch {
@@ -71,6 +78,54 @@ func (h *WayenHandler) Login(c *gin.Context) {
 		return
 	}
 	c.Redirect(http.StatusFound, result.TargetURL)
+}
+
+func (h *WayenHandler) resolveWayneRef(c *gin.Context, claims *auth.Claims) (string, bool) {
+	rawBusinessLineID := strings.TrimSpace(c.Query("business_line_id"))
+	if rawBusinessLineID == "" {
+		return "", true
+	}
+
+	businessLineID, err := strconv.ParseUint(rawBusinessLineID, 10, 64)
+	if err != nil || businessLineID == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid business_line_id"})
+		return "", false
+	}
+
+	var businessLine model.BusinessLine
+	if err := h.db.First(&businessLine, "id = ?", businessLineID).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "business line not found"})
+			return "", false
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return "", false
+	}
+
+	if !claims.IsAdmin {
+		var binding model.BusinessLineUser
+		if err := h.db.Where("business_line_id = ? AND user_id = ?", businessLineID, claims.UserID).First(&binding).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusForbidden, gin.H{"error": "current user does not have business line permission"})
+				return "", false
+			}
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return "", false
+		}
+	}
+
+	var mapping model.BusinessLineWayneNamespace
+	if err := h.db.Where("business_line_id = ?", businessLineID).Order("wayne_namespace_id ASC").First(&mapping).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return "", true
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return "", false
+	}
+	if mapping.WayneNamespaceID == 0 {
+		return "", true
+	}
+	return fmt.Sprintf("/portal/namespace/%d/app", mapping.WayneNamespaceID), true
 }
 
 func (h *WayenHandler) GetCredential(c *gin.Context) {

@@ -12,6 +12,7 @@ export interface UserInfo {
   display_name: string
   email: string
   business_line: string
+  is_admin: boolean
 }
 
 export interface LoginResponse {
@@ -113,6 +114,7 @@ export const authApi = {
         display_name: data.display_name || data.username,
         email: data.email || '',
         business_line: data.business_line || '',
+        is_admin: data.is_admin === true,
       },
     }
   },

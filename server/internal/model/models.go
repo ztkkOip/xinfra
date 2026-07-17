@@ -32,6 +32,32 @@ type WayenCredential struct {
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
 }
 
+type BusinessLine struct {
+	ID        uint64    `gorm:"primaryKey" json:"id"`
+	Name      string    `gorm:"size:128;not null;uniqueIndex" json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type BusinessLineUser struct {
+	ID             uint64    `gorm:"primaryKey" json:"id"`
+	BusinessLineID uint64    `gorm:"not null;uniqueIndex:idx_business_line_users_unique,priority:1;index" json:"business_line_id"`
+	UserID         uint64    `gorm:"not null;uniqueIndex:idx_business_line_users_unique,priority:2;index" json:"user_id"`
+	Permission     int       `gorm:"not null;default:1" json:"permission"`
+	CreatedAt      time.Time `json:"created_at"`
+	UpdatedAt      time.Time `json:"updated_at"`
+}
+
+type BusinessLineWayneNamespace struct {
+	ID                 uint64    `gorm:"primaryKey" json:"id"`
+	BusinessLineID     uint64    `gorm:"not null;uniqueIndex:idx_business_line_wayne_namespaces_unique,priority:1;index" json:"business_line_id"`
+	WayneNamespaceID   uint64    `gorm:"not null;uniqueIndex:idx_business_line_wayne_namespaces_unique,priority:2" json:"wayne_namespace_id"`
+	WayneNamespaceName string    `gorm:"size:128;not null;default:''" json:"wayne_namespace_name"`
+	KubeNamespace      string    `gorm:"size:128;not null;default:''" json:"kube_namespace"`
+	CreatedAt          time.Time `json:"created_at"`
+	UpdatedAt          time.Time `json:"updated_at"`
+}
+
 type AccessToken struct {
 	ID        uint64     `gorm:"primaryKey" json:"id"`
 	UserID    uint64     `gorm:"not null;index" json:"user_id"`

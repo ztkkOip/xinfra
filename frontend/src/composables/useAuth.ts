@@ -1,14 +1,17 @@
 import { useAuthStore } from '@/stores/auth'
+import { useBusinessLineStore } from '@/stores/businessLine'
 import { authApi } from '@/api/auth'
 import { redirectToSSO } from '@/utils/sso'
 
 export function useAuth() {
   const authStore = useAuthStore()
+  const businessLineStore = useBusinessLineStore()
 
   const login = async (username: string, password: string) => {
     const response = await authApi.login({ username, password })
     const { token, user } = response.data
     authStore.setAuth(token, user)
+    await businessLineStore.loadMine()
     return response
   }
 
@@ -19,6 +22,7 @@ export function useAuth() {
       logoutUrl = response.data.logout_url || ''
     } finally {
       authStore.clearAuth()
+      businessLineStore.clear()
       window.location.assign(logoutUrl || '/login?logged_out=1')
     }
   }

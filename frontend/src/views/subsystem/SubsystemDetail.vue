@@ -75,8 +75,6 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { subsystemApi, type Subsystem } from '@/api/subsystem'
-import { getToken } from '@/utils/auth'
-import { redirectToSSO } from '@/utils/sso'
 
 const route = useRoute()
 

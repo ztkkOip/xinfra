@@ -5,7 +5,7 @@
         class="bl-ic"
         :style="{ background: currentBL?.iconBg, color: currentBL?.iconColor }"
       >
-        {{ currentBL?.iconText }}
+        {{ currentBL?.iconText || 'BL' }}
       </div>
       <span class="bl-name-trigger">{{ currentBL?.name || '未选择' }}</span>
       <span class="bl-role" v-if="currentBL">{{ currentBL.role }} · 授权 {{ authCount }} 子系统</span>
@@ -32,7 +32,7 @@
             <div class="bl-sub">{{ bl.ou }} · {{ bl.role }}</div>
           </div>
           <span v-if="bl.authorized" class="bl-check">✓</span>
-          <span v-else class="bl-lock">🔒 无权限</span>
+          <span v-else class="bl-lock">无权限</span>
         </div>
       </div>
     </Transition>
@@ -72,6 +72,9 @@ function onClickOutside(e: MouseEvent) {
 
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
+  blStore.loadMine().catch(() => {
+    // 页面其他接口会统一展示登录状态，这里只保持切换器为空态。
+  })
 })
 
 onUnmounted(() => {

@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { getToken } from '@/utils/auth'
 import { consumeSSOToken, redirectToSSO } from '@/utils/sso'
 import { useAuthStore } from '@/stores/auth'
+import { useBusinessLineStore } from '@/stores/businessLine'
 import { authApi } from '@/api/auth'
 
 const router = createRouter({
@@ -45,6 +46,22 @@ const router = createRouter({
           name: 'SubsystemAuthorization',
           component: () => import('@/views/subsystem/Authorization.vue'),
           meta: { title: '子系统赋权' },
+        },
+        {
+          path: 'business-line/permissions',
+          redirect: '/business-line/manage',
+        },
+        {
+          path: 'business-line/manage',
+          name: 'BusinessLineManage',
+          component: () => import('@/views/businessLine/Manage.vue'),
+          meta: { title: '业务线管理' },
+        },
+        {
+          path: 'business-line/assignment',
+          name: 'BusinessLineAssignment',
+          component: () => import('@/views/businessLine/Assignment.vue'),
+          meta: { title: '业务线分配' },
         },
         {
           path: 'audit/login',
@@ -142,6 +159,7 @@ router.beforeEach(async (to) => {
   if (token && (!authStore.user || ssoToken)) {
     try {
       await authStore.refreshUser()
+      await useBusinessLineStore().loadMine()
     } catch {
       authStore.clearAuth()
       const { data } = await authApi.getConfig()
@@ -151,6 +169,8 @@ router.beforeEach(async (to) => {
       redirectToSSO()
       return false
     }
+  } else if (token && !useBusinessLineStore().businessLines.length) {
+    await useBusinessLineStore().loadMine().catch(() => {})
   }
   if (to.path === '/login' && token) {
     return '/'

@@ -1,6 +1,7 @@
 import type { ApiResponse } from '@/types/api'
 import { getToken, removeToken } from '@/utils/auth'
 import { redirectToSSO } from '@/utils/sso'
+import { useBusinessLineStore } from '@/stores/businessLine'
 
 export interface Subsystem {
   id: number
@@ -138,7 +139,7 @@ export const subsystemApi = {
 
     const token = getToken()
     const openApp = subsystem.name === 'CloudDM' ? 'clouddm' : 'wayne'
-    const path = subsystem.name === 'CloudDM' ? '/auth/api/v1/clouddm/login' : '/auth/api/v1/wayen/login'
+    const path = subsystem.name === 'CloudDM' ? '/auth/api/v1/clouddm/login' : wayneLoginPath()
     const response = await fetch(path, {
       headers: {
         Accept: 'application/json',
@@ -175,4 +176,12 @@ export const subsystemApi = {
       },
     }
   },
+}
+
+function wayneLoginPath(): string {
+  const businessLineID = useBusinessLineStore().current?.id
+  if (!businessLineID) {
+    return '/auth/api/v1/wayen/login'
+  }
+  return `/auth/api/v1/wayen/login?business_line_id=${encodeURIComponent(String(businessLineID))}`
 }
