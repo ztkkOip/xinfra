@@ -5,16 +5,16 @@
         <h1>{{ system.name }}</h1>
         <p>{{ system.description }} · {{ system.domain }}</p>
       </div>
-      <span class="env-pill" :class="system.status === 'integrated' ? '' : 'warn'">
-        {{ system.status === 'integrated' ? '● 已接入' : '● 接入中' }}
+      <span class="env-pill" :class="system.status === 'active' ? '' : 'warn'">
+        {{ system.status === 'active' ? '● 在线' : '● 接入中' }}
       </span>
     </div>
 
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">接入状态</div>
-        <div class="value" :class="system.status === 'integrated' ? 'accent' : 'warn'">
-          {{ system.status === 'integrated' ? '已接入' : '接入中' }}
+        <div class="value" :class="system.status === 'active' ? 'accent' : 'warn'">
+          {{ system.status === 'active' ? '在线' : '接入中' }}
         </div>
         <div class="delta">{{ system.category }}</div>
       </div>
@@ -50,11 +50,17 @@
           </div>
           <p>{{ detailDesc }}</p>
           <div class="sso-row">
-            <span class="sso-dot" :class="{ warn: system.status === 'integrating' }"></span>
-            {{ system.status === 'integrated' ? 'LDAP 原生配置接入 · 已上线' : 'LDAP 接入改造中' }}
+            <span class="sso-dot" :class="{ warn: system.status !== 'active' }"></span>
+            {{ system.status === 'active' ? 'LDAP 原生配置接入 · 在线' : 'LDAP 接入改造中' }}
           </div>
-          <button class="btn btn-primary" style="margin-top:8px;align-self:flex-start;" @click="openPortal">
-            打开 {{ system.name }} ↗
+          <button
+            class="btn btn-primary"
+            :class="{ 'btn-disabled': system.status !== 'active' }"
+            :disabled="system.status !== 'active'"
+            style="margin-top:8px;align-self:flex-start;"
+            @click="openPortal"
+          >
+            {{ system.status !== 'active' ? '暂未开放' : '打开 ' + system.name + ' ↗' }}
           </button>
         </div>
       </div>
@@ -88,6 +94,7 @@ const bgColor = computed(() => {
     AP: 'var(--logo-ap-bg)',
     QP: 'var(--logo-qp-bg)',
     GF: 'var(--logo-gf-bg)',
+    SS: 'var(--logo-ss-bg)',
   }
   return colors[system.value.icon] || 'var(--bg-panel-2)'
 })
@@ -101,6 +108,7 @@ const iconColor = computed(() => {
     AP: 'var(--tag-blue-text)',
     QP: 'var(--tag-amber-text)',
     GF: 'var(--warn)',
+    SS: 'var(--tag-cyan-text)',
   }
   return colors[system.value.icon] || 'var(--text-mid)'
 })
@@ -114,6 +122,7 @@ const detailDesc = computed(() => {
     Apollo: '统一管理多机房 Config Service Cluster 的配置发布、灰度、回滚与变更审计，所有机房配置项均可在此单一入口检索与编辑。',
     qpass: '七牛云内部系统。',
     Grafana: '对接 VictoriaMetrics 数据源，K8s / 容器 / 业务指标统一仪表盘展示。预置核心看板，支持自定义。',
+    Superset: '日志数据探索与可视化分析平台，支持多数据源接入和丰富的图表展示。用于日志数据分析和可视化报表。',
   }
   return descs[system.value.name] || system.value.description
 })
@@ -168,5 +177,15 @@ const openPortal = async () => {
 
 .btn-primary:hover {
   opacity: 0.85;
+}
+
+.btn-disabled {
+  background: var(--text-dim);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-disabled:hover {
+  opacity: 0.6;
 }
 </style>
