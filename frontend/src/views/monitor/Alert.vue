@@ -2,13 +2,12 @@
   <div>
     <div class="page-head">
       <div>
-        <h1>告警</h1>
+        <h1>告警信息</h1>
         <p>夜莺（Nightingale）统一告警引擎 · qpass 推送</p>
       </div>
     </div>
 
-    <div class="cols-2-equal">
-      <div class="panel">
+    <div class="panel">
         <div class="panel-head">
           <h3>当前告警</h3>
           <span class="meta">实时</span>
@@ -32,28 +31,6 @@
           </table>
         </div>
       </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <h3>告警通道</h3>
-          <span class="meta">qpass</span>
-        </div>
-        <div class="panel-body">
-          <table>
-            <tbody>
-              <tr class="tr-hover">
-                <td>推送状态</td>
-                <td class="status-text ok">● 正常</td>
-              </tr>
-              <tr class="tr-hover">
-                <td>通道类型</td>
-                <td>企业微信 · 钉钉 · 短信</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
 
     <div class="panel">
       <div class="panel-head">

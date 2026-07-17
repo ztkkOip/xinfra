@@ -2,7 +2,7 @@
   <div>
     <div class="page-head">
       <div>
-        <h1>监控</h1>
+        <h1>监控看板</h1>
         <p>VictoriaMetrics 指标 · Zabbix 硬件状态</p>
       </div>
     </div>
