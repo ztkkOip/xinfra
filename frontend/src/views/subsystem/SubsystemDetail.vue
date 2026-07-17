@@ -5,16 +5,16 @@
         <h1>{{ system.name }}</h1>
         <p>{{ system.description }} · {{ system.domain }}</p>
       </div>
-      <span class="env-pill" :class="system.status === 'integrated' ? '' : 'warn'">
-        {{ system.status === 'integrated' ? '● 已接入' : '● 接入中' }}
+      <span class="env-pill" :class="system.status === 'active' ? '' : 'warn'">
+        {{ system.status === 'active' ? '● 在线' : '● 接入中' }}
       </span>
     </div>
 
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">接入状态</div>
-        <div class="value" :class="system.status === 'integrated' ? 'accent' : 'warn'">
-          {{ system.status === 'integrated' ? '已接入' : '接入中' }}
+        <div class="value" :class="system.status === 'active' ? 'accent' : 'warn'">
+          {{ system.status === 'active' ? '在线' : '接入中' }}
         </div>
         <div class="delta">{{ system.category }}</div>
       </div>
@@ -50,11 +50,17 @@
           </div>
           <p>{{ detailDesc }}</p>
           <div class="sso-row">
-            <span class="sso-dot" :class="{ warn: system.status === 'integrating' }"></span>
-            {{ system.status === 'integrated' ? 'LDAP 原生配置接入 · 已上线' : 'LDAP 接入改造中' }}
+            <span class="sso-dot" :class="{ warn: system.status !== 'active' }"></span>
+            {{ system.status === 'active' ? 'LDAP 原生配置接入 · 在线' : 'LDAP 接入改造中' }}
           </div>
-          <button class="btn btn-primary" style="margin-top:8px;align-self:flex-start;" @click="openPortal">
-            打开 {{ system.name }} ↗
+          <button
+            class="btn btn-primary"
+            :class="{ 'btn-disabled': system.status !== 'active' }"
+            :disabled="system.status !== 'active'"
+            style="margin-top:8px;align-self:flex-start;"
+            @click="openPortal"
+          >
+            {{ system.status !== 'active' ? '暂未开放' : '打开 ' + system.name + ' ↗' }}
           </button>
         </div>
       </div>
@@ -171,5 +177,15 @@ const openPortal = async () => {
 
 .btn-primary:hover {
   opacity: 0.85;
+}
+
+.btn-disabled {
+  background: var(--text-dim);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-disabled:hover {
+  opacity: 0.6;
 }
 </style>

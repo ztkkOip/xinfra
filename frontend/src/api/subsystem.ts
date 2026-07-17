@@ -11,7 +11,7 @@ export interface Subsystem {
   url: string
   domain: string
   category: string
-  status: 'integrated' | 'integrating'
+  status: 'active' | 'integrated' | 'integrating'
   sso_enabled: boolean
 }
 
@@ -30,7 +30,7 @@ const mockSubsystems: Subsystem[] = [
     url: 'https://wayne.qiniu.com',
     domain: 'wayne.xinfra.internal',
     category: '容器管理',
-    status: 'integrated',
+    status: 'active',
     sso_enabled: true,
   },
   {
@@ -42,7 +42,7 @@ const mockSubsystems: Subsystem[] = [
     url: 'https://clouddm.qiniu.com',
     domain: 'clouddm.xinfra.internal',
     category: '数据库',
-    status: 'integrated',
+    status: 'active',
     sso_enabled: true,
   },
   {
@@ -78,7 +78,7 @@ const mockSubsystems: Subsystem[] = [
     url: 'https://qpass.xinfra.internal',
     domain: 'qpass.xinfra.internal',
     category: '内部系统',
-    status: 'integrated',
+    status: 'integrating',
     sso_enabled: true,
   },
   {
@@ -90,7 +90,7 @@ const mockSubsystems: Subsystem[] = [
     url: 'https://grafana.xinfra.internal',
     domain: 'grafana.xinfra.internal',
     category: '可观测性',
-    status: 'integrated',
+    status: 'integrating',
     sso_enabled: true,
   },
   {

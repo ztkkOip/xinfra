@@ -11,8 +11,8 @@
     </div>
     <p>{{ system.description }}</p>
     <div class="sso-row">
-      <span class="sso-dot" :class="{ warn: system.status === 'integrating' }"></span>
-      {{ system.status === 'integrated' ? 'LDAP 原生配置接入 · 零代码' : 'LDAP 接入改造中' }}
+      <span class="sso-dot" :class="{ warn: system.status !== 'active' }"></span>
+      {{ system.status === 'active' ? 'LDAP 原生配置接入 · 在线' : 'LDAP 接入改造中' }}
     </div>
   </div>
 </template>
