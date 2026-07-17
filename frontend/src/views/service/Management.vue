@@ -16,12 +16,12 @@
       </div>
       <div class="stat-card">
         <div class="label">服务总数</div>
-        <div class="value">186</div>
+        <div class="value">{{ filteredServices.length }}</div>
         <div class="delta">去重后唯一服务名</div>
       </div>
       <div class="stat-card">
         <div class="label">服务实例总数</div>
-        <div class="value">842</div>
+        <div class="value">{{ serviceInstances }}</div>
         <div class="delta">所有机房注册 IP 汇总</div>
       </div>
       <div class="stat-card">
@@ -50,10 +50,9 @@
       <el-select placeholder="全部业务标签">
         <el-option label="全部业务标签" value="" />
         <el-option label="kodo" value="kodo" />
+        <el-option label="linxi" value="linxi" />
+        <el-option label="xinfra" value="xinfra" />
         <el-option label="las" value="las" />
-        <el-option label="lingxi" value="lingxi" />
-        <el-option label="ltoken" value="ltoken" />
-        <el-option label="maas" value="maas" />
       </el-select>
       <el-select placeholder="全部状态">
         <el-option label="全部状态" value="" />
@@ -83,7 +82,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="service in services" :key="service.name" class="tr-hover">
+            <tr v-for="service in filteredServices" :key="service.name" class="tr-hover">
               <td class="strong mono">{{ service.name }}</td>
               <td><span class="tag" :class="service.dcClass">{{ service.dc }}</span></td>
               <td class="mono">{{ service.biz }}</td>
@@ -95,7 +94,7 @@
           </tbody>
         </table>
         <div class="pagination">
-          <span>共 186 条 · 每页 7 条</span>
+          <span>共 {{ filteredServices.length }} 条 · 当前业务线：{{ currentName }}</span>
           <div class="pg-btns">
             <span class="pg-btn disabled">‹</span>
             <span class="pg-btn active">1</span>
@@ -112,17 +111,22 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName } = useBusinessLineMockProfile()
 
 const services = ref([
   { name: 'kodo-gateway-svc', dc: 'YZH', dcClass: 'zone-a', biz: 'kodo', instances: 12, healthy: '12 / 12', ip: '10.21.4.51', status: '健康', statusClass: 'ok' },
   { name: 'kodo-upload-svc', dc: 'XS', dcClass: 'zone-b', biz: 'kodo', instances: 10, healthy: '10 / 10', ip: '10.34.37.66', status: '健康', statusClass: 'ok' },
+  { name: 'linxi-render-svc', dc: 'JF', dcClass: 'zone-c', biz: 'linxi', instances: 6, healthy: '6 / 6', ip: '10.45.2.30', status: '健康', statusClass: 'ok' },
+  { name: 'xinfra-portal-svc', dc: 'YZH', dcClass: 'zone-a', biz: 'xinfra', instances: 8, healthy: '8 / 8', ip: '10.21.4.88', status: '健康', statusClass: 'ok' },
   { name: 'las-search-api', dc: 'XS', dcClass: 'zone-b', biz: 'las', instances: 18, healthy: '17 / 18', ip: '10.34.37.20', status: '部分异常', statusClass: 'warn' },
   { name: 'las-order-svc', dc: '达拉斯 IDC', dcClass: '', biz: 'las', instances: 5, healthy: '5 / 5', ip: '10.66.2.20', status: '健康', statusClass: 'ok' },
-  { name: 'lingxi-render-svc', dc: 'JF', dcClass: 'zone-c', biz: 'lingxi', instances: 6, healthy: '6 / 6', ip: '10.45.2.30', status: '健康', statusClass: 'ok' },
-  { name: 'ltoken-wallet-svc', dc: 'YZH', dcClass: 'zone-a', biz: 'ltoken', instances: 8, healthy: '8 / 8', ip: '10.21.4.88', status: '健康', statusClass: 'ok' },
-  { name: 'maas-infer-svc', dc: '新加坡 IDC', dcClass: '', biz: 'maas', instances: 4, healthy: '3 / 4', ip: '10.88.1.40', status: '部分异常', statusClass: 'warn' },
 ])
+
+const filteredServices = computed(() => services.value.filter((service) => service.biz === currentName.value))
+const serviceInstances = computed(() => filteredServices.value.reduce((sum, service) => sum + service.instances, 0))
 </script>
 
 <style scoped>

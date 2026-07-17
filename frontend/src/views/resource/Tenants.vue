@@ -28,7 +28,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="tenant in tenants" :key="tenant.key" class="tr-hover">
+            <tr v-for="tenant in currentTenants" :key="tenant.key" class="tr-hover">
               <td class="strong">{{ tenant.name }}</td>
               <td class="mono">{{ tenant.key }}</td>
               <td class="mono">{{ tenant.namespace }}</td>
@@ -63,23 +63,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName, profile } = useBusinessLineMockProfile()
 
 const tenants = ref([
   {
-    name: 'LAS',
-    key: 'las',
-    namespace: 'ns-las-prod',
-    nodes: 12,
-    cpuPct: 64,
-    cpuClass: '',
-    memPct: 71,
-    memClass: '',
-    status: '正常',
-    statusClass: 'ok',
-  },
-  {
-    name: 'KODO',
+    name: 'kodo',
     key: 'kodo',
     namespace: 'ns-kodo-prod',
     nodes: 8,
@@ -91,9 +82,9 @@ const tenants = ref([
     statusClass: 'ok',
   },
   {
-    name: 'PILI',
-    key: 'pili',
-    namespace: 'ns-pili-prod',
+    name: 'linxi',
+    key: 'linxi',
+    namespace: 'ns-linxi-prod',
     nodes: 6,
     cpuPct: 82,
     cpuClass: 'warn',
@@ -103,9 +94,9 @@ const tenants = ref([
     statusClass: 'warn',
   },
   {
-    name: 'QVM',
-    key: 'qvm',
-    namespace: 'ns-qvm-prod',
+    name: 'xinfra',
+    key: 'xinfra',
+    namespace: 'ns-xinfra-prod',
     nodes: 4,
     cpuPct: 23,
     cpuClass: '',
@@ -114,7 +105,34 @@ const tenants = ref([
     status: '正常',
     statusClass: 'ok',
   },
+  {
+    name: 'las',
+    key: 'las',
+    namespace: 'ns-las-prod',
+    nodes: 12,
+    cpuPct: 64,
+    cpuClass: '',
+    memPct: 71,
+    memClass: '',
+    status: '正常',
+    statusClass: 'ok',
+  },
 ])
+
+const currentTenants = computed(() => {
+  const tenant = tenants.value.find((item) => item.key === currentName.value)
+  if (!tenant) return []
+  return [{
+    ...tenant,
+    nodes: Math.max(1, Math.round(profile.value.nodes / 12)),
+    cpuPct: profile.value.cpuAllocated,
+    cpuClass: profile.value.cpuAllocated > 75 ? 'warn' : '',
+    memPct: Math.min(96, profile.value.cpuAllocated + 8),
+    memClass: profile.value.cpuAllocated > 75 ? 'warn' : '',
+    status: profile.value.alertsP1 ? '资源告警' : '正常',
+    statusClass: profile.value.alertsP1 ? 'warn' : 'ok',
+  }]
+})
 </script>
 
 <style scoped>

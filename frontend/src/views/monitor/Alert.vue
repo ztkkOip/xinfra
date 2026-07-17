@@ -10,17 +10,17 @@
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">P0 / Disaster 告警</div>
-        <div class="value" style="color: var(--err)">1</div>
+        <div class="value" style="color: var(--err)">{{ profile.alertsP0 }}</div>
         <div class="delta" style="color: var(--err)">来自 VictoriaMetrics</div>
       </div>
       <div class="stat-card">
         <div class="label">P1 / High 告警</div>
-        <div class="value" style="color: var(--warn)">5</div>
-        <div class="delta warn">来自 Zabbix · 4 条 / VM · 1 条</div>
+        <div class="value" style="color: var(--warn)">{{ profile.alertsP1 }}</div>
+        <div class="delta warn">来自 Zabbix · {{ Math.max(0, profile.alertsP1 - 1) }} 条 / VM · {{ profile.alertsP1 ? 1 : 0 }} 条</div>
       </div>
       <div class="stat-card">
         <div class="label">今日已推送</div>
-        <div class="value">5</div>
+        <div class="value">{{ profile.alertsP0 + profile.alertsP1 }}</div>
         <div class="delta">qpass 统一告警通道</div>
       </div>
     </div>
@@ -69,53 +69,13 @@
             <th>告警内容</th>
             <th>时间</th>
           </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-p0">P0</span></td>
-            <td class="mono">VictoriaMetrics</td>
-            <td class="mono">disaster</td>
-            <td class="strong mono">sg-las-overseas-007</td>
-            <td>磁盘只读 / IO 错误，节点不可写</td>
-            <td class="mono">07:38:55</td>
-          </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-p1">P1</span></td>
-            <td class="mono">Zabbix</td>
-            <td class="mono">high</td>
-            <td class="strong mono">yzh-las-014</td>
-            <td>风扇转速低于阈值（FAN_6: 1920 RPM）</td>
-            <td class="mono">07:35:12</td>
-          </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-p1">P1</span></td>
-            <td class="mono">Zabbix</td>
-            <td class="mono">high</td>
-            <td class="strong mono">xs-bm-291</td>
-            <td>电源冗余丢失（PSU2 离线）</td>
-            <td class="mono">07:21:40</td>
-          </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-p1">P1</span></td>
-            <td class="mono">VictoriaMetrics</td>
-            <td class="mono">high</td>
-            <td class="strong mono">redis-ads-feature-cluster-02</td>
-            <td>慢查询比例超阈值（>5%，持续5分钟）</td>
-            <td class="mono">07:18:03</td>
-          </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-avg">average</span></td>
-            <td class="mono">Zabbix</td>
-            <td class="mono">average</td>
-            <td class="strong mono">overseas-dallas-idc</td>
-            <td>专线延迟抖动超基线（WireGuard ↔ AWS US）</td>
-            <td class="mono">07:10:22</td>
-          </tr>
-          <tr class="tr-hover">
-            <td><span class="tag sev-avg">average</span></td>
-            <td class="mono">Zabbix</td>
-            <td class="mono">average</td>
-            <td class="strong mono">jf-bm-118</td>
-            <td>CPU 温度接近阈值（76℃ / 80℃）</td>
-            <td class="mono">06:58:47</td>
+          <tr v-for="alert in alertRows" :key="alert.object" class="tr-hover">
+            <td><span :class="['tag', alert.sevClass]">{{ alert.level }}</span></td>
+            <td class="mono">{{ alert.source }}</td>
+            <td class="mono">{{ alert.rawLevel }}</td>
+            <td class="strong mono">{{ alert.object }}</td>
+            <td>{{ alert.message }}</td>
+            <td class="mono">{{ alert.time }}</td>
           </tr>
         </table>
       </div>
@@ -127,7 +87,7 @@
         <span class="meta">近 24h · qpass</span>
       </div>
       <div class="panel-body log-stream">
-        <div v-for="(alert, index) in alerts" :key="index" :class="['task-log-line', alert.class]">
+          <div v-for="(alert, index) in alerts" :key="index" :class="['task-log-line', alert.class]">
           <span class="t">{{ alert.time }}</span>{{ alert.message }}
         </div>
       </div>
@@ -136,18 +96,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
 
-const alerts = ref([
-  { time: '07:38:55', message: '[qpass] P0 告警推送：sg-las-overseas-007 磁盘只读 / IO 错误', class: 'err' },
-  { time: '07:35:12', message: '[qpass] P1 告警推送：yzh-las-014 风扇转速低于阈值（FAN_6: 1920 RPM）', class: '' },
-  { time: '07:21:40', message: '[qpass] P1 告警推送：xs-bm-291 电源冗余丢失（PSU2 离线）', class: '' },
-  { time: '07:18:03', message: '[qpass] P1 告警推送：redis-ads-feature-cluster-02 慢查询比例超阈值', class: '' },
-  { time: '07:10:22', message: '[qpass] average 告警推送：overseas-dallas-idc 专线延迟抖动超基线', class: '' },
-  { time: '06:58:47', message: '[qpass] average 告警推送：jf-bm-118 CPU 温度接近阈值（76℃ / 80℃）', class: '' },
-  { time: '06:15:22', message: '[Nightingale] sg-las-007 CPU 使用率恢复（当前 42%）', class: 'ok' },
-  { time: '05:48:10', message: '[Nightingale] sg-las-007 CPU 使用率超过 90% 持续 5 分钟', class: '' },
-])
+const { currentName, profile } = useBusinessLineMockProfile()
+
+const alertRows = computed(() => {
+  const rows = []
+  if (profile.value.alertsP0) {
+    rows.push({ level: 'P0', sevClass: 'sev-p0', source: 'VictoriaMetrics', rawLevel: 'disaster', object: `${currentName.value}-node-critical-007`, message: '磁盘只读 / IO 错误，节点不可写', time: '07:38:55' })
+  }
+  for (let i = 0; i < profile.value.alertsP1; i += 1) {
+    rows.push({ level: 'P1', sevClass: 'sev-p1', source: i % 2 ? 'VictoriaMetrics' : 'Zabbix', rawLevel: 'high', object: `${currentName.value}-svc-${String(i + 1).padStart(2, '0')}`, message: i % 2 ? '慢查询比例超阈值（>5%，持续5分钟）' : '节点硬件健康指标异常', time: `07:${35 - i * 4}:12` })
+  }
+  if (!rows.length) {
+    rows.push({ level: 'average', sevClass: 'sev-avg', source: 'Zabbix', rawLevel: 'average', object: `${currentName.value}-baseline`, message: '当前无 P0/P1，仅保留基线观察项', time: '07:10:22' })
+  }
+  return rows
+})
+
+const alerts = computed(() => alertRows.value.map((alert) => ({
+  time: alert.time,
+  message: `[qpass] ${alert.level} 告警推送：${alert.object} ${alert.message}`,
+  class: alert.level === 'P0' ? 'err' : '',
+})))
 </script>
 
 <style scoped>

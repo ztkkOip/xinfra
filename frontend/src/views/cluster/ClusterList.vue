@@ -24,7 +24,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="cluster in clusters" :key="cluster.name" class="tr-hover">
+            <tr v-for="cluster in businessLineClusters" :key="cluster.name" class="tr-hover">
               <td class="strong">{{ cluster.name }}</td>
               <td><span class="tag" :class="cluster.zoneClass">{{ cluster.zone }}</span></td>
               <td :class="['status-text', cluster.statusClass]">● {{ cluster.status }}</td>
@@ -43,7 +43,7 @@
 
     <div class="panel">
       <div class="panel-head">
-        <h3>rke2-bj-prod-01 · 节点列表（节选）</h3>
+        <h3>{{ businessLineClusters[0]?.name }} · 节点列表（节选）</h3>
         <span class="meta">node-label 多租户隔离</span>
       </div>
       <div class="panel-body">
@@ -60,7 +60,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="node in nodes" :key="node.name" class="tr-hover">
+            <tr v-for="node in businessLineNodes" :key="node.name" class="tr-hover">
               <td class="strong mono">{{ node.name }}</td>
               <td class="mono">{{ node.ip }}</td>
               <td><span class="tag biz" :style="{ color: node.labelColor, borderColor: node.labelBorder }">{{ node.label }}</span></td>
@@ -77,7 +77,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName, profile } = useBusinessLineMockProfile()
 
 const clusters = ref([
   { name: 'rke2-bj-prod-01', zone: '华北 · IDC', zoneClass: 'zone-a', status: '健康', statusClass: 'ok', nodes: 46, cpu: 64, cpuClass: '', version: 'v1.28.9+rke2r1', calico: 'BGP AS64512' },
@@ -87,10 +90,43 @@ const clusters = ref([
 
 const nodes = ref([
   { name: 'bj-node-014', ip: '10.21.4.14', label: 'business-line=kodo', labelColor: 'var(--tag-blue-text)', labelBorder: 'var(--tag-blue-border)', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 58, cpuClass: '', status: 'Ready', statusClass: 'ok' },
-  { name: 'bj-node-015', ip: '10.21.4.15', label: 'business-line=kodo', labelColor: 'var(--tag-blue-text)', labelBorder: 'var(--tag-blue-border)', taint: 'kodo:NoSchedule', spec: '64C/256G', cpu: 62, cpuClass: '', status: 'Ready', statusClass: 'ok' },
-  { name: 'bj-node-031', ip: '10.21.4.31', label: 'business-line=las', labelColor: 'var(--tag-purple-text)', labelBorder: 'var(--tag-purple-border)', taint: 'las:NoSchedule', spec: '32C/128G', cpu: 88, cpuClass: 'warn', status: '资源告警', statusClass: 'warn' },
-  { name: 'bj-node-048', ip: '10.21.4.48', label: '未分配', labelColor: 'var(--text-dim)', labelBorder: 'var(--line)', taint: '—', spec: '32C/128G', cpu: 4, cpuClass: '', status: 'Ready · 空闲', statusClass: 'ok' },
+  { name: 'bj-node-015', ip: '10.21.4.15', label: 'business-line=linxi', labelColor: 'var(--tag-blue-text)', labelBorder: 'var(--tag-blue-border)', taint: 'linxi:NoSchedule', spec: '64C/256G', cpu: 62, cpuClass: '', status: 'Ready', statusClass: 'ok' },
+  { name: 'bj-node-031', ip: '10.21.4.31', label: 'business-line=xinfra', labelColor: 'var(--tag-purple-text)', labelBorder: 'var(--tag-purple-border)', taint: 'xinfra:NoSchedule', spec: '32C/128G', cpu: 88, cpuClass: 'warn', status: '资源告警', statusClass: 'warn' },
+  { name: 'bj-node-048', ip: '10.21.4.48', label: 'business-line=las', labelColor: 'var(--text-dim)', labelBorder: 'var(--line)', taint: 'las:NoSchedule', spec: '32C/128G', cpu: 4, cpuClass: '', status: 'Ready · 空闲', statusClass: 'ok' },
 ])
+
+const businessLineClusters = computed(() => {
+  const cpu = profile.value.cpuAllocated
+  return clusters.value.map((cluster, index) => ({
+    ...cluster,
+    name: `${cluster.name}-${currentName.value}`,
+    nodes: Math.max(1, Math.round(profile.value.nodes * ([0.42, 0.36, 0.22][index] || 0.2))),
+    cpu: Math.min(96, Math.max(8, cpu + (index - 1) * 7)),
+    cpuClass: cpu > 75 ? 'warn' : '',
+    status: profile.value.alertsP1 && index === 2 ? `${profile.value.alertsP1} 节点告警` : '健康',
+    statusClass: profile.value.alertsP1 && index === 2 ? 'warn' : 'ok',
+  }))
+})
+
+const businessLineNodes = computed(() => {
+  const selected = nodes.value.filter((node) => node.label === `business-line=${currentName.value}`)
+  if (selected.length) return selected
+  return [
+    {
+      name: `${currentName.value}-node-001`,
+      ip: '10.21.4.14',
+      label: `business-line=${currentName.value}`,
+      labelColor: 'var(--tag-blue-text)',
+      labelBorder: 'var(--tag-blue-border)',
+      taint: `${currentName.value}:NoSchedule`,
+      spec: '64C/256G',
+      cpu: profile.value.cpuAllocated,
+      cpuClass: profile.value.cpuAllocated > 75 ? 'warn' : '',
+      status: profile.value.alertsP1 ? '资源告警' : 'Ready',
+      statusClass: profile.value.alertsP1 ? 'warn' : 'ok',
+    },
+  ]
+})
 </script>
 
 <style scoped>

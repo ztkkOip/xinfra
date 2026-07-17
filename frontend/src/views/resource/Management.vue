@@ -11,8 +11,8 @@
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">资源总数</div>
-        <div class="value">658</div>
-        <div class="delta">物理机 146 · 虚机 512</div>
+        <div class="value">{{ filteredResources.length }}</div>
+        <div class="delta">物理机 {{ physicalCount }} · 虚机 {{ vmCount }}</div>
       </div>
       <div class="stat-card">
         <div class="label">SINA CMDB</div>
@@ -25,9 +25,9 @@
         <div class="delta">ECS · 增量同步</div>
       </div>
       <div class="stat-card">
-        <div class="label">AWS / 七牛 LAS 同步</div>
+        <div class="label">AWS / 七牛同步</div>
         <div class="value">136</div>
-        <div class="delta">AWS 58 · 七牛 LAS 78</div>
+        <div class="delta">AWS 58 · 七牛 78</div>
       </div>
       <div class="stat-card">
         <div class="label">最近一次同步</div>
@@ -47,16 +47,14 @@
         <el-option label="SINA CMDB" value="cmdb" />
         <el-option label="阿里云同步" value="aliyun" />
         <el-option label="AWS 同步" value="aws" />
-        <el-option label="七牛 LAS 同步" value="qiniu" />
+        <el-option label="七牛同步" value="qiniu" />
       </el-select>
       <el-select placeholder="全部业务线">
         <el-option label="全部业务线" value="" />
         <el-option label="kodo" value="kodo" />
+        <el-option label="linxi" value="linxi" />
+        <el-option label="xinfra" value="xinfra" />
         <el-option label="las" value="las" />
-        <el-option label="lingxi" value="lingxi" />
-        <el-option label="ltoken" value="ltoken" />
-        <el-option label="maas" value="maas" />
-        <el-option label="未分配" value="unassigned" />
       </el-select>
       <el-input placeholder="搜索 hostname / asset_number / IP" class="search-input" />
     </div>
@@ -82,7 +80,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="item in resources" :key="item.hostname" class="tr-hover">
+            <tr v-for="item in filteredResources" :key="item.hostname" class="tr-hover">
               <td class="strong mono">{{ item.hostname }}</td>
               <td class="mono text-xs">{{ item.asset_number }}</td>
               <td><span class="tag" :class="item.type === '物理机' ? '' : 'vm'">{{ item.type }}</span></td>
@@ -96,7 +94,7 @@
           </tbody>
         </table>
         <div class="pagination">
-          <span>共 658 条 · 每页 7 条</span>
+          <span>共 {{ filteredResources.length }} 条 · 当前业务线：{{ currentName }}</span>
           <div class="pg-btns">
             <span class="pg-btn disabled">‹</span>
             <span class="pg-btn active">1</span>
@@ -113,17 +111,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName } = useBusinessLineMockProfile()
 
 const resources = ref([
   { hostname: 'xs291', asset_number: 'SERV00003502', type: '物理机', location: '华东·杭州下沙', ip: '10.34.37.52', spec: '20C/192G/13.52T', business_line: 'kodo', source: 'SINA CMDB', status: 'production' },
   { hostname: 'yzh-las-014', asset_number: 'SERV00004187', type: '虚机', location: '华北·YZH', ip: '10.21.4.214', spec: '32C/128G/4.0T', business_line: 'las', source: 'SINA CMDB', status: 'production' },
-  { hostname: 'jf-bm-118', asset_number: 'SERV00004290', type: '物理机', location: '华南·JF', ip: '10.45.2.18', spec: '16C/64G/2.0T', business_line: 'lingxi', source: 'SINA CMDB', status: 'production' },
-  { hostname: 'ali-ecs-sz-0231', asset_number: '—', type: '虚机', location: '阿里云·华南', ip: '172.18.4.31', spec: '16C/64G/500G', business_line: 'ltoken', source: '阿里云同步', status: 'production' },
-  { hostname: 'aws-us-i-0a13fe2', asset_number: '—', type: '虚机', location: 'AWS · 美国', ip: '10.66.2.12', spec: '8C/32G/200G', business_line: 'maas', source: 'AWS 同步', status: 'production' },
-  { hostname: 'sg-las-007', asset_number: 'SERV00004511', type: '虚机', location: '七牛 LAS · 新加坡', ip: '10.88.1.07', spec: '16C/64G/2.0T', business_line: 'las', source: '七牛 LAS 同步', status: 'idle' },
-  { hostname: 'hk-bm-001', asset_number: 'SERV00004602', type: '物理机', location: '香港 IDC', ip: '10.90.0.11', spec: '8C/32G/1.0T', business_line: '未分配', source: 'SINA CMDB', status: 'production' },
+  { hostname: 'jf-bm-118', asset_number: 'SERV00004290', type: '物理机', location: '华南·JF', ip: '10.45.2.18', spec: '16C/64G/2.0T', business_line: 'linxi', source: 'SINA CMDB', status: 'production' },
+  { hostname: 'ali-ecs-sz-0231', asset_number: '—', type: '虚机', location: '阿里云·华南', ip: '172.18.4.31', spec: '16C/64G/500G', business_line: 'xinfra', source: '阿里云同步', status: 'production' },
+  { hostname: 'aws-us-i-0a13fe2', asset_number: '—', type: '虚机', location: 'AWS · 美国', ip: '10.66.2.12', spec: '8C/32G/200G', business_line: 'las', source: 'AWS 同步', status: 'production' },
+  { hostname: 'sg-las-007', asset_number: 'SERV00004511', type: '虚机', location: '七牛 · 新加坡', ip: '10.88.1.07', spec: '16C/64G/2.0T', business_line: 'las', source: '七牛同步', status: 'idle' },
+  { hostname: 'hk-bm-001', asset_number: 'SERV00004602', type: '物理机', location: '香港 IDC', ip: '10.90.0.11', spec: '8C/32G/1.0T', business_line: 'xinfra', source: 'SINA CMDB', status: 'production' },
 ])
+
+const filteredResources = computed(() => resources.value.filter((item) => item.business_line === currentName.value))
+const physicalCount = computed(() => filteredResources.value.filter((item) => item.type === '物理机').length)
+const vmCount = computed(() => filteredResources.value.filter((item) => item.type === '虚机').length)
 </script>
 
 <style scoped>

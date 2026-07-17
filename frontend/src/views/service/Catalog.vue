@@ -77,8 +77,10 @@
               <div class="field">
                 <label>业务线</label>
                 <select v-model="mysqlForm.bl">
-                  <option value="las">las（当前）</option>
                   <option value="kodo">kodo</option>
+                  <option value="linxi">linxi</option>
+                  <option value="xinfra">xinfra</option>
+                  <option value="las">las</option>
                 </select>
               </div>
               <div class="field">
@@ -128,12 +130,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
 import { subsystemApi } from '@/api/subsystem'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
 
 const router = useRouter()
+const { currentName } = useBusinessLineMockProfile()
 
 interface Service {
   name: string
@@ -210,11 +214,16 @@ const basicServices = ref<Service[]>([
 const showMysqlModal = ref(false)
 
 const mysqlForm = reactive({
-  bl: 'las',
+  bl: currentName.value,
   topology: '1m2r',
   spec: '8C32G',
   version: '8.0.36',
-  instanceName: 'mysql-las-billing-02',
+  instanceName: `mysql-${currentName.value}-billing-02`,
+})
+
+watch(currentName, (name) => {
+  mysqlForm.bl = name
+  mysqlForm.instanceName = `mysql-${name}-billing-02`
 })
 
 const handleCardClick = (service: Service) => {

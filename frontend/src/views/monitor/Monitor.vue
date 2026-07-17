@@ -11,18 +11,18 @@
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">物理机总数</div>
-        <div class="value">186</div>
-        <div class="delta">186 / 186 监控覆盖</div>
+        <div class="value">{{ profile.physicalMachines }}</div>
+        <div class="delta">{{ profile.physicalMachines }} / {{ profile.physicalMachines }} 监控覆盖</div>
       </div>
       <div class="stat-card">
-        <div class="label">虚机总数（LAS）</div>
-        <div class="value">512</div>
-        <div class="delta up">↑ 14 本周新增</div>
+        <div class="label">虚机总数</div>
+        <div class="value">{{ profile.virtualMachines }}</div>
+        <div class="delta up">↑ {{ Math.max(1, Math.round(profile.virtualMachines / 36)) }} 本周新增</div>
       </div>
       <div class="stat-card">
         <div class="label">基础组件实例</div>
-        <div class="value">214</div>
-        <div class="delta">MySQL 38 · Redis 92 · 其他 84</div>
+        <div class="value">{{ profile.components }}</div>
+        <div class="delta">MySQL {{ profile.mysql }} · Redis {{ profile.redis }} · 其他 {{ profile.components - profile.mysql - profile.redis }}</div>
       </div>
     </div>
 
@@ -87,7 +87,7 @@
 
       <div class="panel">
         <div class="panel-head">
-          <h3>虚机状态 · LAS 资源池</h3>
+          <h3>虚机状态 · 按业务线</h3>
           <span class="meta">数据源：VictoriaMetrics</span>
         </div>
         <div class="panel-body">
@@ -99,40 +99,13 @@
               <th>状态</th>
             </tr>
             <tr class="tr-hover">
-              <td class="strong mono">Kodo</td>
-              <td class="mono">218</td>
+              <td class="strong mono">{{ currentName }}</td>
+              <td class="mono">{{ profile.virtualMachines }}</td>
               <td>
-                <span class="bar-wrap"><span class="bar-fill" style="width: 64%"></span></span>
-                64%
+                <span class="bar-wrap"><span class="bar-fill" :class="{ warn: profile.cpuAllocated > 75 }" :style="{ width: `${profile.cpuAllocated}%` }"></span></span>
+                {{ profile.cpuAllocated }}%
               </td>
-              <td class="status-text ok">● 正常</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="strong mono">LAS</td>
-              <td class="mono">164</td>
-              <td>
-                <span class="bar-wrap"><span class="bar-fill warn" style="width: 82%"></span></span>
-                82%
-              </td>
-              <td class="status-text warn">● 1 条告警</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="strong mono">灵矽</td>
-              <td class="mono">96</td>
-              <td>
-                <span class="bar-wrap"><span class="bar-fill" style="width: 57%"></span></span>
-                57%
-              </td>
-              <td class="status-text ok">● 正常</td>
-            </tr>
-            <tr class="tr-hover">
-              <td class="strong mono">共享池 / 未分配</td>
-              <td class="mono">34</td>
-              <td>
-                <span class="bar-wrap"><span class="bar-fill" style="width: 31%"></span></span>
-                31%
-              </td>
-              <td class="status-text ok">● 正常</td>
+              <td :class="['status-text', profile.alertsP1 ? 'warn' : 'ok']">● {{ profile.alertsP1 ? `${profile.alertsP1} 条告警` : '正常' }}</td>
             </tr>
           </table>
         </div>
@@ -155,17 +128,17 @@
           </tr>
           <tr class="tr-hover">
             <td class="strong">MySQL</td>
-            <td class="mono">38</td>
+            <td class="mono">{{ profile.mysql }}</td>
             <td class="mono">0</td>
             <td class="mono">100%</td>
             <td class="status-text ok">● 正常</td>
           </tr>
           <tr class="tr-hover">
             <td class="strong">Redis（CacheCloud）</td>
-            <td class="mono">92</td>
-            <td class="mono">1</td>
-            <td class="mono">98.9%</td>
-            <td class="status-text warn">● 1 条告警</td>
+            <td class="mono">{{ profile.redis }}</td>
+            <td class="mono">{{ profile.alertsP1 ? 1 : 0 }}</td>
+            <td class="mono">{{ profile.alertsP1 ? '98.9%' : '100%' }}</td>
+            <td :class="['status-text', profile.alertsP1 ? 'warn' : 'ok']">● {{ profile.alertsP1 ? '1 条告警' : '正常' }}</td>
           </tr>
           <tr class="tr-hover">
             <td class="strong">PostgreSQL</td>
@@ -183,7 +156,7 @@
           </tr>
           <tr class="tr-hover">
             <td class="strong">其他中间件</td>
-            <td class="mono">46</td>
+            <td class="mono">{{ profile.components - profile.mysql - profile.redis - 12 - 26 }}</td>
             <td class="mono">0</td>
             <td class="mono">100%</td>
             <td class="status-text ok">● 正常</td>
@@ -196,6 +169,9 @@
 </template>
 
 <script setup lang="ts">
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName, profile } = useBusinessLineMockProfile()
 </script>
 
 <style scoped>

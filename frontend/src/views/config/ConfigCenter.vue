@@ -21,13 +21,13 @@
       </div>
       <div class="stat-card">
         <div class="label">配置项总数</div>
-        <div class="value">1,260</div>
-        <div class="delta">Namespace 38 个</div>
+        <div class="value">{{ configItemCount }}</div>
+        <div class="delta">Namespace {{ Math.max(1, Math.round(configItemCount / 32)) }} 个</div>
       </div>
       <div class="stat-card">
         <div class="label">接入业务线</div>
-        <div class="value">2 / 5</div>
-        <div class="delta">kodo · las 已接入</div>
+        <div class="value">1 / 1</div>
+        <div class="delta">{{ currentName }} 已接入</div>
       </div>
       <div class="stat-card">
         <div class="label">同步状态</div>
@@ -78,7 +78,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="cluster in clusters" :key="cluster.name" class="tr-hover">
+            <tr v-for="cluster in currentClusters" :key="cluster.name" class="tr-hover">
               <td><span class="tag" :class="cluster.zoneClass">{{ cluster.name }}</span></td>
               <td class="mono">cluster={{ cluster.cluster }}</td>
               <td class="mono text-xs">{{ cluster.address }}</td>
@@ -95,17 +95,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName } = useBusinessLineMockProfile()
 
 const clusters = ref([
   { name: 'YZH 机房', zoneClass: 'zone-a', cluster: 'yzh', address: 'config-yzh.xinfra.internal:8080', type: '容器化 · K8s Service', biz: 'kodo', items: 486, status: '运行中', statusClass: 'ok' },
-  { name: 'XS 机房', zoneClass: 'zone-b', cluster: 'xs', address: 'config-xs.xinfra.internal:8080', type: '容器化 · K8s Service', biz: 'las', items: 398, status: '运行中', statusClass: 'ok' },
-  { name: 'JF 机房', zoneClass: 'zone-c', cluster: 'jf', address: 'config-jf.xinfra.internal:8080', type: '容器化 · K8s Service', biz: '灵矽', items: 376, status: '灰度接入中', statusClass: 'warn' },
-  { name: '达拉斯 IDC', zoneClass: '', cluster: 'dallas', address: '—', type: '容器化 · K8s Service', biz: '—', items: 0, status: '建设中', statusClass: 'idle' },
+  { name: 'XS 机房', zoneClass: 'zone-b', cluster: 'xs', address: 'config-xs.xinfra.internal:8080', type: '容器化 · K8s Service', biz: 'linxi', items: 398, status: '运行中', statusClass: 'ok' },
+  { name: 'JF 机房', zoneClass: 'zone-c', cluster: 'jf', address: 'config-jf.xinfra.internal:8080', type: '容器化 · K8s Service', biz: 'xinfra', items: 376, status: '灰度接入中', statusClass: 'warn' },
+  { name: '达拉斯 IDC', zoneClass: '', cluster: 'dallas', address: 'config-dallas.xinfra.internal:8080', type: '容器化 · K8s Service', biz: 'las', items: 128, status: '建设中', statusClass: 'idle' },
   { name: '新加坡 IDC', zoneClass: '', cluster: 'singapore', address: '—', type: '容器化 · K8s Service', biz: '—', items: 0, status: '建设中', statusClass: 'idle' },
   { name: '香港 IDC', zoneClass: '', cluster: 'hk', address: '—', type: '容器化 · K8s Service', biz: '—', items: 0, status: '待启动', statusClass: 'idle' },
   { name: '东南亚 IDC', zoneClass: '', cluster: 'sea', address: '—', type: '容器化 · K8s Service', biz: '—', items: 0, status: '待启动', statusClass: 'idle' },
 ])
+
+const currentClusters = computed(() => clusters.value.filter((cluster) => cluster.biz === currentName.value))
+const configItemCount = computed(() => currentClusters.value.reduce((sum, cluster) => sum + cluster.items, 0))
 </script>
 
 <style scoped>

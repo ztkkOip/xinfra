@@ -11,28 +11,28 @@
     <div class="stat-row">
       <div class="stat-card">
         <div class="label">RKE2 集群</div>
-        <div class="value">3</div>
-        <div class="delta">3 机房在线</div>
+        <div class="value">{{ profile.clusters }}</div>
+        <div class="delta">{{ profile.clusters }} 机房在线</div>
       </div>
       <div class="stat-card">
         <div class="label">节点总数</div>
-        <div class="value">128</div>
-        <div class="delta up">↑ 6 本周新增</div>
+        <div class="value">{{ profile.nodes }}</div>
+        <div class="delta up">↑ {{ Math.max(1, Math.round(profile.nodes / 24)) }} 本周新增</div>
       </div>
       <div class="stat-card">
         <div class="label">CPU 已分配</div>
-        <div class="value">61%</div>
-        <div class="delta">2,048 / 3,360 核</div>
+        <div class="value">{{ profile.cpuAllocated }}%</div>
+        <div class="delta">{{ Math.round(profile.nodes * 16 * profile.cpuAllocated / 100) }} / {{ profile.nodes * 16 }} 核</div>
       </div>
       <div class="stat-card">
         <div class="label">组件实例</div>
-        <div class="value">214</div>
-        <div class="delta">MySQL 38 · Redis 92 · 其他 84</div>
+        <div class="value">{{ profile.components }}</div>
+        <div class="delta">MySQL {{ profile.mysql }} · Redis {{ profile.redis }} · 其他 {{ profile.components - profile.mysql - profile.redis }}</div>
       </div>
       <div class="stat-card">
         <div class="label">进行中任务</div>
-        <div class="value warn">2</div>
-        <div class="delta warn">1 个待关注</div>
+        <div class="value warn">{{ profile.tasksRunning }}</div>
+        <div class="delta warn">{{ Math.min(profile.tasksRunning, 1) }} 个待关注</div>
       </div>
     </div>
 
@@ -45,8 +45,8 @@
         <div class="topo">
           <div class="topo-cluster">
             <div class="tname">
-              <span class="tag zone-a">IDC-华北机房</span>
-              <span class="mono text-dim">46节点</span>
+              <span class="tag zone-a">{{ profile.primaryZone }}</span>
+              <span class="mono text-dim">{{ Math.round(profile.nodes * 0.42) }}节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 24" :key="i" :class="['node-cell', i <= 18 ? 'a' : '']"></div>
@@ -54,8 +54,8 @@
           </div>
           <div class="topo-cluster">
             <div class="tname">
-              <span class="tag zone-b">IDC-华东机房</span>
-              <span class="mono text-dim">52节点</span>
+              <span class="tag zone-b">{{ profile.secondaryZone }}</span>
+              <span class="mono text-dim">{{ Math.round(profile.nodes * 0.36) }}节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 24" :key="i" :class="['node-cell', i <= 20 ? 'b' : '']"></div>
@@ -63,8 +63,8 @@
           </div>
           <div class="topo-cluster">
             <div class="tname">
-              <span class="tag zone-c">阿里云-华南</span>
-              <span class="mono text-dim">30节点</span>
+              <span class="tag zone-c">弹性云资源池</span>
+              <span class="mono text-dim">{{ Math.max(1, profile.nodes - Math.round(profile.nodes * 0.42) - Math.round(profile.nodes * 0.36)) }}节点</span>
             </div>
             <div class="node-grid">
               <div v-for="i in 18" :key="i" :class="['node-cell', i <= 12 ? 'c' : '']"></div>
@@ -72,9 +72,9 @@
           </div>
         </div>
         <div class="legend">
-          <span><span class="node-cell a inline"></span>Kodo业务线</span>
-          <span><span class="node-cell b inline"></span>LAS业务线</span>
-          <span><span class="node-cell c inline"></span>灵矽业务线</span>
+          <span><span class="node-cell a inline"></span>{{ currentName }}主资源池</span>
+          <span><span class="node-cell b inline"></span>{{ currentName }}扩展池</span>
+          <span><span class="node-cell c inline"></span>{{ currentName }}弹性池</span>
           <span><span class="node-cell empty inline"></span>空闲</span>
         </div>
       </div>
@@ -89,22 +89,22 @@
             <tbody>
               <tr class="tr-hover">
                 <td class="status-text ok">● 成功</td>
-                <td class="strong">MySQL 主从部署</td>
+                <td class="strong">{{ profile.servicePrefix }} MySQL 主从部署</td>
                 <td class="mono">2m14s</td>
               </tr>
               <tr class="tr-hover">
                 <td class="status-text warn">● 执行中</td>
-                <td class="strong">RKE2 节点加入</td>
+                <td class="strong">{{ profile.servicePrefix }} RKE2 节点加入</td>
                 <td class="mono">38s</td>
               </tr>
               <tr class="tr-hover">
                 <td class="status-text ok">● 成功</td>
-                <td class="strong">Redis Cluster 部署</td>
+                <td class="strong">{{ profile.servicePrefix }} Redis Cluster 部署</td>
                 <td class="mono">3m02s</td>
               </tr>
               <tr class="tr-hover">
                 <td class="status-text err">● 失败</td>
-                <td class="strong">openresty 网关部署</td>
+                <td class="strong">{{ profile.servicePrefix }} openresty 网关部署</td>
                 <td class="mono">41s</td>
               </tr>
               <tr class="tr-hover">
@@ -121,6 +121,10 @@
 </template>
 
 <script setup lang="ts">
+import { useBusinessLineMockProfile } from '@/utils/businessLineMock'
+
+const { currentName, profile } = useBusinessLineMockProfile()
+
 const refresh = () => {
   // 刷新数据
 }
