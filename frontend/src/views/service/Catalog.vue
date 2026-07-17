@@ -1,5 +1,6 @@
 <template>
   <div>
+    <!-- 基础服务目录 -->
     <div class="page-head">
       <div>
         <h1>基础服务目录</h1>
@@ -9,7 +10,7 @@
 
     <div class="svc-grid">
       <div
-        v-for="service in services"
+        v-for="service in basicServices"
         :key="service.name"
         class="svc-card"
         :class="{ disabled: service.disabled }"
@@ -30,61 +31,38 @@
       </div>
     </div>
 
-    <!-- 弹窗：发布服务 · 跳 Wayne -->
-    <Teleport to="body">
-      <div v-if="showWayneModal" class="overlay" @click.self="showWayneModal = false">
-        <div class="modal">
-          <div class="modal-head">
-            <h3>发布服务 · 跳 Wayne</h3>
-            <button class="close" @click="showWayneModal = false">&times;</button>
-          </div>
-          <div class="modal-body">
-            <div class="field-row">
-              <div class="field">
-                <label>业务线</label>
-                <select v-model="wayneForm.bl">
-                  <option value="las">las（当前）</option>
-                  <option value="kodo">kodo</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>命名空间</label>
-                <select v-model="wayneForm.namespace">
-                  <option value="ns-las-prod">ns-las-prod</option>
-                </select>
-              </div>
-            </div>
-            <div class="field-row">
-              <div class="field">
-                <label>目标集群</label>
-                <select v-model="wayneForm.cluster">
-                  <option value="rke2-sh-prod-01">rke2-sh-prod-01（华东）</option>
-                  <option value="rke2-bj-prod-01">rke2-bj-prod-01（华北）</option>
-                </select>
-              </div>
-              <div class="field">
-                <label>规格</label>
-                <select v-model="wayneForm.spec">
-                  <option value="2C4G">2C 4G × 3 副本</option>
-                  <option value="4C8G">4C 8G × 3 副本</option>
-                </select>
-              </div>
-            </div>
-            <div class="field">
-              <label>服务名称</label>
-              <input v-model="wayneForm.serviceName" placeholder="las-search-api" />
-            </div>
-            <div class="tooltip-note">
-              凭 SSO 身份免登进入 <b>Wayne</b>，在 ns-las-prod 下部署服务；权限随业务线 / 角色自动具备，仅可操作被授权 namespace。
+    <!-- 容器服务部署 -->
+    <div class="page-head" style="margin-top: 24px;">
+      <div>
+        <h1>容器服务部署</h1>
+        <p>容器化服务统一管理与发布</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h3>统一入口</h3>
+        <span class="meta">Wayne · LDAP 单点登录</span>
+      </div>
+      <div class="panel-body" style="padding: 16px;">
+        <div class="ext-card" style="max-width: 560px;">
+          <div class="ext-top">
+            <div class="ext-logo" style="background: var(--logo-w-bg); color: var(--tag-blue-text);">W</div>
+            <div>
+              <h4>Wayne</h4>
+              <div class="ext-sub">wayne.xinfra.internal</div>
             </div>
           </div>
-          <div class="modal-foot">
-            <button class="btn btn-ghost" @click="showWayneModal = false">取消</button>
-            <button class="btn btn-primary" @click="handleWayneSubmit">跳 Wayne 发布 ↗</button>
+          <p>业务容器发布、命名空间与配额管理，复用 Wayne 原生多租户能力。所有集群的容器发布均可通过此入口统一操作。</p>
+          <div class="sso-row">
+            <span class="sso-dot"></span> LDAP 原生配置接入 · 在线
           </div>
+          <button class="btn btn-primary" style="margin-top: 8px; align-self: flex-start;" @click="openWayne">
+            打开 Wayne ↗
+          </button>
         </div>
       </div>
-    </Teleport>
+    </div>
 
     <!-- 弹窗：数据库标准化交付 · MySQL -->
     <Teleport to="body">
@@ -153,6 +131,7 @@
 import { ref, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useRouter } from 'vue-router'
+import { subsystemApi } from '@/api/subsystem'
 
 const router = useRouter()
 
@@ -170,17 +149,7 @@ interface Service {
   modal?: string
 }
 
-const services = ref<Service[]>([
-  {
-    name: '容器服务（Wayne）',
-    icon: 'Wy',
-    bgColor: '#1C2A3A',
-    iconColor: '#7FB8FF',
-    description: '在 RKE2 容器池标准发布业务服务，跳 Wayne 免登管理多集群与命名空间。',
-    playbook: 'wayne · ns-las-prod',
-    version: '',
-    modal: 'wayne',
-  },
+const basicServices = ref<Service[]>([
   {
     name: 'MySQL',
     icon: 'My',
@@ -238,16 +207,7 @@ const services = ref<Service[]>([
 ])
 
 // 弹窗状态
-const showWayneModal = ref(false)
 const showMysqlModal = ref(false)
-
-const wayneForm = reactive({
-  bl: 'las',
-  namespace: 'ns-las-prod',
-  cluster: 'rke2-sh-prod-01',
-  spec: '2C4G',
-  serviceName: 'las-search-api',
-})
 
 const mysqlForm = reactive({
   bl: 'las',
@@ -264,7 +224,7 @@ const handleCardClick = (service: Service) => {
     return
   }
   if (service.modal === 'wayne') {
-    showWayneModal.value = true
+    openWayne()
   } else if (service.modal === 'mysql') {
     showMysqlModal.value = true
   } else if (service.modal === 'openresty') {
@@ -272,10 +232,18 @@ const handleCardClick = (service: Service) => {
   }
 }
 
-const handleWayneSubmit = () => {
-  showWayneModal.value = false
-  ElMessage.success('已跳转 Wayne 并提交发布任务')
-  router.push({ name: 'Tasks' })
+const openWayne = async () => {
+  try {
+    const wayne = subsystemApi.getSubsystemByName('wayne')
+    if (!wayne) {
+      ElMessage.error('Wayne 子系统未找到')
+      return
+    }
+    const { data } = await subsystemApi.getSSOUrl(wayne.id)
+    window.location.assign(data.sso_url)
+  } catch {
+    // 错误已由 request 拦截器统一处理
+  }
 }
 
 const handleMysqlSubmit = () => {
