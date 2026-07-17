@@ -115,7 +115,7 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 		protected.PUT("/wayen/credential", wayenHandler.SaveCredential)
 		protected.GET("/wayne/namespaces", wayneRoleBindingHandler.ListNamespaces)
 		protected.GET("/wayne/groups", wayneRoleBindingHandler.ListGroups)
-		protected.GET("/wayne/users/me/roles", wayneRoleBindingHandler.GetCurrentUserRoles)
+		protected.GET("/wayne/users/:userid/roles", wayneRoleBindingHandler.GetCurrentUserRoles)
 		protected.GET("/wayne/namespaces/:namespaceid/operator-permissions", wayneRoleBindingHandler.NamespaceOperatorPermissions)
 		protected.GET("/wayne/apps/:appid/operator-permissions", wayneRoleBindingHandler.AppOperatorPermissions)
 		protected.PUT("/wayne/namespaces/:namespaceid/roles", wayneRoleBindingHandler.BindNamespace)

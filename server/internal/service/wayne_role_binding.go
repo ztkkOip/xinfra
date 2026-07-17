@@ -24,6 +24,7 @@ var (
 )
 
 type WayneRoleBindingRequest struct {
+	UserID         *uint64  `json:"userId,omitempty"`
 	GroupIDs       []uint64 `json:"groupIds,omitempty"`
 	OperatorUserID *uint64  `json:"operatorUserId,omitempty"`
 	OperatorName   string   `json:"operatorName,omitempty"`
@@ -71,20 +72,20 @@ func NewWayneRoleBindingService(cfg config.Config) *WayneRoleBindingService {
 	}
 }
 
-func (s *WayneRoleBindingService) BindNamespace(ctx context.Context, namespaceID uint64, username string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%s/roles", namespaceID, url.PathEscape(username)), username, req)
+func (s *WayneRoleBindingService) BindNamespace(ctx context.Context, namespaceID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%d/roles", namespaceID, userID), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) UnbindNamespace(ctx context.Context, namespaceID uint64, username string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%s/roles", namespaceID, url.PathEscape(username)), username, req)
+func (s *WayneRoleBindingService) UnbindNamespace(ctx context.Context, namespaceID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%d/roles", namespaceID, userID), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) BindApp(ctx context.Context, appID uint64, username string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/apps/%d/users/%s/roles", appID, url.PathEscape(username)), username, req)
+func (s *WayneRoleBindingService) BindApp(ctx context.Context, appID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/apps/%d/users/%d/roles", appID, userID), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) UnbindApp(ctx context.Context, appID uint64, username string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/apps/%d/users/%s/roles", appID, url.PathEscape(username)), username, req)
+func (s *WayneRoleBindingService) UnbindApp(ctx context.Context, appID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/apps/%d/users/%d/roles", appID, userID), operatorEmail, req)
 }
 
 func (s *WayneRoleBindingService) ListNamespaces(ctx context.Context) (*WayneRoleBindingResult, error) {
@@ -101,12 +102,11 @@ func (s *WayneRoleBindingService) ListGroups(ctx context.Context, groupType *int
 	return s.callRaw(ctx, http.MethodGet, internalPath, nil)
 }
 
-func (s *WayneRoleBindingService) GetUserRoles(ctx context.Context, username string) (*WayneRoleBindingResult, error) {
-	username = strings.TrimSpace(username)
-	if username == "" {
-		return nil, ErrWayenEmailMissing
+func (s *WayneRoleBindingService) GetUserRoles(ctx context.Context, userID uint64) (*WayneRoleBindingResult, error) {
+	if userID == 0 {
+		return nil, ErrWayneRoleBindingRequestFailed
 	}
-	return s.callRaw(ctx, http.MethodGet, fmt.Sprintf("/api/v1/internal/users/%s/roles", url.PathEscape(username)), nil)
+	return s.callRaw(ctx, http.MethodGet, fmt.Sprintf("/api/v1/internal/users/%d/roles", userID), nil)
 }
 
 func (s *WayneRoleBindingService) NamespaceOperatorPermissions(ctx context.Context, namespaceID uint64, operatorEmail string) (*WayneRoleBindingResult, error) {
@@ -128,6 +128,7 @@ func (s *WayneRoleBindingService) call(ctx context.Context, method, internalPath
 
 	req.OperatorUserID = nil
 	req.OperatorName = operatorEmail
+	req.UserID = nil
 
 	body, err := json.Marshal(req)
 	if err != nil {

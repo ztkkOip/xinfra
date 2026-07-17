@@ -285,14 +285,14 @@ Wayne 会把回调地址拼成：
 
 ## Wayne 授权代理接口
 
-AuthServer 的 Wayne 授权代理接口不要求调用方传 Wayne user ID。后端会从当前 `authserver_token` 里取 `email`，把它作为 Wayne username 传给 Wayne internal API。
+AuthServer 的 Wayne 授权代理接口要求调用方传目标 Wayne `userId`。后端会从当前 `authserver_token` 里取 `email` 作为操作者 `operatorName`，目标用户 ID 由请求体或路径参数提供。
 
 对外接口：
 
 ```text
 GET    /auth/api/v1/wayne/namespaces
 GET    /auth/api/v1/wayne/groups
-GET    /auth/api/v1/wayne/users/me/roles
+GET    /auth/api/v1/wayne/users/:userid/roles
 GET    /auth/api/v1/wayne/namespaces/:namespaceid/operator-permissions
 GET    /auth/api/v1/wayne/apps/:appid/operator-permissions
 PUT    /auth/api/v1/wayne/namespaces/:namespaceid/roles
@@ -309,6 +309,7 @@ Authorization: Bearer <authserver_token>
 Content-Type: application/json
 
 {
+  "userId": 2001,
   "groupIds": [10, 11],
   "replace": false,
   "requestId": "req-001",
@@ -316,13 +317,13 @@ Content-Type: application/json
 }
 ```
 
-AuthServer 转发到 Wayne internal API 时会使用 token email：
+AuthServer 转发到 Wayne internal API 时会使用请求体里的 `userId`：
 
 ```text
-PUT /api/v1/internal/namespaces/1/users/<token-email>/roles
+PUT /api/v1/internal/namespaces/1/users/2001/roles
 ```
 
-并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。
+并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。`userId` 只用于 Wayne path，不会透传到 Wayne 请求体。
 
 相关配置：
 
