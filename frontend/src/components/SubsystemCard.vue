@@ -19,11 +19,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import { subsystemApi, type Subsystem } from '@/api/subsystem'
+import { useRouter } from 'vue-router'
+import type { Subsystem } from '@/api/subsystem'
 
 const props = defineProps<{
   system: Subsystem
 }>()
+
+const router = useRouter()
 
 const bgColor = computed(() => {
   const colors: Record<string, string> = {
@@ -51,13 +54,8 @@ const iconColor = computed(() => {
   return colors[props.system.icon] || 'var(--text-mid)'
 })
 
-const handleClick = async () => {
-  if (props.system.sso_enabled) {
-    const { data } = await subsystemApi.getSSOUrl(props.system.id)
-    window.location.assign(data.sso_url)
-  } else {
-    window.open(props.system.url, '_blank')
-  }
+const handleClick = () => {
+  router.push(`/subsystem/detail/${props.system.name.toLowerCase()}`)
 }
 </script>
 
