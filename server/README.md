@@ -285,14 +285,14 @@ Wayne 会把回调地址拼成：
 
 ## Wayne 授权代理接口
 
-AuthServer 的 Wayne 授权代理接口要求调用方传目标 Wayne `userId`。后端会从当前 `authserver_token` 里取 `email` 作为操作者 `operatorName`，目标用户 ID 由请求体或路径参数提供。
+AuthServer 的 Wayne 授权代理接口要求调用方传目标 Wayne `username`。后端会从当前 `authserver_token` 里取 `email` 作为操作者 `operatorName`，目标用户名由请求体或路径参数提供。
 
 对外接口：
 
 ```text
 GET    /auth/api/v1/wayne/namespaces
 GET    /auth/api/v1/wayne/groups
-GET    /auth/api/v1/wayne/users/:userid/roles
+GET    /auth/api/v1/wayne/users/:username/roles
 GET    /auth/api/v1/wayne/namespaces/:namespaceid/operator-permissions
 GET    /auth/api/v1/wayne/apps/:appid/operator-permissions
 PUT    /auth/api/v1/wayne/namespaces/:namespaceid/roles
@@ -309,7 +309,7 @@ Authorization: Bearer <authserver_token>
 Content-Type: application/json
 
 {
-  "userId": 2001,
+  "username": "target@example.com",
   "groupIds": [10, 11],
   "replace": false,
   "requestId": "req-001",
@@ -317,13 +317,13 @@ Content-Type: application/json
 }
 ```
 
-AuthServer 转发到 Wayne internal API 时会使用请求体里的 `userId`：
+AuthServer 转发到 Wayne internal API 时会使用请求体里的 `username`：
 
 ```text
-PUT /api/v1/internal/namespaces/1/users/2001/roles
+PUT /api/v1/internal/namespaces/1/users/target@example.com/roles
 ```
 
-并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。`userId` 只用于 Wayne path，不会透传到 Wayne 请求体。
+并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。`username` 只用于 Wayne path，不会透传到 Wayne 请求体。
 
 相关配置：
 
@@ -340,6 +340,58 @@ bodyHash = SHA256_HEX(rawBody)
 payload = METHOD + "\n" + URI + "\n" + timestamp + "\n" + nonce + "\n" + bodyHash
 signature = HMAC_SHA256_HEX(secret, payload)
 X-Wayne-Signature = "sha256=" + signature
+```
+
+## 子系统赋权接口
+
+子系统赋权接口是平台业务层接口，前端应优先调用这一组，而不是直接调用低层 `/wayne/*` 代理。当前只实现 Wayne，CloudDM 先返回未启用占位。
+
+权限规则：
+
+- 平台管理员可以操作任意业务线。
+- 非平台管理员必须是当前业务线管理员，也就是 `business_line_users.permission = 0`。
+- Wayne 写操作前还会查询 Wayne `operator-permissions`，确认当前登录用户在目标 namespace 下具备创建/更新/删除用户角色的权限。
+- 用户首次加入业务线时，如果该业务线绑定了 Wayne namespace，会自动给该用户初始化 Wayne namespace `访客` 角色。
+
+接口列表：
+
+```text
+GET    /auth/api/v1/subsystem-auth/systems
+GET    /auth/api/v1/subsystem-auth/wayne/roles
+GET    /auth/api/v1/subsystem-auth/wayne/business-lines/:id/namespaces
+GET    /auth/api/v1/subsystem-auth/wayne/users/:username/roles
+PUT    /auth/api/v1/subsystem-auth/wayne/business-lines/:id/namespaces/:namespaceid/users/:username/roles
+DELETE /auth/api/v1/subsystem-auth/wayne/business-lines/:id/namespaces/:namespaceid/users/:username/roles
+POST   /auth/api/v1/subsystem-auth/wayne/business-lines/:id/users/:userid/init
+```
+
+Wayne 授权示例：
+
+```http
+PUT /auth/api/v1/subsystem-auth/wayne/business-lines/1/namespaces/3/users/eastsales@qiniu.com/roles
+Authorization: Bearer <authserver_token>
+Content-Type: application/json
+
+{
+  "groupIds": [2],
+  "replace": true,
+  "requestId": "req-001",
+  "reason": "业务线授权"
+}
+```
+
+Wayne 解绑示例：
+
+```http
+DELETE /auth/api/v1/subsystem-auth/wayne/business-lines/1/namespaces/3/users/eastsales@qiniu.com/roles
+Authorization: Bearer <authserver_token>
+Content-Type: application/json
+
+{
+  "groupIds": [2],
+  "requestId": "req-002",
+  "reason": "回收业务线授权"
+}
 ```
 
 管理员可查看当前 SAML metadata 配置：

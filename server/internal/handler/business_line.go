@@ -4,16 +4,19 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/1024XEngineer/xinfra/server/internal/model"
+	"github.com/1024XEngineer/xinfra/server/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
 
 type BusinessLineHandler struct {
-	db *gorm.DB
+	db    *gorm.DB
+	wayne *service.WayneRoleBindingService
 }
 
 type BusinessLineWithPermission struct {
@@ -45,8 +48,8 @@ type WayneNamespaceBindingItem struct {
 	KubeNamespace string `json:"kubeNamespace"`
 }
 
-func NewBusinessLineHandler(db *gorm.DB) *BusinessLineHandler {
-	return &BusinessLineHandler{db: db}
+func NewBusinessLineHandler(db *gorm.DB, wayne *service.WayneRoleBindingService) *BusinessLineHandler {
+	return &BusinessLineHandler{db: db, wayne: wayne}
 }
 
 func (h *BusinessLineHandler) ListCurrentUserBusinessLines(c *gin.Context) {
@@ -269,6 +272,7 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 	}
 
 	var binding model.BusinessLineUser
+	created := false
 	err := h.db.Where("business_line_id = ? AND user_id = ?", req.TargetBusinessLineID, req.TargetUserID).First(&binding).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		binding = model.BusinessLineUser{
@@ -280,6 +284,7 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 			return
 		}
+		created = true
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -291,6 +296,24 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 		binding.Permission = req.Permission
 	}
 
+	var initializedWayne []gin.H
+	if created {
+		operatorEmail, ok := subsystemOperatorEmail(c, claims)
+		if !ok {
+			return
+		}
+		targetUsername := wayneUsernameForUser(targetUser)
+		if targetUsername == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "target user has no Wayne username"})
+			return
+		}
+		initialized, ok := h.initializeWayneVisitorForBusinessLine(c, req.TargetBusinessLineID, targetUsername, operatorEmail, claims.IsAdmin)
+		if !ok {
+			return
+		}
+		initializedWayne = initialized
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"id":               binding.ID,
 		"business_line_id": binding.BusinessLineID,
@@ -298,6 +321,7 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 		"permission":       binding.Permission,
 		"created_at":       binding.CreatedAt.Format(time.RFC3339),
 		"updated_at":       binding.UpdatedAt.Format(time.RFC3339),
+		"wayne_init":       initializedWayne,
 	})
 }
 
@@ -397,6 +421,60 @@ func (h *BusinessLineHandler) canManageBusinessLine(c *gin.Context, businessLine
 		return false
 	}
 	return true
+}
+
+func (h *BusinessLineHandler) initializeWayneVisitorForBusinessLine(c *gin.Context, businessLineID uint64, targetUsername string, operatorEmail string, skipWaynePermissionCheck bool) ([]gin.H, bool) {
+	var namespaces []model.BusinessLineWayneNamespace
+	if err := h.db.Where("business_line_id = ?", businessLineID).Order("wayne_namespace_id ASC").Find(&namespaces).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return nil, false
+	}
+	if len(namespaces) == 0 {
+		return []gin.H{}, true
+	}
+	if h.wayne == nil {
+		c.JSON(http.StatusServiceUnavailable, gin.H{"error": "wayne internal role binding api is not configured"})
+		return nil, false
+	}
+
+	groupIDs, err := h.wayne.NamespaceVisitorGroupIDs(c.Request.Context())
+	if err != nil {
+		writeWayneRoleBindingError(c, nil, err)
+		return nil, false
+	}
+	replace := true
+	req := service.WayneRoleBindingRequest{
+		GroupIDs:  groupIDs,
+		Replace:   &replace,
+		RequestID: "business-line-user-init-" + strconv.FormatInt(time.Now().UnixNano(), 10),
+		Reason:    "初始化业务线 Wayne 访客角色",
+	}
+
+	items := make([]gin.H, 0, len(namespaces))
+	for _, namespace := range namespaces {
+		if !skipWaynePermissionCheck {
+			permissions, err := h.wayne.NamespaceOperatorPermissionsParsed(c.Request.Context(), namespace.WayneNamespaceID, operatorEmail)
+			if err != nil {
+				writeWayneRoleBindingError(c, nil, err)
+				return nil, false
+			}
+			if !permissions.Create && !permissions.Update {
+				c.JSON(http.StatusForbidden, gin.H{"error": "current user does not have Wayne namespace role create or update permission"})
+				return nil, false
+			}
+		}
+		result, err := h.wayne.BindNamespace(c.Request.Context(), namespace.WayneNamespaceID, strings.TrimSpace(targetUsername), operatorEmail, req)
+		if err != nil {
+			writeWayneRoleBindingError(c, result, err)
+			return nil, false
+		}
+		items = append(items, gin.H{
+			"namespace_id":   namespace.WayneNamespaceID,
+			"namespace_name": namespace.WayneNamespaceName,
+			"group_ids":      groupIDs,
+		})
+	}
+	return items, true
 }
 
 func parseBusinessLineID(c *gin.Context) (uint64, bool) {

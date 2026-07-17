@@ -40,9 +40,8 @@ func TestWayneRoleBindingServiceBindNamespaceSignsAndOverridesOperator(t *testin
 
 	operatorUserID := uint64(123)
 	replace := false
-	targetUserID := uint64(2001)
-	result, err := svc.BindNamespace(context.Background(), 1, targetUserID, "eastsales@qiniu.com", WayneRoleBindingRequest{
-		UserID:         &targetUserID,
+	result, err := svc.BindNamespace(context.Background(), 1, "target@example.com", "eastsales@qiniu.com", WayneRoleBindingRequest{
+		Username:       "target@example.com",
 		GroupIDs:       []uint64{10, 11},
 		OperatorUserID: &operatorUserID,
 		OperatorName:   "attacker@example.com",
@@ -56,7 +55,7 @@ func TestWayneRoleBindingServiceBindNamespaceSignsAndOverridesOperator(t *testin
 	if result.StatusCode != http.StatusOK {
 		t.Fatalf("StatusCode = %d, want 200", result.StatusCode)
 	}
-	if requestPath != "/api/v1/internal/namespaces/1/users/2001/roles" {
+	if requestPath != "/api/v1/internal/namespaces/1/users/target@example.com/roles" {
 		t.Fatalf("requestPath = %q", requestPath)
 	}
 	if payload.OperatorName != "eastsales@qiniu.com" {
@@ -65,8 +64,8 @@ func TestWayneRoleBindingServiceBindNamespaceSignsAndOverridesOperator(t *testin
 	if payload.OperatorUserID != nil {
 		t.Fatalf("OperatorUserID should be omitted, got %v", *payload.OperatorUserID)
 	}
-	if payload.UserID != nil {
-		t.Fatalf("UserID should be omitted from Wayne body, got %v", *payload.UserID)
+	if payload.Username != "" {
+		t.Fatalf("Username should be omitted from Wayne body, got %q", payload.Username)
 	}
 	if payload.Replace == nil || *payload.Replace {
 		t.Fatalf("Replace = %v, want false", payload.Replace)
@@ -82,23 +81,23 @@ func TestWayneRoleBindingServiceCallsAllDocumentedEndpoints(t *testing.T) {
 		{
 			name: "unbind namespace",
 			call: func(s *WayneRoleBindingService) (*WayneRoleBindingResult, error) {
-				return s.UnbindNamespace(context.Background(), 1, 2001, "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{10}})
+				return s.UnbindNamespace(context.Background(), 1, "target@example.com", "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{10}})
 			},
-			want: "DELETE /api/v1/internal/namespaces/1/users/2001/roles",
+			want: "DELETE /api/v1/internal/namespaces/1/users/target@example.com/roles",
 		},
 		{
 			name: "bind app",
 			call: func(s *WayneRoleBindingService) (*WayneRoleBindingResult, error) {
-				return s.BindApp(context.Background(), 3, 2001, "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
+				return s.BindApp(context.Background(), 3, "target@example.com", "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
 			},
-			want: "PUT /api/v1/internal/apps/3/users/2001/roles",
+			want: "PUT /api/v1/internal/apps/3/users/target@example.com/roles",
 		},
 		{
 			name: "unbind app",
 			call: func(s *WayneRoleBindingService) (*WayneRoleBindingResult, error) {
-				return s.UnbindApp(context.Background(), 3, 2001, "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
+				return s.UnbindApp(context.Background(), 3, "target@example.com", "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
 			},
-			want: "DELETE /api/v1/internal/apps/3/users/2001/roles",
+			want: "DELETE /api/v1/internal/apps/3/users/target@example.com/roles",
 		},
 		{
 			name: "list namespaces",
@@ -125,9 +124,9 @@ func TestWayneRoleBindingServiceCallsAllDocumentedEndpoints(t *testing.T) {
 		{
 			name: "get user roles",
 			call: func(s *WayneRoleBindingService) (*WayneRoleBindingResult, error) {
-				return s.GetUserRoles(context.Background(), 2001)
+				return s.GetUserRoles(context.Background(), "target@example.com")
 			},
-			want: "GET /api/v1/internal/users/2001/roles",
+			want: "GET /api/v1/internal/users/target@example.com/roles",
 		},
 		{
 			name: "namespace operator permissions",
@@ -231,7 +230,7 @@ func TestWayneRoleBindingServiceHTTPError(t *testing.T) {
 		WayneServiceName:         "xinfra",
 		WayneServiceAPISecretKey: "service-secret",
 	})
-	result, err := svc.BindApp(context.Background(), 3, 2001, "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
+	result, err := svc.BindApp(context.Background(), 3, "target@example.com", "eastsales@qiniu.com", WayneRoleBindingRequest{GroupIDs: []uint64{20}})
 	if err == nil {
 		t.Fatal("expected error")
 	}

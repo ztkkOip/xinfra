@@ -24,7 +24,7 @@ var (
 )
 
 type WayneRoleBindingRequest struct {
-	UserID         *uint64  `json:"userId,omitempty"`
+	Username       string   `json:"username,omitempty"`
 	GroupIDs       []uint64 `json:"groupIds,omitempty"`
 	OperatorUserID *uint64  `json:"operatorUserId,omitempty"`
 	OperatorName   string   `json:"operatorName,omitempty"`
@@ -38,6 +38,19 @@ type WayneRoleBindingResult struct {
 	StatusCode  int
 	ContentType string
 	Body        []byte
+}
+
+type WayneRoleGroup struct {
+	ID      uint64 `json:"id"`
+	Name    string `json:"name"`
+	Comment string `json:"comment"`
+	Type    int    `json:"type"`
+}
+
+type WayneOperatorPermissions struct {
+	Create bool `json:"create"`
+	Update bool `json:"update"`
+	Delete bool `json:"delete"`
 }
 
 type WayneRoleBindingHTTPError struct {
@@ -72,20 +85,20 @@ func NewWayneRoleBindingService(cfg config.Config) *WayneRoleBindingService {
 	}
 }
 
-func (s *WayneRoleBindingService) BindNamespace(ctx context.Context, namespaceID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%d/roles", namespaceID, userID), operatorEmail, req)
+func (s *WayneRoleBindingService) BindNamespace(ctx context.Context, namespaceID uint64, username string, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%s/roles", namespaceID, url.PathEscape(username)), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) UnbindNamespace(ctx context.Context, namespaceID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%d/roles", namespaceID, userID), operatorEmail, req)
+func (s *WayneRoleBindingService) UnbindNamespace(ctx context.Context, namespaceID uint64, username string, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/namespaces/%d/users/%s/roles", namespaceID, url.PathEscape(username)), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) BindApp(ctx context.Context, appID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/apps/%d/users/%d/roles", appID, userID), operatorEmail, req)
+func (s *WayneRoleBindingService) BindApp(ctx context.Context, appID uint64, username string, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodPut, fmt.Sprintf("/api/v1/internal/apps/%d/users/%s/roles", appID, url.PathEscape(username)), operatorEmail, req)
 }
 
-func (s *WayneRoleBindingService) UnbindApp(ctx context.Context, appID uint64, userID uint64, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
-	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/apps/%d/users/%d/roles", appID, userID), operatorEmail, req)
+func (s *WayneRoleBindingService) UnbindApp(ctx context.Context, appID uint64, username string, operatorEmail string, req WayneRoleBindingRequest) (*WayneRoleBindingResult, error) {
+	return s.call(ctx, http.MethodDelete, fmt.Sprintf("/api/v1/internal/apps/%d/users/%s/roles", appID, url.PathEscape(username)), operatorEmail, req)
 }
 
 func (s *WayneRoleBindingService) ListNamespaces(ctx context.Context) (*WayneRoleBindingResult, error) {
@@ -102,15 +115,50 @@ func (s *WayneRoleBindingService) ListGroups(ctx context.Context, groupType *int
 	return s.callRaw(ctx, http.MethodGet, internalPath, nil)
 }
 
-func (s *WayneRoleBindingService) GetUserRoles(ctx context.Context, userID uint64) (*WayneRoleBindingResult, error) {
-	if userID == 0 {
-		return nil, ErrWayneRoleBindingRequestFailed
+func (s *WayneRoleBindingService) ListNamespaceRoleGroups(ctx context.Context) ([]WayneRoleGroup, error) {
+	groupType := 1
+	result, err := s.ListGroups(ctx, &groupType)
+	if err != nil {
+		return nil, err
 	}
-	return s.callRaw(ctx, http.MethodGet, fmt.Sprintf("/api/v1/internal/users/%d/roles", userID), nil)
+	return parseWayneRoleGroups(result.Body)
+}
+
+func (s *WayneRoleBindingService) NamespaceVisitorGroupIDs(ctx context.Context) ([]uint64, error) {
+	groups, err := s.ListNamespaceRoleGroups(ctx)
+	if err != nil {
+		return nil, err
+	}
+	ids := make([]uint64, 0, 1)
+	for _, group := range groups {
+		if isWayneVisitorRoleName(group.Name) {
+			ids = append(ids, group.ID)
+		}
+	}
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("wayne visitor role group not found")
+	}
+	return ids, nil
+}
+
+func (s *WayneRoleBindingService) GetUserRoles(ctx context.Context, username string) (*WayneRoleBindingResult, error) {
+	username = strings.TrimSpace(username)
+	if username == "" {
+		return nil, ErrWayenEmailMissing
+	}
+	return s.callRaw(ctx, http.MethodGet, fmt.Sprintf("/api/v1/internal/users/%s/roles", url.PathEscape(username)), nil)
 }
 
 func (s *WayneRoleBindingService) NamespaceOperatorPermissions(ctx context.Context, namespaceID uint64, operatorEmail string) (*WayneRoleBindingResult, error) {
 	return s.operatorPermissions(ctx, fmt.Sprintf("/api/v1/internal/namespaces/%d/operator-permissions", namespaceID), operatorEmail)
+}
+
+func (s *WayneRoleBindingService) NamespaceOperatorPermissionsParsed(ctx context.Context, namespaceID uint64, operatorEmail string) (*WayneOperatorPermissions, error) {
+	result, err := s.NamespaceOperatorPermissions(ctx, namespaceID, operatorEmail)
+	if err != nil {
+		return nil, err
+	}
+	return parseWayneOperatorPermissions(result.Body)
 }
 
 func (s *WayneRoleBindingService) AppOperatorPermissions(ctx context.Context, appID uint64, operatorEmail string) (*WayneRoleBindingResult, error) {
@@ -128,7 +176,7 @@ func (s *WayneRoleBindingService) call(ctx context.Context, method, internalPath
 
 	req.OperatorUserID = nil
 	req.OperatorName = operatorEmail
-	req.UserID = nil
+	req.Username = ""
 
 	body, err := json.Marshal(req)
 	if err != nil {
@@ -248,4 +296,45 @@ func truncateForDebugLog(value string, limit int) string {
 		return value
 	}
 	return value[:limit] + "...(truncated)"
+}
+
+func parseWayneRoleGroups(body []byte) ([]WayneRoleGroup, error) {
+	var wrapped struct {
+		Data  []WayneRoleGroup `json:"data"`
+		Items []WayneRoleGroup `json:"items"`
+	}
+	if err := json.Unmarshal(body, &wrapped); err == nil {
+		if wrapped.Data != nil {
+			return wrapped.Data, nil
+		}
+		if wrapped.Items != nil {
+			return wrapped.Items, nil
+		}
+	}
+	var direct []WayneRoleGroup
+	if err := json.Unmarshal(body, &direct); err != nil {
+		return nil, err
+	}
+	return direct, nil
+}
+
+func parseWayneOperatorPermissions(body []byte) (*WayneOperatorPermissions, error) {
+	var wrapped struct {
+		Data struct {
+			Permissions WayneOperatorPermissions `json:"permissions"`
+		} `json:"data"`
+		Permissions WayneOperatorPermissions `json:"permissions"`
+	}
+	if err := json.Unmarshal(body, &wrapped); err != nil {
+		return nil, err
+	}
+	if wrapped.Data.Permissions != (WayneOperatorPermissions{}) {
+		return &wrapped.Data.Permissions, nil
+	}
+	return &wrapped.Permissions, nil
+}
+
+func isWayneVisitorRoleName(name string) bool {
+	normalized := strings.ToLower(strings.TrimSpace(name))
+	return normalized == "访客" || normalized == "visitor" || strings.Contains(normalized, "visitor")
 }

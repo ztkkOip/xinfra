@@ -64,11 +64,12 @@ func (h *WayneRoleBindingHandler) ListGroups(c *gin.Context) {
 }
 
 func (h *WayneRoleBindingHandler) GetCurrentUserRoles(c *gin.Context) {
-	userID, ok := parseUintPathParam(c, "userid")
-	if !ok {
+	username := strings.TrimSpace(c.Param("username"))
+	if username == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username"})
 		return
 	}
-	h.handleQuery(c, "user_roles", userID, "")
+	h.handleQuery(c, "user_roles", 0, username)
 }
 
 func (h *WayneRoleBindingHandler) NamespaceOperatorPermissions(c *gin.Context) {
@@ -111,7 +112,7 @@ func (h *WayneRoleBindingHandler) handle(c *gin.Context, scope string, method st
 	if !ok {
 		return
 	}
-	targetUserID, ok := roleBindingTargetUserID(c, req)
+	targetUsername, ok := roleBindingTargetUsername(c, req)
 	if !ok {
 		return
 	}
@@ -120,25 +121,25 @@ func (h *WayneRoleBindingHandler) handle(c *gin.Context, scope string, method st
 		return
 	}
 
-	result, err := h.call(c, scope, method, resourceID, targetUserID, operatorEmail, req)
+	result, err := h.call(c, scope, method, resourceID, targetUsername, operatorEmail, req)
 	if err != nil {
-		h.writeAudit(c, claims.UserID, operatorEmail, scope, resourceID, targetUserID, "deny", req.RequestID, err.Error())
+		h.writeAudit(c, claims.UserID, operatorEmail, scope, resourceID, targetUsername, "deny", req.RequestID, err.Error())
 		writeWayneRoleBindingError(c, result, err)
 		return
 	}
 
-	h.writeAudit(c, claims.UserID, operatorEmail, scope, resourceID, targetUserID, "allow", req.RequestID, "")
+	h.writeAudit(c, claims.UserID, operatorEmail, scope, resourceID, targetUsername, "allow", req.RequestID, "")
 	writeWayneRoleBindingResult(c, result)
 }
 
-func (h *WayneRoleBindingHandler) handleQuery(c *gin.Context, resourceType string, resourceID uint64, _ string) {
+func (h *WayneRoleBindingHandler) handleQuery(c *gin.Context, resourceType string, resourceID uint64, username string) {
 	var result *service.WayneRoleBindingResult
 	var err error
 	switch resourceType {
 	case "namespaces":
 		result, err = h.wayne.ListNamespaces(c.Request.Context())
 	case "user_roles":
-		result, err = h.wayne.GetUserRoles(c.Request.Context(), resourceID)
+		result, err = h.wayne.GetUserRoles(c.Request.Context(), username)
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": "unsupported query resource"})
 		return
@@ -181,17 +182,17 @@ func (h *WayneRoleBindingHandler) handleOperatorPermissions(c *gin.Context, scop
 	writeWayneRoleBindingResult(c, result)
 }
 
-func (h *WayneRoleBindingHandler) call(c *gin.Context, scope, method string, resourceID uint64, targetUserID uint64, operatorEmail string, req service.WayneRoleBindingRequest) (*service.WayneRoleBindingResult, error) {
+func (h *WayneRoleBindingHandler) call(c *gin.Context, scope, method string, resourceID uint64, targetUsername string, operatorEmail string, req service.WayneRoleBindingRequest) (*service.WayneRoleBindingResult, error) {
 	if scope == "namespace" {
 		if method == http.MethodPut {
-			return h.wayne.BindNamespace(c.Request.Context(), resourceID, targetUserID, operatorEmail, req)
+			return h.wayne.BindNamespace(c.Request.Context(), resourceID, targetUsername, operatorEmail, req)
 		}
-		return h.wayne.UnbindNamespace(c.Request.Context(), resourceID, targetUserID, operatorEmail, req)
+		return h.wayne.UnbindNamespace(c.Request.Context(), resourceID, targetUsername, operatorEmail, req)
 	}
 	if method == http.MethodPut {
-		return h.wayne.BindApp(c.Request.Context(), resourceID, targetUserID, operatorEmail, req)
+		return h.wayne.BindApp(c.Request.Context(), resourceID, targetUsername, operatorEmail, req)
 	}
-	return h.wayne.UnbindApp(c.Request.Context(), resourceID, targetUserID, operatorEmail, req)
+	return h.wayne.UnbindApp(c.Request.Context(), resourceID, targetUsername, operatorEmail, req)
 }
 
 func parseRoleBindingRequest(c *gin.Context) (service.WayneRoleBindingRequest, bool) {
@@ -212,24 +213,19 @@ func parseRoleBindingRequest(c *gin.Context) (service.WayneRoleBindingRequest, b
 	return req, true
 }
 
-func roleBindingTargetUserID(c *gin.Context, req service.WayneRoleBindingRequest) (uint64, bool) {
-	if req.UserID != nil && *req.UserID != 0 {
-		return *req.UserID, true
+func roleBindingTargetUsername(c *gin.Context, req service.WayneRoleBindingRequest) (string, bool) {
+	if username := strings.TrimSpace(req.Username); username != "" {
+		return username, true
 	}
-	for _, key := range []string{"userId", "user_id", "userid"} {
+	for _, key := range []string{"username", "userName", "user_name"} {
 		raw := strings.TrimSpace(c.Query(key))
 		if raw == "" {
 			continue
 		}
-		value, err := strconv.ParseUint(raw, 10, 64)
-		if err != nil || value == 0 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid userId"})
-			return 0, false
-		}
-		return value, true
+		return raw, true
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"error": "userId is required"})
-	return 0, false
+	c.JSON(http.StatusBadRequest, gin.H{"error": "username is required"})
+	return "", false
 }
 
 func parseUintPathParam(c *gin.Context, name string) (uint64, bool) {
@@ -280,7 +276,7 @@ func writeWayneRoleBindingError(c *gin.Context, result *service.WayneRoleBinding
 	}
 }
 
-func (h *WayneRoleBindingHandler) writeAudit(c *gin.Context, userID uint64, operatorEmail, scope string, resourceID uint64, targetUserID uint64, decision, requestID, reason string) {
+func (h *WayneRoleBindingHandler) writeAudit(c *gin.Context, userID uint64, operatorEmail, scope string, resourceID uint64, targetUsername string, decision, requestID, reason string) {
 	h.audit.Write(service.AuditEntry{
 		RequestID:     requestID,
 		ActorUserID:   userID,
@@ -295,7 +291,7 @@ func (h *WayneRoleBindingHandler) writeAudit(c *gin.Context, userID uint64, oper
 		Decision:      decision,
 		Reason:        truncateAuditReason(reason),
 		Metadata: map[string]any{
-			"targetUserId": targetUserID,
+			"targetUsername": targetUsername,
 		},
 	})
 }
