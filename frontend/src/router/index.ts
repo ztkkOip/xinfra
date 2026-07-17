@@ -82,10 +82,10 @@ const router = createRouter({
           meta: { title: '资源状态看板' },
         },
         {
-          path: 'resource/management',
-          name: 'ResourceManagement',
+          path: 'machine/management',
+          name: 'MachineManagement',
           component: () => import('@/views/resource/Management.vue'),
-          meta: { title: '资源管理' },
+          meta: { title: '机器管理' },
         },
         {
           path: 'infrastructure/cluster',
