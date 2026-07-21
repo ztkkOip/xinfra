@@ -19,9 +19,6 @@
             <el-option v-for="item in businessLineStore.items" :key="item.id" :label="item.name" :value="item.id" />
           </el-select>
         </el-form-item>
-        <el-form-item label="权限">
-          <el-segmented v-model="grantForm.permission" :options="permissionOptions" />
-        </el-form-item>
         <el-button type="primary" :loading="granting" @click="grantPermission">保存分配</el-button>
       </el-form>
 
@@ -72,17 +69,10 @@ const savingWayneNamespaces = ref(false)
 const grantForm = reactive<{
   target_user_id: number | null
   target_business_line_id: number | null
-  permission: 0 | 1
 }>({
   target_user_id: null,
   target_business_line_id: null,
-  permission: 1,
 })
-
-const permissionOptions = [
-  { label: '管理员', value: 0 },
-  { label: '普通用户', value: 1 },
-]
 
 watch(
   () => businessLineStore.current?.id,
@@ -139,7 +129,6 @@ async function grantPermission() {
       business_line_id: businessLineID,
       target_user_id: grantForm.target_user_id,
       target_business_line_id: grantForm.target_business_line_id,
-      permission: grantForm.permission,
     })
     ElMessage.success('已保存业务线分配')
   } catch (error) {

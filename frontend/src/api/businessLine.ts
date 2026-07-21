@@ -59,7 +59,6 @@ export const businessLineApi = {
     business_line_id: number
     target_user_id: number
     target_business_line_id: number
-    permission: 0 | 1
   }): Promise<void> {
     await request('/auth/api/v1/business-lines/authorizations', {
       method: 'POST',
@@ -69,7 +68,7 @@ export const businessLineApi = {
 
   async listWayneNamespaces(): Promise<WayneNamespace[]> {
     const data = await request('/auth/api/v1/wayne/namespaces')
-    const items = Array.isArray(data.data) ? data.data : Array.isArray(data.items) ? data.items : []
+    const items = Array.isArray(data.data?.list) ? data.data.list : []
     return items.map((item: any) => ({
       id: Number(item.id),
       name: item.name || '',

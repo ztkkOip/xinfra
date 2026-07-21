@@ -71,6 +71,15 @@ type AccessToken struct {
 	RevokedAt *time.Time `json:"revoked_at"`
 }
 
+type WayneToken struct {
+	ID        uint64    `gorm:"primaryKey" json:"id"`
+	Account   string    `gorm:"size:128;not null;uniqueIndex" json:"account"`
+	Token     string    `gorm:"type:text;not null" json:"-"`
+	ExpiresAt time.Time `gorm:"not null;index" json:"expires_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type AuditLog struct {
 	ID             uint64    `gorm:"primaryKey" json:"id"`
 	RequestID      string    `gorm:"size:128;not null;default:''" json:"request_id"`

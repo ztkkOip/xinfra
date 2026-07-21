@@ -285,7 +285,7 @@ Wayne 会把回调地址拼成：
 
 ## Wayne 授权代理接口
 
-AuthServer 的 Wayne 授权代理接口要求调用方传目标 Wayne `username`。后端会从当前 `authserver_token` 里取 `email` 作为操作者 `operatorName`，目标用户名由请求体或路径参数提供。
+AuthServer 的 Wayne 授权代理接口要求调用方传目标 Wayne `username`。后端使用配置里的 Wayne 超级管理员账号登录 Wayne 原生 API，拿到 Wayne token 后存入数据库，后续代理请求都带 `Authorization: Bearer <wayne_token>`。token 过期或 Wayne 返回 401 时会重新调用 Wayne 登录接口获取 token 并重试一次。
 
 对外接口：
 
@@ -317,30 +317,36 @@ Content-Type: application/json
 }
 ```
 
-AuthServer 转发到 Wayne internal API 时会使用请求体里的 `username`：
+AuthServer 转发到 Wayne 原生 API 时会先按 `username` 查询 Wayne 用户，拿到 Wayne `user.id` 后再查询目标 namespace/app 下的用户角色绑定记录：
 
 ```text
-PUT /api/v1/internal/namespaces/1/users/target@example.com/roles
+GET /api/v1/users?name=target@example.com
+GET /api/v1/namespaces/1/users?userId=<wayne_user_id>
 ```
 
-并覆盖请求体中的 `operatorName` 为 token email，忽略外部传入的 `operatorUserId`。`username` 只用于 Wayne path，不会透传到 Wayne 请求体。
+如果绑定记录存在，会调用原生更新接口；不存在则调用原生创建接口：
+
+```text
+POST /api/v1/namespaces/1/users
+PUT  /api/v1/namespaces/1/users/<namespace_user_id>
+```
+
+删除角色时会先查询绑定记录，再调用：
+
+```text
+DELETE /api/v1/namespaces/1/users/<namespace_user_id>
+```
 
 相关配置：
 
 ```env
-WAYNE_INTERNAL_API_BASE_URL=http://wayne-backend.demo.svc.cluster.local:8080
-WAYNE_SERVICE_NAME=xinfra
-WAYNE_SERVICE_API_SECRET_KEY=<wayne-service-secret>
+WAYNE_API_BASE_URL=http://wayne-backend.demo.svc.cluster.local:8080
+WAYNE_ADMIN_USERNAME=admin
+WAYNE_ADMIN_PASSWORD=<wayne-admin-password>
+WAYNE_TOKEN_TTL_MINUTES=1440
 ```
 
-Wayne internal API 签名规则：
-
-```text
-bodyHash = SHA256_HEX(rawBody)
-payload = METHOD + "\n" + URI + "\n" + timestamp + "\n" + nonce + "\n" + bodyHash
-signature = HMAC_SHA256_HEX(secret, payload)
-X-Wayne-Signature = "sha256=" + signature
-```
+`WAYNE_API_BASE_URL` 未配置时会兼容读取旧的 `WAYNE_INTERNAL_API_BASE_URL`。Wayne admin token 会写入 `wayne_tokens` 表，服务重启后优先复用未过期 token。
 
 ## 子系统赋权接口
 

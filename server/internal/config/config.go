@@ -37,6 +37,10 @@ type Config struct {
 	WayenLoginValue          string
 	WayenOAuthRef            string
 	WayenOAuthLoginURL       string
+	WayneAPIBaseURL          string
+	WayneAdminUsername       string
+	WayneAdminPassword       string
+	WayneTokenTTLMinutes     int
 	WayneInternalAPIBaseURL  string
 	WayneServiceName         string
 	WayneServiceAPISecretKey string
@@ -88,6 +92,10 @@ func Load() Config {
 		WayenLoginValue:          env("WAYEN_LOGIN_VALUE", "email"),
 		WayenOAuthRef:            env("WAYEN_OAUTH_REF", "/portal/namespace/1/app"),
 		WayenOAuthLoginURL:       trimURL(env("WAYEN_OAUTH_LOGIN_URL", "")),
+		WayneAPIBaseURL:          trimURL(env("WAYNE_API_BASE_URL", env("WAYNE_INTERNAL_API_BASE_URL", ""))),
+		WayneAdminUsername:       env("WAYNE_ADMIN_USERNAME", ""),
+		WayneAdminPassword:       env("WAYNE_ADMIN_PASSWORD", ""),
+		WayneTokenTTLMinutes:     envInt("WAYNE_TOKEN_TTL_MINUTES", 1440),
 		WayneInternalAPIBaseURL:  trimURL(env("WAYNE_INTERNAL_API_BASE_URL", "")),
 		WayneServiceName:         env("WAYNE_SERVICE_NAME", "xinfra"),
 		WayneServiceAPISecretKey: env("WAYNE_SERVICE_API_SECRET_KEY", ""),

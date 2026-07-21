@@ -31,7 +31,6 @@ type GrantBusinessLinePermissionRequest struct {
 	BusinessLineID       uint64 `json:"business_line_id" binding:"required"`
 	TargetUserID         uint64 `json:"target_user_id" binding:"required"`
 	TargetBusinessLineID uint64 `json:"target_business_line_id" binding:"required"`
-	Permission           int    `json:"permission"`
 }
 
 type BusinessLinePayload struct {
@@ -223,10 +222,6 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	if req.Permission != 0 && req.Permission != 1 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "permission must be 0 or 1"})
-		return
-	}
 
 	if !claims.IsAdmin {
 		var currentBinding model.BusinessLineUser
@@ -278,7 +273,7 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 		binding = model.BusinessLineUser{
 			BusinessLineID: req.TargetBusinessLineID,
 			UserID:         req.TargetUserID,
-			Permission:     req.Permission,
+			Permission:     1,
 		}
 		if err := h.db.Create(&binding).Error; err != nil {
 			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
@@ -288,30 +283,6 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 	} else if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
-	} else if binding.Permission != req.Permission {
-		if err := h.db.Model(&binding).Update("permission", req.Permission).Error; err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-		binding.Permission = req.Permission
-	}
-
-	var initializedWayne []gin.H
-	if created {
-		operatorEmail, ok := subsystemOperatorEmail(c, claims)
-		if !ok {
-			return
-		}
-		targetUsername := wayneUsernameForUser(targetUser)
-		if targetUsername == "" {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "target user has no Wayne username"})
-			return
-		}
-		initialized, ok := h.initializeWayneVisitorForBusinessLine(c, req.TargetBusinessLineID, targetUsername, operatorEmail, claims.IsAdmin)
-		if !ok {
-			return
-		}
-		initializedWayne = initialized
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -321,7 +292,7 @@ func (h *BusinessLineHandler) GrantPermission(c *gin.Context) {
 		"permission":       binding.Permission,
 		"created_at":       binding.CreatedAt.Format(time.RFC3339),
 		"updated_at":       binding.UpdatedAt.Format(time.RFC3339),
-		"wayne_init":       initializedWayne,
+		"created":          created,
 	})
 }
 

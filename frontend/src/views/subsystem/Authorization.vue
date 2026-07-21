@@ -239,10 +239,11 @@ const operatorStateDetail = computed(() => {
 watch(
   () => businessLineStore.current?.id,
   async () => {
+    selectedUserId.value = null
     selectedNamespaceId.value = null
     selectedRoleIds.value = []
     userRoles.value = null
-    await loadBusinessLineData()
+    await Promise.all([loadUsers(), loadBusinessLineData()])
   },
 )
 
@@ -286,14 +287,25 @@ async function loadSystems() {
 }
 
 async function loadUsers() {
+  const businessLineId = currentBusinessLineId.value
+  if (!businessLineId) {
+    users.value = []
+    selectedUserId.value = null
+    return
+  }
   loadingUsers.value = true
   try {
-    users.value = await userApi.list()
+    users.value = await userApi.list({ businessLineId })
     if (!selectedUserId.value && users.value.length) {
       selectedUserId.value = users.value[0].uid
       await loadSelectedUserRoles()
+    } else if (selectedUserId.value && !users.value.some((user) => user.uid === selectedUserId.value)) {
+      selectedUserId.value = users.value[0]?.uid || null
+      await loadSelectedUserRoles()
     }
   } catch (error) {
+    users.value = []
+    selectedUserId.value = null
     ElMessage.error(error instanceof Error ? error.message : '查询用户失败')
   } finally {
     loadingUsers.value = false

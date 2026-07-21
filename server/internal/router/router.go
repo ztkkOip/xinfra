@@ -69,7 +69,7 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	auditService := service.NewAuditService(deps.DB)
 	authService := service.NewAuthService(deps.Config, deps.DB, auditService)
 	wayenService := service.NewWayenService(deps.Config, deps.DB)
-	wayneRoleBindingService := service.NewWayneRoleBindingService(deps.Config)
+	wayneRoleBindingService := service.NewWayneRoleBindingService(deps.Config, deps.DB)
 
 	healthHandler := handler.NewHealthHandler(deps.DB)
 	authHandler := handler.NewAuthHandler(deps.Config, authService)
