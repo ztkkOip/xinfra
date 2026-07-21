@@ -106,6 +106,12 @@ const router = createRouter({
           meta: { title: '基础服务' },
         },
         {
+          path: 'service/catalog/:component',
+          name: 'ServiceDelivery',
+          component: () => import('@/views/service/Catalog.vue'),
+          meta: { title: '基础服务交付' },
+        },
+        {
           path: 'service/management',
           name: 'ServiceManagement',
           component: () => import('@/views/service/Management.vue'),

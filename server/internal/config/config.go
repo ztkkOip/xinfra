@@ -14,49 +14,52 @@ type OAuthClient struct {
 }
 
 type Config struct {
-	AppEnv                   string
-	HTTPAddr                 string
-	PublicBaseURL            string
-	MySQLDSN                 string
-	AutoMigrate              bool
-	SSOEnabled               bool
-	JWTSecret                string
-	JWTIssuer                string
-	JWTTTLMinutes            int
-	SAMLEntityID             string
-	SAMLACSURL               string
-	SAMLSPCert               string
-	SAMLSPKey                string
-	SAMLIDPMetaURL           string
-	SAMLLogoutURL            string
-	WayenLoginURL            string
-	WayenTargetURL           string
-	WayenUsernameKey         string
-	WayenPasswordKey         string
-	WayenLoginFormat         string
-	WayenLoginValue          string
-	WayenOAuthRef            string
-	WayenOAuthLoginURL       string
-	WayneAPIBaseURL          string
-	WayneAdminUsername       string
-	WayneAdminPassword       string
-	WayneTokenTTLMinutes     int
-	WayneInternalAPIBaseURL  string
-	WayneServiceName         string
-	WayneServiceAPISecretKey string
-	OAuthClientID            string
-	OAuthClientSecret        string
-	OAuthRedirectURI         string
-	OAuthCodeTTLSeconds      int
-	OIDCIssuer               string
-	OIDCAuthorizeURL         string
-	OIDCTokenURL             string
-	OIDCUserInfoURL          string
-	OIDCJWKSURL              string
-	CloudDMClientID          string
-	CloudDMClientSecret      string
-	CloudDMRedirectURI       string
-	CloudDMTargetURL         string
+	AppEnv                    string
+	HTTPAddr                  string
+	PublicBaseURL             string
+	MySQLDSN                  string
+	AutoMigrate               bool
+	SSOEnabled                bool
+	JWTSecret                 string
+	JWTIssuer                 string
+	JWTTTLMinutes             int
+	SAMLEntityID              string
+	SAMLACSURL                string
+	SAMLSPCert                string
+	SAMLSPKey                 string
+	SAMLIDPMetaURL            string
+	SAMLLogoutURL             string
+	WayenLoginURL             string
+	WayenTargetURL            string
+	WayenUsernameKey          string
+	WayenPasswordKey          string
+	WayenLoginFormat          string
+	WayenLoginValue           string
+	WayenOAuthRef             string
+	WayenOAuthLoginURL        string
+	WayneAPIBaseURL           string
+	WayneAdminUsername        string
+	WayneAdminPassword        string
+	WayneTokenTTLMinutes      int
+	WayneInternalAPIBaseURL   string
+	WayneServiceName          string
+	WayneServiceAPISecretKey  string
+	OAuthClientID             string
+	OAuthClientSecret         string
+	OAuthRedirectURI          string
+	OAuthCodeTTLSeconds       int
+	OIDCIssuer                string
+	OIDCAuthorizeURL          string
+	OIDCTokenURL              string
+	OIDCUserInfoURL           string
+	OIDCJWKSURL               string
+	CloudDMClientID           string
+	CloudDMClientSecret       string
+	CloudDMRedirectURI        string
+	CloudDMTargetURL          string
+	AnsibleServiceBaseURL     string
+	AnsibleInternalToken      string
+	DeploymentCallbackBaseURL string
 }
 
 func Load() Config {
@@ -69,49 +72,52 @@ func Load() Config {
 	oidcIssuer = strings.TrimRight(oidcIssuer, "/")
 
 	return Config{
-		AppEnv:                   env("APP_ENV", "dev"),
-		HTTPAddr:                 httpAddr,
-		PublicBaseURL:            publicBaseURL,
-		MySQLDSN:                 env("MYSQL_DSN", "auth:auth@tcp(127.0.0.1:3306)/authserver?charset=utf8mb4&parseTime=True&loc=Local"),
-		AutoMigrate:              envBool("AUTO_MIGRATE", true),
-		SSOEnabled:               envBool("SSO_ENABLED", true),
-		JWTSecret:                env("JWT_SECRET", "change-this-secret"),
-		JWTIssuer:                env("JWT_ISSUER", "authserver"),
-		JWTTTLMinutes:            envInt("JWT_TTL_MINUTES", 120),
-		SAMLEntityID:             samlEntityID,
-		SAMLACSURL:               samlACSURL,
-		SAMLSPCert:               env("SAML_SP_CERT_FILE", "certs/sp.crt"),
-		SAMLSPKey:                env("SAML_SP_KEY_FILE", "certs/sp.key"),
-		SAMLIDPMetaURL:           env("SAML_IDP_METADATA_URL", "http://sso-internal.dev.qiniu.io/saml2/meta"),
-		SAMLLogoutURL:            trimURL(env("SAML_LOGOUT_URL", "")),
-		WayenLoginURL:            env("WAYEN_LOGIN_URL", ""),
-		WayenTargetURL:           env("WAYEN_TARGET_URL", ""),
-		WayenUsernameKey:         env("WAYEN_USERNAME_KEY", "email"),
-		WayenPasswordKey:         env("WAYEN_PASSWORD_KEY", "password"),
-		WayenLoginFormat:         env("WAYEN_LOGIN_FORMAT", "form"),
-		WayenLoginValue:          env("WAYEN_LOGIN_VALUE", "email"),
-		WayenOAuthRef:            env("WAYEN_OAUTH_REF", "/portal/namespace/1/app"),
-		WayenOAuthLoginURL:       trimURL(env("WAYEN_OAUTH_LOGIN_URL", "")),
-		WayneAPIBaseURL:          trimURL(env("WAYNE_API_BASE_URL", env("WAYNE_INTERNAL_API_BASE_URL", ""))),
-		WayneAdminUsername:       env("WAYNE_ADMIN_USERNAME", ""),
-		WayneAdminPassword:       env("WAYNE_ADMIN_PASSWORD", ""),
-		WayneTokenTTLMinutes:     envInt("WAYNE_TOKEN_TTL_MINUTES", 1440),
-		WayneInternalAPIBaseURL:  trimURL(env("WAYNE_INTERNAL_API_BASE_URL", "")),
-		WayneServiceName:         env("WAYNE_SERVICE_NAME", "xinfra"),
-		WayneServiceAPISecretKey: env("WAYNE_SERVICE_API_SECRET_KEY", ""),
-		OAuthClientID:            env("OAUTH_WAYNE_CLIENT_ID", "wayne"),
-		OAuthClientSecret:        env("OAUTH_WAYNE_CLIENT_SECRET", "wayne-secret"),
-		OAuthRedirectURI:         env("OAUTH_WAYNE_REDIRECT_URI", ""),
-		OAuthCodeTTLSeconds:      envInt("OAUTH_CODE_TTL_SECONDS", 120),
-		OIDCIssuer:               oidcIssuer,
-		OIDCAuthorizeURL:         trimURL(env("OIDC_AUTHORIZATION_ENDPOINT", oidcIssuer+"/oauth/authorize")),
-		OIDCTokenURL:             trimURL(env("OIDC_TOKEN_ENDPOINT", oidcIssuer+"/oauth/token")),
-		OIDCUserInfoURL:          trimURL(env("OIDC_USERINFO_ENDPOINT", oidcIssuer+"/oauth/userinfo")),
-		OIDCJWKSURL:              trimURL(env("OIDC_JWKS_URI", oidcIssuer+"/oauth/jwks")),
-		CloudDMClientID:          env("OIDC_CLOUDDM_CLIENT_ID", "clouddm"),
-		CloudDMClientSecret:      env("OIDC_CLOUDDM_CLIENT_SECRET", ""),
-		CloudDMRedirectURI:       env("OIDC_CLOUDDM_REDIRECT_URI", ""),
-		CloudDMTargetURL:         env("CLOUDDM_TARGET_URL", ""),
+		AppEnv:                    env("APP_ENV", "dev"),
+		HTTPAddr:                  httpAddr,
+		PublicBaseURL:             publicBaseURL,
+		MySQLDSN:                  env("MYSQL_DSN", "auth:auth@tcp(127.0.0.1:3306)/authserver?charset=utf8mb4&parseTime=True&loc=Local"),
+		AutoMigrate:               envBool("AUTO_MIGRATE", true),
+		SSOEnabled:                envBool("SSO_ENABLED", true),
+		JWTSecret:                 env("JWT_SECRET", "change-this-secret"),
+		JWTIssuer:                 env("JWT_ISSUER", "authserver"),
+		JWTTTLMinutes:             envInt("JWT_TTL_MINUTES", 120),
+		SAMLEntityID:              samlEntityID,
+		SAMLACSURL:                samlACSURL,
+		SAMLSPCert:                env("SAML_SP_CERT_FILE", "certs/sp.crt"),
+		SAMLSPKey:                 env("SAML_SP_KEY_FILE", "certs/sp.key"),
+		SAMLIDPMetaURL:            env("SAML_IDP_METADATA_URL", "http://sso-internal.dev.qiniu.io/saml2/meta"),
+		SAMLLogoutURL:             trimURL(env("SAML_LOGOUT_URL", "")),
+		WayenLoginURL:             env("WAYEN_LOGIN_URL", ""),
+		WayenTargetURL:            env("WAYEN_TARGET_URL", ""),
+		WayenUsernameKey:          env("WAYEN_USERNAME_KEY", "email"),
+		WayenPasswordKey:          env("WAYEN_PASSWORD_KEY", "password"),
+		WayenLoginFormat:          env("WAYEN_LOGIN_FORMAT", "form"),
+		WayenLoginValue:           env("WAYEN_LOGIN_VALUE", "email"),
+		WayenOAuthRef:             env("WAYEN_OAUTH_REF", "/portal/namespace/1/app"),
+		WayenOAuthLoginURL:        trimURL(env("WAYEN_OAUTH_LOGIN_URL", "")),
+		WayneAPIBaseURL:           trimURL(env("WAYNE_API_BASE_URL", env("WAYNE_INTERNAL_API_BASE_URL", ""))),
+		WayneAdminUsername:        env("WAYNE_ADMIN_USERNAME", ""),
+		WayneAdminPassword:        env("WAYNE_ADMIN_PASSWORD", ""),
+		WayneTokenTTLMinutes:      envInt("WAYNE_TOKEN_TTL_MINUTES", 1440),
+		WayneInternalAPIBaseURL:   trimURL(env("WAYNE_INTERNAL_API_BASE_URL", "")),
+		WayneServiceName:          env("WAYNE_SERVICE_NAME", "xinfra"),
+		WayneServiceAPISecretKey:  env("WAYNE_SERVICE_API_SECRET_KEY", ""),
+		OAuthClientID:             env("OAUTH_WAYNE_CLIENT_ID", "wayne"),
+		OAuthClientSecret:         env("OAUTH_WAYNE_CLIENT_SECRET", "wayne-secret"),
+		OAuthRedirectURI:          env("OAUTH_WAYNE_REDIRECT_URI", ""),
+		OAuthCodeTTLSeconds:       envInt("OAUTH_CODE_TTL_SECONDS", 120),
+		OIDCIssuer:                oidcIssuer,
+		OIDCAuthorizeURL:          trimURL(env("OIDC_AUTHORIZATION_ENDPOINT", oidcIssuer+"/oauth/authorize")),
+		OIDCTokenURL:              trimURL(env("OIDC_TOKEN_ENDPOINT", oidcIssuer+"/oauth/token")),
+		OIDCUserInfoURL:           trimURL(env("OIDC_USERINFO_ENDPOINT", oidcIssuer+"/oauth/userinfo")),
+		OIDCJWKSURL:               trimURL(env("OIDC_JWKS_URI", oidcIssuer+"/oauth/jwks")),
+		CloudDMClientID:           env("OIDC_CLOUDDM_CLIENT_ID", "clouddm"),
+		CloudDMClientSecret:       env("OIDC_CLOUDDM_CLIENT_SECRET", ""),
+		CloudDMRedirectURI:        env("OIDC_CLOUDDM_REDIRECT_URI", ""),
+		CloudDMTargetURL:          env("CLOUDDM_TARGET_URL", ""),
+		AnsibleServiceBaseURL:     trimURL(env("ANSIBLE_SERVICE_BASE_URL", "")),
+		AnsibleInternalToken:      env("ANSIBLE_INTERNAL_TOKEN", ""),
+		DeploymentCallbackBaseURL: trimURL(env("DEPLOYMENT_CALLBACK_BASE_URL", publicBaseURL)),
 	}
 }
 

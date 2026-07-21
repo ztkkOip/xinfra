@@ -70,6 +70,7 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	authService := service.NewAuthService(deps.Config, deps.DB, auditService)
 	wayenService := service.NewWayenService(deps.Config, deps.DB)
 	wayneRoleBindingService := service.NewWayneRoleBindingService(deps.Config, deps.DB)
+	deploymentService := service.NewDeploymentService(deps.Config, deps.DB)
 
 	healthHandler := handler.NewHealthHandler(deps.DB)
 	authHandler := handler.NewAuthHandler(deps.Config, authService)
@@ -81,6 +82,7 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	clouddmHandler := handler.NewCloudDMHandler(deps.Config, auditService)
 	samlHandler := handler.NewSAMLHandler(deps.Config, authService)
 	oauthHandler := handler.NewOAuthHandler(deps.Config, deps.DB, auditService)
+	deploymentHandler := handler.NewDeploymentHandler(deps.Config, deps.DB, deploymentService)
 
 	r.GET("/healthz", healthHandler.Healthz)
 	r.GET("/readyz", healthHandler.Readyz)
@@ -89,6 +91,8 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 	r.POST("/auth/oauth/token", oauthHandler.Token)
 	r.GET("/auth/oauth/jwks", oauthHandler.JWKS)
 	r.GET("/auth/oauth/userinfo", oauthHandler.UserInfo)
+	r.POST("/auth/internal/deployments/:id/events", deploymentHandler.InternalEvent)
+	r.POST("/auth/internal/deployments/:id/finish", deploymentHandler.InternalFinish)
 
 	v1 := r.Group("/auth/api/v1")
 	{
@@ -130,6 +134,10 @@ func registerAuthServerRoutes(r *gin.Engine, deps Dependencies) {
 		protected.PUT("/subsystem-auth/wayne/business-lines/:id/namespaces/:namespaceid/users/:username/roles", subsystemAuthHandler.BindWayneNamespaceRoles)
 		protected.DELETE("/subsystem-auth/wayne/business-lines/:id/namespaces/:namespaceid/users/:username/roles", subsystemAuthHandler.UnbindWayneNamespaceRoles)
 		protected.POST("/subsystem-auth/wayne/business-lines/:id/users/:userid/init", subsystemAuthHandler.InitWayneBusinessLineUser)
+		protected.POST("/deployments", deploymentHandler.Create)
+		protected.GET("/deployments/:id", deploymentHandler.Get)
+		protected.GET("/deployments/:id/events", deploymentHandler.Events)
+		protected.POST("/deployments/:id/cancel", deploymentHandler.Cancel)
 		protected.GET("/clouddm/login", clouddmHandler.Login)
 	}
 }

@@ -20,6 +20,8 @@ func AutoMigrate(db *gorm.DB) error {
 		&model.BusinessLineWayneNamespace{},
 		&model.AccessToken{},
 		&model.WayneToken{},
+		&model.Deployment{},
+		&model.DeploymentEvent{},
 		&model.AuditLog{},
 	)
 }

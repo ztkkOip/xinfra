@@ -15,11 +15,17 @@ const ClaimsKey = "claims"
 func AuthMiddleware(cfg config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		value := c.GetHeader("Authorization")
-		if !strings.HasPrefix(value, "Bearer ") {
+		tokenValue := ""
+		if strings.HasPrefix(value, "Bearer ") {
+			tokenValue = strings.TrimPrefix(value, "Bearer ")
+		} else {
+			tokenValue = strings.TrimSpace(c.Query("access_token"))
+		}
+		if tokenValue == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "missing bearer token"})
 			return
 		}
-		claims, err := auth.Parse(cfg.JWTSecret, strings.TrimPrefix(value, "Bearer "))
+		claims, err := auth.Parse(cfg.JWTSecret, tokenValue)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid token"})
 			return

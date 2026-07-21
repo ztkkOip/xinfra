@@ -80,6 +80,34 @@ type WayneToken struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+type Deployment struct {
+	ID             uint64     `gorm:"primaryKey" json:"id"`
+	DeploymentID   string     `gorm:"size:64;not null;uniqueIndex" json:"deployment_id"`
+	Component      string     `gorm:"size:64;not null;index" json:"component"`
+	BusinessLineID uint64     `gorm:"not null;index" json:"business_line_id"`
+	BusinessLine   string     `gorm:"size:128;not null;default:''" json:"business_line"`
+	Status         string     `gorm:"size:32;not null;index" json:"status"`
+	RequestPayload string     `gorm:"type:longtext" json:"request_payload"`
+	ResultPayload  string     `gorm:"type:longtext" json:"result_payload"`
+	CreatedBy      uint64     `gorm:"not null;index" json:"created_by"`
+	CreatedByName  string     `gorm:"size:128;not null;default:''" json:"created_by_name"`
+	StartedAt      *time.Time `json:"started_at"`
+	FinishedAt     *time.Time `json:"finished_at"`
+	CreatedAt      time.Time  `gorm:"index" json:"created_at"`
+	UpdatedAt      time.Time  `json:"updated_at"`
+}
+
+type DeploymentEvent struct {
+	ID           uint64    `gorm:"primaryKey" json:"id"`
+	DeploymentID string    `gorm:"size:64;not null;index:idx_deployment_events_deployment_seq,priority:1" json:"deployment_id"`
+	Seq          uint64    `gorm:"not null;index:idx_deployment_events_deployment_seq,priority:2" json:"seq"`
+	Type         string    `gorm:"size:32;not null;index" json:"type"`
+	Level        string    `gorm:"size:32;not null;default:''" json:"level"`
+	Message      string    `gorm:"type:longtext" json:"message"`
+	Payload      string    `gorm:"type:longtext" json:"payload"`
+	CreatedAt    time.Time `gorm:"index" json:"created_at"`
+}
+
 type AuditLog struct {
 	ID             uint64    `gorm:"primaryKey" json:"id"`
 	RequestID      string    `gorm:"size:128;not null;default:''" json:"request_id"`
